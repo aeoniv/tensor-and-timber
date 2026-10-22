@@ -10,6 +10,7 @@ export interface AIModelViewerOptions {
   titleId?: string;
   defaultModelUrl?: string;
   modelName?: string;
+  initialPrompt?: string;
 }
 
 export class AIModelViewer {
@@ -45,8 +46,8 @@ export class AIModelViewer {
 
     this.options = {
       autoLoadSample: true,
-      defaultModelUrl: '/models/sample_ai_trellis.glb',
-      modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)',
+      modelName: 'Mesa de Jantar Flutuante Ipanema',
+      initialPrompt: 'Mesa de Jantar Flutuante em Madeira Cumaru Maciça com Cabos Tensores de Inox',
       ...options
     };
 
@@ -103,11 +104,11 @@ export class AIModelViewer {
     this.groundPlane.receiveShadow = true;
     this.scene.add(this.groundPlane);
 
-    // Load initial REAL neural 3D model automatically
-    if (this.options.autoLoadSample && this.options.defaultModelUrl) {
-      this.loadGLBUrl(this.options.defaultModelUrl, this.options.modelName || 'Neural Tensegrity Masterpiece').catch(() => {
-        this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
-      });
+    // Load initial authentic Brazilian tensegrity 3D model automatically
+    if (this.options.defaultModelUrl) {
+      this.loadGLBUrl(this.options.defaultModelUrl, this.options.modelName || 'Mobiliário em Tensegridade');
+    } else if (this.options.autoLoadSample) {
+      this.generateCustom3DObject(this.options.initialPrompt || 'Mesa de Jantar Flutuante em Madeira Cumaru Maciça com Cabos Tensores de Inox');
     }
 
     this.setupResizeListener();
@@ -144,7 +145,7 @@ export class AIModelViewer {
     const titleId = this.options.titleId || 'ai-active-model-title';
     const titleEl = document.getElementById(titleId);
     if (titleEl && metadata) {
-      titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} Ã— ${metadata.dimensions.widthCm} Ã— ${metadata.dimensions.heightCm} cm)`;
+      titleEl.textContent = `Geometria 3D: ${metadata.name} (${metadata.dimensions.lengthCm} Ã— ${metadata.dimensions.widthCm} Ã— ${metadata.dimensions.heightCm} cm)`;
     }
   }
 
@@ -345,9 +346,9 @@ export class AIModelViewer {
     const pillId = this.options.hudPillId || 'ai-mesh-stats-pill';
     const pill = document.getElementById(pillId);
     if (pill) {
-      const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Vision Contour Extruded]</span>' : '';
-      const neuralBadge = metadata.isFromHuggingFace ? ' <span style="color: #10b981;">[ZeroGPU TRELLIS 3D]</span>' : '';
-      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge}${neuralBadge} &bull; <strong>${metadata.vertexCount.toLocaleString()}</strong> Vertices &bull; <strong>${metadata.triangleCount.toLocaleString()}</strong> Polys &bull; ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
+      const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Contorno Visão]</span>' : '';
+      const timberBadge = metadata.timberSpecies ? ` • <strong>${metadata.timberSpecies}</strong>` : '';
+      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge}${timberBadge} • <strong>${metadata.vertexCount.toLocaleString('pt-BR')}</strong> Vértices • <strong>${metadata.triangleCount.toLocaleString('pt-BR')}</strong> Polígonos • ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
     }
   }
 

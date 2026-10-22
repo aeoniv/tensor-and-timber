@@ -19,7 +19,7 @@ class AtelierApp {
   private atelierAIViewer: AIModelViewer | null = null;
 
   // Active Model State
-  private currentGlbUrl: string = '/models/sample_ai_trellis.glb';
+  private currentGlbUrl: string = '';
   private currentModelName: string = 'Mesa de Jantar Flutuante Ipanema';
   private currentEstimatedBracket: string = 'R$ 38.500 – R$ 48.000';
 
@@ -57,24 +57,24 @@ class AtelierApp {
   }
 
   private initViewers(): void {
-    // 1. Hero 3D Stage (Auto-renders real 3D model on initial page load)
+    // 1. Hero 3D Stage (Auto-renders authentic Brazilian Cumaru tensegrity model)
     try {
       this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
         hudPillId: 'hero-model-pill',
-        defaultModelUrl: this.currentGlbUrl,
-        modelName: this.currentModelName
+        modelName: 'Mesa de Jantar Flutuante Ipanema'
       });
+      this.heroAIViewer.generateCustom3DObject('Mesa de Jantar Flutuante em Madeira Cumaru Maciça com Cabos Tensores de Inox');
     } catch (e) {
       console.warn('Hero 3D viewer init error:', e);
     }
 
-    // 2. Main Bespoke Atelier 3D Stage (Auto-renders real 3D model on load)
+    // 2. Main Bespoke Atelier 3D Stage
     try {
       this.atelierAIViewer = new AIModelViewer('atelier-3d-canvas', {
         hudPillId: 'atelier-model-pill',
-        defaultModelUrl: this.currentGlbUrl,
-        modelName: this.currentModelName
+        modelName: 'Mesa de Jantar Flutuante Ipanema'
       });
+      this.atelierAIViewer.generateCustom3DObject('Mesa de Jantar Flutuante em Madeira Cumaru Maciça com Cabos Tensores de Inox');
     } catch (e) {
       console.warn('Atelier 3D viewer init error:', e);
     }
@@ -151,15 +151,27 @@ class AtelierApp {
     });
 
     document.querySelectorAll('.btn-view-3d-piece').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const el = e.currentTarget as HTMLElement;
         const pieceName = el.dataset.pieceName || 'Mobiliário em Tensegridade';
         this.currentModelName = pieceName;
         const dealTitle = document.getElementById('deal-project-name');
         if (dealTitle) dealTitle.textContent = pieceName;
 
+        const promptInput = document.getElementById('atelier-vision-input') as HTMLTextAreaElement;
+        if (promptInput) {
+          promptInput.value = `${pieceName} sob medida com cabos de aço naval`;
+        }
+
         this.showToast(`Carregando ${pieceName} no Ateliê 3D...`);
         document.getElementById('atelier-section')?.scrollIntoView({ behavior: 'smooth' });
+
+        if (this.atelierAIViewer) {
+          await this.atelierAIViewer.generateCustom3DObject(pieceName);
+        }
+        if (this.heroAIViewer) {
+          await this.heroAIViewer.generateCustom3DObject(pieceName);
+        }
       });
     });
 
@@ -184,20 +196,28 @@ class AtelierApp {
 
     // Innovative Projects Buttons
     document.querySelectorAll('.btn-load-project').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const pId = (e.currentTarget as HTMLElement).dataset.projectId;
         const project = INNOVATIVE_PROJECTS.find(p => p.id === pId);
         if (project) {
           this.currentModelName = project.title;
+          const promptVal = `${project.title}: ${project.subtitle} em ${project.materials.join(', ')}`;
           const promptInput = document.getElementById('atelier-vision-input') as HTMLTextAreaElement;
           if (promptInput) {
-            promptInput.value = `${project.title}: ${project.subtitle} em ${project.materials.join(', ')}`;
+            promptInput.value = promptVal;
           }
           const dealTitle = document.getElementById('deal-project-name');
           if (dealTitle) dealTitle.textContent = project.title;
 
           this.showToast(`Carregado: ${project.title}`);
           document.getElementById('atelier-section')?.scrollIntoView({ behavior: 'smooth' });
+
+          if (this.atelierAIViewer) {
+            await this.atelierAIViewer.generateCustom3DObject(promptVal);
+          }
+          if (this.heroAIViewer) {
+            await this.heroAIViewer.generateCustom3DObject(promptVal);
+          }
         }
       });
     });
@@ -279,18 +299,27 @@ class AtelierApp {
         if (dealPrice) dealPrice.textContent = price;
 
         const defaultPrompts: Record<string, string> = {
-          'dining-table': 'Mesa de jantar suspensa para 10 lugares em madeira Cumaru maciça com cabos de aço inoxidável naval 316 e esticadores ocultos.',
-          'lounge-chair': 'Poltrona lounge Niemeyer em madeira Freijó curvada no vapor com tirantes tensores dourados em titânio e couro nobre caramelo.',
-          'canopy': 'Aparador escultural Cerrado em Jacarandá da Bahia de demolição com portas ripadas e base suspensa em equilíbrio tensil.',
+          'dining-table': 'Mesa de jantar flutuante para 10 lugares em madeira Cumaru maciça com cabos de aço inoxidável naval 316 e esticadores ocultos.',
+          'lounge-chair': 'Poltrona lounge Niemeyer flutuante em madeira Freijó curvada no vapor com tirantes tensores dourados em titânio e couro nobre caramelo.',
+          'canopy': 'Aparador escultural Cerrado suspenso por cabos em madeira Jacarandá da Bahia de demolição com portas ripadas e base suspensa.',
           'dome': 'Cúpula geodésica biosfera 3V em madeira tratada de reflorestamento com conectores em alumínio naval e claraboias triangulares.'
         };
 
         const archType = target.dataset.archetype || 'dining-table';
-        if (promptInput && defaultPrompts[archType]) {
-          promptInput.value = defaultPrompts[archType];
+        const promptToRun = defaultPrompts[archType] || name;
+        if (promptInput) {
+          promptInput.value = promptToRun;
         }
 
-        this.showToast(`Arquétipo selecionado: ${name}`);
+        // Live 3D procedural regeneration on tab switch
+        if (this.atelierAIViewer) {
+          await this.atelierAIViewer.generateCustom3DObject(promptToRun);
+        }
+        if (this.heroAIViewer) {
+          await this.heroAIViewer.generateCustom3DObject(promptToRun);
+        }
+
+        this.showToast(`Peça atualizada no Ateliê 3D: ${name}`);
       });
     });
 

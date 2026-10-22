@@ -1,3 +1,38 @@
+
+function createProceduralWoodTexture(baseColorHex: number): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  const baseHexStr = '#' + baseColorHex.toString(16).padStart(6, '0');
+  ctx.fillStyle = baseHexStr;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Subtle natural wood growth grain
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+  for (let y = 0; y < 512; y += 3) {
+    const wave = Math.sin(y * 0.04) * 6 + Math.cos(y * 0.09) * 3;
+    ctx.fillRect(0, y + wave, 512, 1.8);
+  }
+
+  // Soft wood rings
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 2.5;
+  for (let r = 30; r < 600; r += 28) {
+    ctx.beginPath();
+    ctx.ellipse(256, -80, r * 1.4, r, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 2);
+  return tex;
+}
+
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { WOOD_SPECIES, TENSION_SYSTEMS } from '../data/constants';
@@ -36,19 +71,22 @@ export class Real3DGeneratorService {
     const group = new THREE.Group();
 
     // 1. Determine Wood Species & Materials
-    let wood = WOOD_SPECIES[0]; // Default Walnut
-    if (lower.includes('oak')) wood = WOOD_SPECIES[1];
-    else if (lower.includes('teak') || lower.includes('cumaru')) wood = WOOD_SPECIES[2];
-    else if (lower.includes('charred') || lower.includes('yakisugi') || lower.includes('shou sugi')) wood = WOOD_SPECIES[3];
-    else if (lower.includes('maple') || lower.includes('curl') || lower.includes('tiger')) wood = WOOD_SPECIES[4];
+    let wood = WOOD_SPECIES[2]; // Default to Reclaimed Brazilian Teak (Cumaru)
+    if (lower.includes('walnut') || lower.includes('nogueira') || lower.includes('jacaranda') || lower.includes('jacarandá')) wood = WOOD_SPECIES[0];
+    else if (lower.includes('oak') || lower.includes('carvalho') || lower.includes('freijo') || lower.includes('freijó')) wood = WOOD_SPECIES[1];
+    else if (lower.includes('teak') || lower.includes('cumaru') || lower.includes('ipe') || lower.includes('ipê') || lower.includes('peroba')) wood = WOOD_SPECIES[2];
+    else if (lower.includes('charred') || lower.includes('yakisugi') || lower.includes('shou sugi') || lower.includes('carbonizada')) wood = WOOD_SPECIES[3];
+    else if (lower.includes('maple') || lower.includes('pequia') || lower.includes('pequiá') || lower.includes('marfim')) wood = WOOD_SPECIES[4];
 
     // 2. Determine Tension System
-    let tension = TENSION_SYSTEMS[0]; // Stainless
-    if (lower.includes('gold') || lower.includes('brass') || lower.includes('titanium')) tension = TENSION_SYSTEMS[1];
-    else if (lower.includes('black') || lower.includes('carbon') || lower.includes('stealth')) tension = TENSION_SYSTEMS[2];
+    let tension = TENSION_SYSTEMS[0]; // Aço Inox Naval 316
+    if (lower.includes('gold') || lower.includes('dourado') || lower.includes('ouro') || lower.includes('brass') || lower.includes('latão') || lower.includes('latao') || lower.includes('titanium') || lower.includes('titânio')) tension = TENSION_SYSTEMS[1];
+    else if (lower.includes('black') || lower.includes('preto') || lower.includes('carbon') || lower.includes('carbono') || lower.includes('stealth')) tension = TENSION_SYSTEMS[2];
 
+    const woodTexture = createProceduralWoodTexture(wood.threeColor);
     const woodMat = new THREE.MeshStandardMaterial({
       color: wood.threeColor,
+      map: woodTexture,
       roughness: wood.roughness,
       metalness: 0.05
     });
@@ -106,40 +144,40 @@ export class Real3DGeneratorService {
       );
     } else {
       // REAL PARAMETRIC CAD SYNTHESIS ACCORDING TO PROMPT ARCHETYPE
-      const isDome = lower.includes('dome') || lower.includes('geodesic') || lower.includes('pavilion') || lower.includes('icosa');
-      const isChair = lower.includes('chair') || lower.includes('lounge') || lower.includes('armchair') || lower.includes('rocker');
-      const isShelf = lower.includes('shelf') || lower.includes('shelv') || lower.includes('bookcase') || lower.includes('display');
-      const isBench = lower.includes('bench') || lower.includes('stool') || lower.includes('ottoman');
-      const isDesk = lower.includes('desk') || lower.includes('workspace') || lower.includes('office') || lower.includes('console');
-      const isRiver = lower.includes('river') || lower.includes('glass') || lower.includes('epoxy') || lower.includes('resin');
+      const isDome = lower.includes('dome') || lower.includes('cupula') || lower.includes('cúpula') || lower.includes('geodesic') || lower.includes('geodésica') || lower.includes('pavilion') || lower.includes('icosa');
+      const isChair = lower.includes('chair') || lower.includes('poltrona') || lower.includes('cadeira') || lower.includes('lounge') || lower.includes('armchair') || lower.includes('rocker');
+      const isShelf = lower.includes('shelf') || lower.includes('aparador') || lower.includes('buffet') || lower.includes('estante') || lower.includes('shelv') || lower.includes('bookcase') || lower.includes('display');
+      const isBench = lower.includes('bench') || lower.includes('banco') || lower.includes('banqueta') || lower.includes('stool') || lower.includes('ottoman');
+      const isDesk = lower.includes('desk') || lower.includes('escrivaninha') || lower.includes('mesa de escritório') || lower.includes('workspace') || lower.includes('office') || lower.includes('console');
+      const isRiver = lower.includes('river') || lower.includes('rio') || lower.includes('cristal') || lower.includes('glass') || lower.includes('vidro') || lower.includes('epoxy') || lower.includes('resin');
 
       if (isDome) {
         category = 'Timber Geodesic Dome';
         const domeDiam = prompt.match(/(\d+)\s*(?:m|meter)/i) ? parseFloat(prompt.match(/(\d+)\s*(?:m|meter)/i)![1]) : 6.0;
-        name = `${domeDiam}m Handcrafted Geodesic Dome (${wood.name})`;
+        name = `Cúpula Geodésica Biosfera ${domeDiam}M em ${wood.name}`;
         dims = { lengthCm: Math.round(domeDiam * 100), widthCm: Math.round(domeDiam * 100), heightCm: Math.round((domeDiam / 2) * 100), diameterMeters: domeDiam };
 
         const hubMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
         this.buildRealGeodesicDome(group, domeDiam, woodMat, hubMat);
       } else if (isChair) {
         category = 'Tensegrity Ergonomic Seating';
-        name = `Floating ${wood.name} Tensegrity Lounge Chair`;
+        name = `Poltrona Lounge Flutuante em ${wood.name}`;
         dims = { lengthCm: 70, widthCm: 65, heightCm: 84 };
         this.buildTensegrityChair(group, woodMat, cableMat, tbMat);
       } else if (isShelf) {
         category = 'Suspended Tensegrity Shelving';
         const tiers = lower.includes('5') ? 5 : (lower.includes('3') ? 3 : 4);
-        name = `${tiers}-Tier Floating ${wood.name} Tension Bookshelf`;
+        name = `Aparador & Estante Flutuante em ${wood.name}`;
         dims = { lengthCm: 140, widthCm: 35, heightCm: 180 };
         this.buildTensegrityShelving(group, tiers, woodMat, cableMat, tbMat);
       } else if (isBench) {
         category = 'Tensegrity Bench & Stool';
-        name = `Equilibrium ${wood.name} Tension Bench`;
+        name = `Banco Escultural Equilibrium em ${wood.name}`;
         dims = { lengthCm: 150, widthCm: 45, heightCm: 46 };
         this.buildTensegrityBench(group, woodMat, cableMat, tbMat);
       } else if (isDesk) {
         category = 'Cantilever Executive Desk';
-        name = `Zero-Gravity ${wood.name} Cantilever Executive Desk`;
+        name = `Mesa Executiva Cantilever em ${wood.name}`;
         dims = { lengthCm: 190, widthCm: 85, heightCm: 76 };
         this.buildTensegrityDesk(group, woodMat, cableMat, tbMat);
       } else {
@@ -150,7 +188,7 @@ export class Real3DGeneratorService {
         const W = isCoffee ? 0.75 : parsedW;
 
         category = isCoffee ? 'Floating Coffee Table' : 'Tensegrity Dining Table';
-        name = `${isCoffee ? 'Sculptural Coffee Table' : 'Live-Edge Dining Table'} in ${wood.name}`;
+        name = `${isCoffee ? 'Mesa de Centro Escultural' : 'Mesa de Jantar Flutuante'} em ${wood.name}`;
         dims = { lengthCm: Math.round(L * 100), widthCm: Math.round(W * 100), heightCm: Math.round(H * 100) };
 
         this.buildTensegrityTable(group, L, W, H, isRiver, woodMat, cableMat, tbMat, lower);
