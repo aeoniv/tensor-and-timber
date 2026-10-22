@@ -71,12 +71,11 @@ export class Real3DGeneratorService {
     const group = new THREE.Group();
 
     // 1. Determine Wood Species & Materials
-    let wood = WOOD_SPECIES[2]; // Default to Reclaimed Brazilian Teak (Cumaru)
-    if (lower.includes('walnut') || lower.includes('nogueira') || lower.includes('jacaranda') || lower.includes('jacarandá')) wood = WOOD_SPECIES[0];
-    else if (lower.includes('oak') || lower.includes('carvalho') || lower.includes('freijo') || lower.includes('freijó')) wood = WOOD_SPECIES[1];
-    else if (lower.includes('teak') || lower.includes('cumaru') || lower.includes('ipe') || lower.includes('ipê') || lower.includes('peroba')) wood = WOOD_SPECIES[2];
-    else if (lower.includes('charred') || lower.includes('yakisugi') || lower.includes('shou sugi') || lower.includes('carbonizada')) wood = WOOD_SPECIES[3];
-    else if (lower.includes('maple') || lower.includes('pequia') || lower.includes('pequiá') || lower.includes('marfim')) wood = WOOD_SPECIES[4];
+    let wood = WOOD_SPECIES[0]; // Default Cumaru
+    if (lower.includes('freijo') || lower.includes('freijó') || lower.includes('oak')) wood = WOOD_SPECIES[1];
+    else if (lower.includes('jacaranda') || lower.includes('jacarandá') || lower.includes('walnut')) wood = WOOD_SPECIES[2];
+    else if (lower.includes('pequia') || lower.includes('pequiá') || lower.includes('maple')) wood = WOOD_SPECIES[3];
+    else if (lower.includes('cumaru') || lower.includes('teak') || lower.includes('ipe') || lower.includes('ipê')) wood = WOOD_SPECIES[0];
 
     // 2. Determine Tension System
     let tension = TENSION_SYSTEMS[0]; // Aço Inox Naval 316

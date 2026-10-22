@@ -1,4 +1,4 @@
-﻿export interface RealFurniturePiece {
+export interface RealFurniturePiece {
   id: string;
   name: string;
   subtitle: string;
@@ -12,6 +12,7 @@
   priceRange: string;
   badge: string;
   description: string;
+  whatsappMsg: string;
 }
 
 export const REAL_FURNITURE_COLLECTION: RealFurniturePiece[] = [
@@ -28,7 +29,8 @@ export const REAL_FURNITURE_COLLECTION: RealFurniturePiece[] = [
     deliveryTime: '6 a 8 semanas',
     priceRange: 'R$ 38.500 – R$ 48.000',
     badge: 'Cumaru Maciço',
-    description: 'Tampo esculpido em prancha única de Cumaru com borda orgânica natural. A estrutura de tensegridade suspende o tampo no ar com estabilidade absoluta.'
+    description: 'Tampo esculpido em prancha única de Cumaru com borda orgânica natural. A estrutura de tensegridade suspende o tampo no ar com estabilidade absoluta.',
+    whatsappMsg: 'Olá! Gostaria de encomendar a Mesa de Jantar Flutuante Ipanema em Cumaru Maciço.'
   },
   {
     id: 'poltrona-freijo-niemeyer',
@@ -43,7 +45,8 @@ export const REAL_FURNITURE_COLLECTION: RealFurniturePiece[] = [
     deliveryTime: '4 a 6 semanas',
     priceRange: 'R$ 18.900 – R$ 24.500',
     badge: 'Freijó & Couro',
-    description: 'Homenagem ao modernismo brasileiro. Almofadas em couro nobre caramelo costuradas à mão, suspensas por tirantes tensores dourados com amortecimento passivo.'
+    description: 'Homenagem ao modernismo brasileiro. Almofadas em couro nobre caramelo costuradas à mão, suspensas por tirantes tensores dourados com amortecimento passivo.',
+    whatsappMsg: 'Olá! Gostaria de encomendar a Poltrona Tensa Niemeyer em Freijó e Couro.'
   },
   {
     id: 'aparador-jacaranda-cerrado',
@@ -58,7 +61,8 @@ export const REAL_FURNITURE_COLLECTION: RealFurniturePiece[] = [
     deliveryTime: '5 a 7 semanas',
     priceRange: 'R$ 26.000 – R$ 34.000',
     badge: 'Jacarandá da Bahia',
-    description: 'Corpo volumoso em Jacarandá suspenso por uma treliça tensil que parece levitar sobre o piso. Portas de correr ripadas com ferragens suíças ocultas.'
+    description: 'Corpo volumoso em Jacarandá suspenso por uma treliça tensil que parece levitar sobre o piso. Portas de correr ripadas com ferragens suíças ocultas.',
+    whatsappMsg: 'Olá! Gostaria de encomendar o Aparador Escultural Cerrado em Jacarandá da Bahia.'
   },
   {
     id: 'mesa-centro-pequia-tupi',
@@ -73,7 +77,8 @@ export const REAL_FURNITURE_COLLECTION: RealFurniturePiece[] = [
     deliveryTime: '4 a 5 semanas',
     priceRange: 'R$ 15.800 – R$ 21.000',
     badge: 'Pequiá & Cristal',
-    description: 'Tora centenária de Pequiá flutuando em equilíbrio hiperbólico sob disco circular de vidro extra-clear 19mm. O centro das atenções em qualquer living.'
+    description: 'Tora centenária de Pequiá flutuando em equilíbrio hiperbólico sob disco circular de vidro extra-clear 19mm. O centro das atenções em qualquer living.',
+    whatsappMsg: 'Olá! Gostaria de encomendar a Mesa de Centro Tupi em Pequiá e Cristal.'
   }
 ];
 
@@ -126,21 +131,22 @@ export function renderRealFurnitureSection(): string {
         </div>
 
         <div class="real-furniture-actions">
-          <button 
-            class="btn btn-primary-gold btn-inquire-piece" 
-            data-piece-name="${item.name}" 
-            data-piece-price="${item.priceRange}"
-            data-piece-wood="${item.wood}"
+          <a 
+            href="https://wa.me/5511999998888?text=${encodeURIComponent(item.whatsappMsg)}" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="btn btn-whatsapp"
           >
-            <span>Encomendar Esta Peça</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
             </svg>
-          </button>
+            <span>Encomendar via WhatsApp</span>
+          </a>
           <button 
             class="btn btn-glass btn-view-3d-piece" 
             data-piece-name="${item.name}"
             data-piece-category="${item.category}"
+            data-piece-price="${item.priceRange}"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
@@ -157,17 +163,15 @@ export function renderRealFurnitureSection(): string {
       <div class="container">
         <div class="section-header text-center">
           <span class="section-tag gold">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
+            <span class="flag-dot-green"></span>
             Marcenaria Autoral &bull; Produção Real 🇧🇷
           </span>
           <h2 class="section-title">
             Mobiliário de Alto Padrão em <span class="gold-gradient">Madeira &amp; Tensão</span>
           </h2>
           <p class="section-subtitle">
-            Além de pesquisas espaciais, executamos peças reais para residências exclusivas, escritórios de arquitetura e colecionadores.
-            Cada peça é produzida artesanalmente com madeiras nobres brasileiras e certificação estrutural.
+            Cada peça é produzida artesanalmente com madeiras nobres brasileiras certificadas e cálculo estrutural de precisão.
+            Entregas e montagens especializadas em todo o Brasil.
           </p>
         </div>
 
@@ -175,6 +179,7 @@ export function renderRealFurnitureSection(): string {
           ${cardsHtml}
         </div>
 
+        <!-- Custom Dimensions Banner -->
         <div class="custom-piece-banner glass-panel">
           <div class="custom-piece-content">
             <div class="custom-piece-tag">PROJETOS ESPECIAIS SOB MEDIDA</div>
@@ -184,8 +189,13 @@ export function renderRealFurnitureSection(): string {
             </p>
           </div>
           <div class="custom-piece-cta">
-            <a href="#consultation-section" class="btn btn-primary-gold">
-              <span>Solicitar Orçamento Personalizado</span>
+            <a 
+              href="https://wa.me/5511999998888?text=Olá!%20Tenho%20um%20projeto%20com%20dimensões%20específicas%20e%20gostaria%20de%20desenvolver%20uma%20peça%20sob%20medida%20com%20a%20Tensor%20%26%20Timber." 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="btn btn-primary-gold"
+            >
+              <span>Conversar com o Marceneiro</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>

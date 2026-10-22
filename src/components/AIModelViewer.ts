@@ -55,7 +55,7 @@ export class AIModelViewer {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 100);
-    this.camera.position.set(3.2, 2.2, 3.8);
+    this.camera.position.set(2.4, 1.6, 2.8);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
@@ -83,16 +83,23 @@ export class AIModelViewer {
     this.ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
     this.scene.add(this.ambientLight);
 
-    this.dirLight1 = new THREE.DirectionalLight(0xfffaed, 2.4);
-    this.dirLight1.position.set(5, 8, 4);
+    // Key warm light
+    this.dirLight1 = new THREE.DirectionalLight(0xfff7ed, 3.0);
+    this.dirLight1.position.set(4, 7, 5);
     this.dirLight1.castShadow = true;
     this.dirLight1.shadow.mapSize.width = 1024;
     this.dirLight1.shadow.mapSize.height = 1024;
     this.scene.add(this.dirLight1);
 
-    this.dirLight2 = new THREE.DirectionalLight(0x38bdf8, 1.4);
-    this.dirLight2.position.set(-5, -2, -4);
+    // Warm wood rim light
+    this.dirLight2 = new THREE.DirectionalLight(0xf59e0b, 1.8);
+    this.dirLight2.position.set(-4, 3, -4);
     this.scene.add(this.dirLight2);
+
+    // Subtle sky fill
+    const skyLight = new THREE.DirectionalLight(0x38bdf8, 0.9);
+    skyLight.position.set(0, -3, 2);
+    this.scene.add(skyLight);
 
     // Subtle ground shadow grid
     this.groundPlane = new THREE.Mesh(
@@ -346,9 +353,7 @@ export class AIModelViewer {
     const pillId = this.options.hudPillId || 'ai-mesh-stats-pill';
     const pill = document.getElementById(pillId);
     if (pill) {
-      const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Contorno Visão]</span>' : '';
-      const timberBadge = metadata.timberSpecies ? ` • <strong>${metadata.timberSpecies}</strong>` : '';
-      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge}${timberBadge} • <strong>${metadata.vertexCount.toLocaleString('pt-BR')}</strong> Vértices • <strong>${metadata.triangleCount.toLocaleString('pt-BR')}</strong> Polígonos • ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
+      pill.innerHTML = `<strong>✨ ${metadata.name}</strong> • ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
     }
   }
 
@@ -370,7 +375,7 @@ export class AIModelViewer {
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z, 1.0);
 
-    this.camera.position.set(maxDim * 1.4, maxDim * 1.1, maxDim * 1.6);
+    this.camera.position.set(maxDim * 0.95, maxDim * 0.72, maxDim * 1.15);
     this.controls.target.set(0, size.y * 0.45, 0);
     this.controls.update();
   }

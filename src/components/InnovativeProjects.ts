@@ -1,82 +1,109 @@
-﻿import { INNOVATIVE_PROJECTS } from '../data/constants';
-
 export function renderInnovativeProjects(): string {
-  const cardsHtml = INNOVATIVE_PROJECTS.map(project => {
-    const isTensegrity = project.category === 'tensegrity';
-    return `
-      <div class="project-card glass-panel" data-category="${project.category}">
-        <div class="project-visual" style="background: linear-gradient(135deg, rgba(14, 18, 26, 0.95) 0%, rgba(22, 28, 40, 0.9) 100%);">
-          <span class="project-badge-top ${isTensegrity ? '' : 'cyan'}">
-            ${isTensegrity ? 'Tensegridade Flutuante' : 'Cúpula Geodésica'}
-          </span>
-          <div class="project-visual-overlay">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${isTensegrity ? '#f5c542' : '#38bdf8'}" stroke-width="1.5" style="margin-bottom: 8px;">
-              ${isTensegrity
-                ? '<polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" /><circle cx="12" cy="12" r="3"/>'
-                : '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>'
-              }
-            </svg>
-            <div class="project-visual-title">${project.title}</div>
-            <div class="project-visual-scale">${project.dimensions.split('(')[0]}</div>
-          </div>
-        </div>
-
-        <div class="project-body">
-          <h3 class="project-title">${project.title}</h3>
-          <p class="project-subtitle">${project.subtitle}</p>
-          <p class="project-description">${project.description}</p>
-
-          <div class="project-specs-list">
-            <div class="spec-row">
-              <span class="spec-name">Madeira Nobre:</span>
-              <span class="spec-val">${project.materials[0]}</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-name">Capacidade de Carga:</span>
-              <span class="spec-val font-accent" style="color: var(--gold-light);">${project.maxLoadBearing}</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-name">Tempo de Produção:</span>
-              <span class="spec-val">${project.craftingDuration}</span>
-            </div>
-          </div>
-
-          <div class="project-actions">
-            <button class="btn btn-primary-gold btn-sm btn-load-project" data-project-id="${project.id}">
-              <span>Simular no Ateliê 3D</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-            <button class="btn btn-glass btn-sm btn-inquire-project" data-project-title="${project.title}">
-              <span>Consultar Viabilidade</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
   return `
     <section class="section" id="projects-section">
       <div class="container">
         <div class="section-header text-center">
           <span class="section-tag gold">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
+            <span class="flag-dot-green"></span>
             Engenharia Estrutural Avançada
           </span>
           <h2 class="section-title">
             Obras Especiais de Inovação em <span class="gold-gradient">Tensegridade</span>
           </h2>
           <p class="section-subtitle">
-            Além do mobiliário residencial, desenvolvemos estruturas monumentais e projetos experimentais sob medida para arquitetos, pavilhões de exposições e eco-resorts.
+            Além do mobiliário residencial, projetamos estruturas monumentais e pavilhões sob medida para arquitetos, spas e eco-resorts.
           </p>
         </div>
 
         <div class="projects-grid">
-          ${cardsHtml}
+          
+          <!-- Project 1: Cúpula Geodésica Biosfera -->
+          <div class="project-card glass-panel">
+            <div class="project-visual-header">
+              <div class="project-tag-top">Cúpula Geodésica &bull; Spas &amp; Glamping</div>
+              <h3 class="project-card-title">Cúpula Geodésica Biosfera 3V</h3>
+              <p class="project-card-dim">6,0 m de Diâmetro &bull; 3,6 m de Altura</p>
+            </div>
+            <div class="project-card-body">
+              <p class="project-card-desc">
+                Estrutura icosaédrica em madeira tratada de reflorestamento com conectores em alumínio naval e claraboias triangulares de vidro temperado para observação estelar.
+              </p>
+              <div class="project-meta-row">
+                <div><strong>Madeira:</strong> Cumaru / Eucalipto Autoclavado</div>
+                <div><strong>Capacidade:</strong> Resistente a ventos de até 140 km/h</div>
+                <div><strong>Investimento:</strong> A partir de R$ 68.000</div>
+              </div>
+              <div class="project-card-actions">
+                <a 
+                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20consultar%20a%20viabilidade%20da%20Cúpula%20Geodésica%20Biosfera%203V." 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="btn btn-whatsapp-sm"
+                >
+                  <span>Consultar Viabilidade no WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project 2: Bancada Executiva Cantilever -->
+          <div class="project-card glass-panel">
+            <div class="project-visual-header">
+              <div class="project-tag-top">Mobiliário Corporativo &bull; Diretoria</div>
+              <h3 class="project-card-title">Mesa Executiva Cantilever Aetherium</h3>
+              <p class="project-card-dim">220 cm (C) &bull; Balanço Extremo</p>
+            </div>
+            <div class="project-card-body">
+              <p class="project-card-desc">
+                Bancada de reuniões e diretoria com tampo em balanço livre sem apoios frontais, sustentada por cabos tensores ocultos de alta tração com gaveteiro flutuante.
+              </p>
+              <div class="project-meta-row">
+                <div><strong>Madeira:</strong> Jacarandá da Bahia &amp; Freijó</div>
+                <div><strong>Capacidade:</strong> Suporta 300 kg na extremidade</div>
+                <div><strong>Investimento:</strong> A partir de R$ 42.000</div>
+              </div>
+              <div class="project-card-actions">
+                <a 
+                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20consultar%20a%20Mesa%20Executiva%20Cantilever%20Aetherium." 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="btn btn-whatsapp-sm"
+                >
+                  <span>Consultar Viabilidade no WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project 3: Escultura Cinética Tensil -->
+          <div class="project-card glass-panel">
+            <div class="project-visual-header">
+              <div class="project-tag-top">Instalação Escultural &bull; Átrios</div>
+              <h3 class="project-card-title">Monumento Cinético de Tensegridade</h3>
+              <p class="project-card-dim">Escala Sob Medida para Pé-Direito Duplo</p>
+            </div>
+            <div class="project-card-body">
+              <p class="project-card-desc">
+                Escultura monumental de módulos rígidos em madeira maciça que flutuam no espaço sem se tocarem, unidos unicamente por cabos tensores em harmonia física.
+              </p>
+              <div class="project-meta-row">
+                <div><strong>Madeira:</strong> Peroba Rosa de Demolição &amp; Inox</div>
+                <div><strong>Aplicação:</strong> Lobbies corporativos, hotéis e galerias</div>
+                <div><strong>Investimento:</strong> Sob consulta técnica</div>
+              </div>
+              <div class="project-card-actions">
+                <a 
+                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20desenvolver%20uma%20Escultura%20Monumental%20em%20Tensegridade%20sob%20medida." 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="btn btn-whatsapp-sm"
+                >
+                  <span>Consultar Viabilidade no WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-﻿export function renderHero(): string {
+export function renderHero(): string {
   return `
     <section class="hero-section" id="hero">
       <div class="container hero-content">
@@ -7,9 +7,7 @@
         <div class="hero-text-col">
           <div class="hero-badge-row">
             <span class="section-tag gold">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
+              <span class="flag-dot-green"></span>
               Ateliê Brasil de Marcenaria
             </span>
             <span class="section-tag-subtle">
@@ -23,7 +21,7 @@
           </h1>
 
           <p class="hero-subtitle">
-            Projetamos e executamos mesas de jantar suspensas, poltronas flutuantes e cúpulas geodésicas sob encomenda para residências e projetos de arquitetura de alto padrão. Equilíbrio absoluto entre madeiras nobres brasileiras e cabos de aço aeroespacial.
+            Projetamos e executamos mesas de jantar suspensas, poltronas flutuantes e aparadores esculturais sob encomenda. Equilíbrio absoluto entre madeiras nobres brasileiras — Cumaru, Freijó, Jacarandá e Pequiá — e cabos de aço aeroespacial naval.
           </p>
 
           <div class="hero-cta-group">
@@ -37,46 +35,46 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
               </svg>
-              <span>Ateliê 3D Interativo</span>
+              <span>Personalizar em 3D</span>
             </a>
           </div>
 
-          <!-- Trust & Value Signals -->
+          <!-- Trust & Value Signals (Clean 4 metrics) -->
           <div class="hero-stats-row">
             <div class="stat-item">
-              <span class="stat-val font-serif">6–8 Sem</span>
-              <span class="stat-label">Produção Artesanal</span>
+              <span class="stat-val font-serif">100% FSC®</span>
+              <span class="stat-label">Madeiras Nacionais</span>
             </div>
             <div class="stat-item">
               <span class="stat-val cyan">1.800 kg</span>
               <span class="stat-label">Carga de Ruptura</span>
             </div>
             <div class="stat-item">
-              <span class="stat-val font-serif">100% FSC®</span>
-              <span class="stat-label">Madeiras Nacionais</span>
+              <span class="stat-val font-serif">6–8 Sem</span>
+              <span class="stat-label">Produção Artesanal</span>
             </div>
             <div class="stat-item">
-              <span class="stat-val font-serif" style="color: var(--gold-light);">3 Vagas</span>
-              <span class="stat-label">Ateliê Q4</span>
+              <span class="stat-val font-serif" style="color: var(--gold-light);">Vitalícia</span>
+              <span class="stat-label">Garantia Estrutural</span>
             </div>
           </div>
         </div>
 
-        <!-- Right Column: Auto-Loaded Three.js 3D Visualizer -->
+        <!-- Right Column: Interactive 3D Visualizer -->
         <div class="hero-visual-stage">
           <div class="stage-overlay-hud">
             <span class="hud-pill" id="hero-model-pill">
-              <strong>✨ Mesa Ipanema em Cumaru</strong> &bull; Malha 3D Real
+              <strong>✨ Mesa Flutuante Ipanema</strong> &bull; Cumaru &amp; Inox Naval
             </span>
-            <span class="hud-pill">
-              Arraste para Girar &bull; Scroll para Zoom
+            <span class="hud-pill subtle-hint">
+              Arraste para girar 360&deg;
             </span>
           </div>
 
           <!-- Canvas Container -->
           <div id="hero-3d-canvas" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
 
-          <!-- Stage Interaction Controls -->
+          <!-- Clean Interaction Controls -->
           <div class="stage-bottom-controls">
             <div class="toggle-group">
               <button class="toggle-btn active" id="hero-btn-autorotate">Girar: ON</button>

@@ -1,51 +1,50 @@
-﻿export function renderNavbar(): string {
+export function renderNavbar(): string {
   return `
-    <header class="site-header">
+    <header class="site-header" id="site-header">
       <div class="container nav-inner">
-        <a href="#" class="brand-logo" id="nav-brand-logo" aria-label="Tensor & Timber Início">
-          <div class="brand-icon">
-            <svg width="24" height="24" viewBox="0 0 100 100">
-              <polygon points="50,14 84,34 84,74 50,92 16,74 16,34" fill="none" stroke="#10b981" stroke-width="5" />
-              <polygon points="50,24 76,70 24,70" fill="none" stroke="#38bdf8" stroke-width="5" />
-              <circle cx="50" cy="50" r="8" fill="#f59e0b" />
+        
+        <!-- Brand Identity -->
+        <a href="#hero" class="brand-link">
+          <div class="brand-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" stroke="#f5c542" />
+              <line x1="12" y1="2" x2="12" y2="22" stroke="#10b981" stroke-dasharray="2 2" />
+              <circle cx="12" cy="12" r="3" fill="#f5c542" />
             </svg>
           </div>
           <div class="brand-text">
-            <span class="brand-name">TENSOR <span class="gold-gradient">&amp;</span> TIMBER</span>
-            <span class="brand-tagline">Marcenaria Autoral &amp; Tensegridade 🇧🇷</span>
+            <span class="brand-name">TENSOR &amp; TIMBER</span>
+            <span class="brand-tagline">Marcenaria Autoral &bull; Brasil</span>
           </div>
         </a>
 
-        <nav>
-          <ul class="nav-links">
-            <li><a href="#real-furniture-section" class="nav-link">Mobiliário Real</a></li>
-            <li><a href="#atelier-section" class="nav-link" style="color: var(--gold-light); font-weight: 600;">Ateliê 3D</a></li>
-            <li><a href="#projects-section" class="nav-link">Inovação</a></li>
-            <li><a href="#consultation-section" class="nav-link">Processo &amp; Encomenda</a></li>
-          </ul>
+        <!-- Clean Navigation Links -->
+        <nav class="nav-links" id="main-nav">
+          <a href="#real-furniture-section" class="nav-link">Mobiliário Real</a>
+          <a href="#atelier-section" class="nav-link">Ateliê 3D</a>
+          <a href="#projects-section" class="nav-link">Inovação</a>
+          <a href="#consultation-section" class="nav-link">Contato</a>
         </nav>
 
+        <!-- High-Conversion Actions -->
         <div class="nav-actions">
-          <div class="quota-badge" title="Vagas de produção limitadas neste trimestre">
-            <span class="pulse-dot"></span>
-            <span>Ateliê Q4: <strong>3 Vagas Restantes</strong></span>
-          </div>
-
-          <button id="nav-btn-leads" class="btn btn-glass btn-sm" title="Painel interno de pedidos">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <path d="M7 8h10M7 12h10M7 16h6"/>
+          <a 
+            href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20de%20mobiliário%20sob%20medida%20da%20Tensor%20%26%20Timber." 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="btn btn-whatsapp-nav"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
             </svg>
-            <span>Pipeline</span>
-          </button>
+            <span>WhatsApp</span>
+          </a>
 
           <a href="#consultation-section" class="btn btn-primary-gold btn-sm">
             <span>Solicitar Orçamento</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
           </a>
         </div>
+
       </div>
     </header>
   `;

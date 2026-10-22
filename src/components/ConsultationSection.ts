@@ -1,144 +1,125 @@
-﻿export function renderConsultationSection(): string {
+export function renderConsultationSection(): string {
   return `
     <section class="section" id="consultation-section">
       <div class="container">
         
-        <!-- Section Header -->
         <div class="section-header text-center">
           <span class="section-tag gold">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-            Processo Exclusivo de Ateliê
+            <span class="flag-dot-green"></span>
+            Atendimento Personalizado
           </span>
           <h2 class="section-title">
-            Da Concepção Digital à <span class="gold-gradient">Instalação Impecável</span>
+            Inicie sua Encomenda <span class="gold-gradient">Sob Medida</span>
           </h2>
           <p class="section-subtitle">
-            Combinamos marcenaria artesanal brasileira com modelagem paramétrica de ponta. 
-            Conheça o passo a passo da encomenda de uma peça de alto padrão.
+            Atendemos arquitetos, designers de interiores e clientes finais em todo o Brasil.
+            Fale diretamente com o mestre marceneiro ou envie as especificações do seu espaço.
           </p>
         </div>
 
-        <!-- 4-Step Bespoke Journey Grid -->
-        <div class="process-steps-grid">
-          <div class="process-step-card glass-panel">
-            <div class="step-badge">Etapa 01</div>
-            <h3 class="step-title">Síntese Espacial 3D</h3>
-            <p class="step-description">
-              Definimos as proporções ideais para seu ambiente através de modelagem digital e simulação de iluminação e circulação.
+        <div class="consultation-layout-grid">
+          
+          <!-- Left: Direct WhatsApp Card & Guarantees -->
+          <div class="consultation-direct-card glass-panel">
+            <div class="direct-card-tag">CANAL DIRETO &bull; RESPOSTA RÁPIDA</div>
+            <h3 class="direct-card-title">Prefere conversar diretamente no WhatsApp?</h3>
+            <p class="direct-card-desc">
+              Envie fotos do seu ambiente, plantas em PDF ou tire dúvidas técnicas sobre madeiras nobres, resistência e prazos com nosso atelier.
             </p>
-          </div>
 
-          <div class="process-step-card glass-panel">
-            <div class="step-badge">Etapa 02</div>
-            <h3 class="step-title">Caixa de Amostras</h3>
-            <p class="step-description">
-              Enviamos por portador uma caixa de curadoria com amostras de Cumaru, Freijó, Jacarandá e conexões de inox/titânio.
-            </p>
-          </div>
-
-          <div class="process-step-card glass-panel">
-            <div class="step-badge">Etapa 03</div>
-            <h3 class="step-title">Engenharia FEA</h3>
-            <p class="step-description">
-              Simulação de Elementos Finitos que calcula a pré-tensão de cada cabo para garantir deflexão milimétrica zero.
-            </p>
-          </div>
-
-          <div class="process-step-card glass-panel">
-            <div class="step-badge">Etapa 04</div>
-            <h3 class="step-title">Entrega White-Glove</h3>
-            <p class="step-description">
-              Nossa equipe de mestres marceneiros realiza o transporte seguro e a montagem técnica calibrada em sua residência.
-            </p>
-          </div>
-        </div>
-
-        <!-- Direct High-Ticket On-Page Commission Form -->
-        <div class="commission-form-card glass-panel" style="margin-top: 64px;">
-          <div class="commission-header text-center">
-            <span class="commission-badge">CANAL DIRETO COM O ATELIÊ</span>
-            <h3 class="commission-title">Solicite seu Orçamento ou Agende uma Visita Técnica</h3>
-            <p class="commission-subtitle">
-              Receba o contato direto do nosso marceneiro-chefe e diretor de engenharia em até 24 horas úteis.
-            </p>
-          </div>
-
-          <form id="onpage-commission-form" class="commission-form-grid">
-            <div class="form-group">
-              <label for="comm-name">Nome Completo *</label>
-              <input type="text" id="comm-name" class="form-input" placeholder="Ex: Dra. Mariana Vasconcellos" required />
-            </div>
-
-            <div class="form-group">
-              <label for="comm-email">E-mail Profissional ou Pessoal *</label>
-              <input type="email" id="comm-email" class="form-input" placeholder="mariana@arquitetura.com.br" required />
-            </div>
-
-            <div class="form-group">
-              <label for="comm-phone">WhatsApp / Telefone com DDD *</label>
-              <input type="tel" id="comm-phone" class="form-input" placeholder="(11) 98765-4321" required />
-            </div>
-
-            <div class="form-group">
-              <label for="comm-archetype">Peça de Interesse *</label>
-              <select id="comm-archetype" class="form-select" required>
-                <option value="Mesa de Jantar Flutuante Ipanema">Mesa de Jantar Flutuante Ipanema (Cumaru)</option>
-                <option value="Poltrona Tensa Niemeyer">Poltrona Tensa Niemeyer (Freijó &amp; Couro)</option>
-                <option value="Aparador Escultural Cerrado">Aparador Escultural Cerrado (Jacarandá)</option>
-                <option value="Mesa de Centro Tupi">Mesa de Centro Tupi (Pequiá &amp; Vidro)</option>
-                <option value="Cúpula Geodésica Biosfera">Cúpula Geodésica Biosfera / Pavilhão</option>
-                <option value="Projeto Corporativo ou Residencial Sob Medida">Projeto Residencial Sob Medida</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="comm-budget">Faixa de Investimento Prevista</label>
-              <select id="comm-budget" class="form-select">
-                <option value="R$ 15.000 a R$ 25.000">R$ 15.000 a R$ 25.000</option>
-                <option value="R$ 25.000 a R$ 50.000" selected>R$ 25.000 a R$ 50.000</option>
-                <option value="R$ 50.000 a R$ 100.000">R$ 50.000 a R$ 100.000</option>
-                <option value="Acima de R$ 100.000">Acima de R$ 100.000 (Grandes Projetos)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="comm-city">Cidade / Estado</label>
-              <input type="text" id="comm-city" class="form-input" placeholder="São Paulo - SP, Rio de Janeiro - RJ..." />
-            </div>
-
-            <div class="form-group full-width">
-              <label for="comm-notes">Dimensões do Espaço ou Detalhes Especiais</label>
-              <textarea id="comm-notes" class="form-textarea" rows="3" placeholder="Conte-nos sobre o ambiente, estilo decorativo, medidas ou prazos específicos..."></textarea>
-            </div>
-
-            <div class="form-submit-row full-width">
-              <button type="submit" class="btn btn-primary-gold btn-lg btn-block" id="comm-submit-btn">
-                <span>Enviar Solicitação de Encomenda para o Ateliê</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
-          </form>
-
-          <!-- Success Message State (Hidden Initially) -->
-          <div id="commission-success-state" class="commission-success-box" style="display: none;">
-            <div class="success-icon-wrap">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
+            <a 
+              href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20para%20mobiliário%20sob%20medida%20da%20Tensor%20%26%20Timber." 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="btn btn-whatsapp-full"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
               </svg>
-            </div>
-            <h4 class="success-title">Sua Solicitação foi Recebida pelo Nosso Marceneiro-Chefe</h4>
-            <p class="success-desc">
-              Sua vaga de produção preliminar no trimestre foi reservada. Nossa equipe técnica entrará em contato via WhatsApp e e-mail com as diretrizes e catálogo em até 24 horas úteis.
-            </p>
-            <div class="success-contact-badge">
-              <span>Atendimento Direto: contato@tensortimber.com.br • WhatsApp: (11) 98921-4400</span>
+              <span>Abrir Conversa no WhatsApp</span>
+            </a>
+
+            <div class="guarantees-list">
+              <div class="guarantee-item">
+                <span class="guarantee-icon">🌿</span>
+                <div>
+                  <strong>Madeiras 100% FSC® e Demolição</strong>
+                  <p>Origem rastreada e documentação DOF emitida pelo IBAMA.</p>
+                </div>
+              </div>
+              <div class="guarantee-item">
+                <span class="guarantee-icon">📐</span>
+                <div>
+                  <strong>Cálculo Estrutural de Precisão</strong>
+                  <p>Análise de elementos finitos e cabos navais de 1.800 kgf.</p>
+                </div>
+              </div>
+              <div class="guarantee-item">
+                <span class="guarantee-icon">🚚</span>
+                <div>
+                  <strong>Entrega White-Glove em Todo o Brasil</strong>
+                  <p>Transporte climatizado e equipe própria de montagem.</p>
+                </div>
+              </div>
+              <div class="guarantee-item">
+                <span class="guarantee-icon">🛡️</span>
+                <div>
+                  <strong>Garantia Vitalícia da Estrutura</strong>
+                  <p>Certificado de autenticidade numerado e calibração periódica.</p>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Right: Clean Consultation Form -->
+          <div class="consultation-form-card glass-panel">
+            <h3 class="form-card-title">Solicitar Proposta por E-mail</h3>
+            <p class="form-card-subtitle">Retornamos com proposta detalhada em até 24 horas úteis.</p>
+
+            <form id="onpage-commission-form" class="clean-form">
+              <div class="form-field">
+                <label for="comm-name">Seu Nome Completo</label>
+                <input type="text" id="comm-name" placeholder="Ex: Dra. Mariana Vasconcelos" required />
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-field">
+                  <label for="comm-phone">WhatsApp / Telefone</label>
+                  <input type="tel" id="comm-phone" placeholder="(11) 99876-5432" required />
+                </div>
+                <div class="form-field">
+                  <label for="comm-city">Cidade / Estado</label>
+                  <input type="text" id="comm-city" placeholder="Ex: São Paulo - SP" required />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="comm-archetype">Peça de Interesse</label>
+                <select id="comm-archetype">
+                  <option value="Mesa de Jantar Flutuante Ipanema">Mesa de Jantar Flutuante Ipanema (Cumaru Maciço)</option>
+                  <option value="Poltrona Tensa Niemeyer">Poltrona Tensa Niemeyer (Freijó &amp; Couro)</option>
+                  <option value="Aparador Escultural Cerrado">Aparador Escultural Cerrado (Jacarandá da Bahia)</option>
+                  <option value="Mesa de Centro Tupi">Mesa de Centro Tupi (Pequiá &amp; Vidro 19mm)</option>
+                  <option value="Cúpula Geodésica Biosfera">Cúpula Geodésica Biosfera 3V</option>
+                  <option value="Projeto Especial Sob Medida">Projeto Especial com Arquiteto</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="comm-notes">Dimensões do Espaço ou Observações</label>
+                <textarea id="comm-notes" rows="3" placeholder="Ex: Living integrado com 45m², desejamos uma mesa para 10 a 12 lugares em tom mel..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary-gold btn-block btn-lg" id="btn-submit-commission">
+                <span>Enviar Solicitação de Orçamento &rarr;</span>
+              </button>
+
+              <div id="commission-success-state" class="form-success-message" style="display: none;">
+                ✓ Solicitação recebida com sucesso! Nossa equipe técnica entrará em contato via WhatsApp em breve.
+              </div>
+            </form>
+          </div>
+
         </div>
 
       </div>
