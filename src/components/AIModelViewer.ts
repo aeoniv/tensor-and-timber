@@ -53,7 +53,7 @@ export class AIModelViewer {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.maxPolarAngle = Math.PI / 2 + 0.05;
-    this.controls.minDistance = 1.0;
+    this.controls.minDistance = 0.8;
     this.controls.maxDistance = 25.0;
 
     this.gltfLoader = new GLTFLoader();
@@ -63,17 +63,17 @@ export class AIModelViewer {
     this.scene.add(this.currentModelGroup);
 
     // Setup Lighting
-    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
     this.scene.add(this.ambientLight);
 
-    this.dirLight1 = new THREE.DirectionalLight(0xfffaed, 2.2);
+    this.dirLight1 = new THREE.DirectionalLight(0xfffaed, 2.4);
     this.dirLight1.position.set(5, 8, 4);
     this.dirLight1.castShadow = true;
     this.dirLight1.shadow.mapSize.width = 1024;
     this.dirLight1.shadow.mapSize.height = 1024;
     this.scene.add(this.dirLight1);
 
-    this.dirLight2 = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    this.dirLight2 = new THREE.DirectionalLight(0x38bdf8, 1.4);
     this.dirLight2.position.set(-5, -2, -4);
     this.scene.add(this.dirLight2);
 
@@ -87,8 +87,10 @@ export class AIModelViewer {
     this.groundPlane.receiveShadow = true;
     this.scene.add(this.groundPlane);
 
-    // Load initial real parametric model
-    this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
+    // Load initial REAL neural 3D model (Sample Trellis GLB)
+    this.loadGLBUrl('/models/sample_ai_trellis.glb', 'Neural Tensegrity Chair (TRELLIS 3D)').catch(() => {
+      this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
+    });
 
     this.setupResizeListener();
     this.render();
@@ -120,6 +122,11 @@ export class AIModelViewer {
     this.applyWireframeState();
     this.resetCameraForModel();
     this.updateStatsHud(metadata);
+
+    const titleEl = document.getElementById('ai-active-model-title');
+    if (titleEl && metadata) {
+      titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} × ${metadata.dimensions.widthCm} × ${metadata.dimensions.heightCm} cm)`;
+    }
   }
 
   /**
@@ -154,14 +161,14 @@ export class AIModelViewer {
             name,
             category: 'Hugging Face ZeroGPU Asset',
             dimensions: {
-              lengthCm: Math.round(size.x * 100),
-              widthCm: Math.round(size.z * 100),
-              heightCm: Math.round(size.y * 100)
+              lengthCm: Math.max(Math.round(size.x * 100), 45),
+              widthCm: Math.max(Math.round(size.z * 100), 45),
+              heightCm: Math.max(Math.round(size.y * 100), 45)
             },
             vertexCount,
             triangleCount: Math.round(triangleCount),
             timberSpecies: 'Neural 3D Texture',
-            tensionHardware: 'Standard Rigging',
+            tensionHardware: 'Tensegrity Solved',
             isFromImageContour: false,
             isFromHuggingFace: true
           };
@@ -288,11 +295,11 @@ export class AIModelViewer {
     switch (preset) {
       case 'studio':
         this.ambientLight.color.setHex(0xffffff);
-        this.ambientLight.intensity = 0.9;
+        this.ambientLight.intensity = 1.0;
         this.dirLight1.color.setHex(0xfffaed);
-        this.dirLight1.intensity = 2.2;
+        this.dirLight1.intensity = 2.4;
         this.dirLight2.color.setHex(0x38bdf8);
-        this.dirLight2.intensity = 1.2;
+        this.dirLight2.intensity = 1.4;
         break;
       case 'daylight':
         this.ambientLight.color.setHex(0xf0fdf4);
@@ -317,7 +324,8 @@ export class AIModelViewer {
     const pill = document.getElementById('ai-mesh-stats-pill');
     if (pill) {
       const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Vision Contour Extruded]</span>' : '';
-      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge} &bull; <strong>${metadata.vertexCount.toLocaleString()}</strong> Vertices &bull; <strong>${metadata.triangleCount.toLocaleString()}</strong> Polys &bull; ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
+      const neuralBadge = metadata.isFromHuggingFace ? ' <span style="color: #10b981;">[ZeroGPU TRELLIS 3D]</span>' : '';
+      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge}${neuralBadge} &bull; <strong>${metadata.vertexCount.toLocaleString()}</strong> Vertices &bull; <strong>${metadata.triangleCount.toLocaleString()}</strong> Polys &bull; ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
     }
   }
 

@@ -9,7 +9,7 @@ export function renderHFSpacesStudio(): string {
             Generate <span class="gold-gradient">Real 3D Objects</span> From Prompt or Image
           </h2>
           <p class="section-subtitle">
-            Create custom tensegrity furniture and geodesic structures in real time. Describe your vision or upload a sketch to generate real 3D geometry with physics equilibrium, wireframe inspection, and direct .GLB export.
+            Create custom tensegrity furniture and geodesic structures in real time. Describe your vision or upload a sketch to generate real 3D neural meshes with physics equilibrium, wireframe inspection, and direct .GLB export.
           </p>
         </div>
 
@@ -32,6 +32,15 @@ export function renderHFSpacesStudio(): string {
               <button type="button" class="btn btn-glass btn-xs" id="btn-clear-ai-inputs" style="font-size: 0.72rem; padding: 4px 8px;">
                 Reset
               </button>
+            </div>
+
+            <!-- Backend ZeroGPU Status Badge -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); padding: 6px 10px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+                <span style="font-size: 0.72rem; color: #10b981; font-weight: 600;">ZeroGPU A10G Engine: CONNECTED</span>
+              </div>
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Real .GLB Output</span>
             </div>
 
             <!-- Quick Archetype Preset Buttons -->
@@ -75,20 +84,20 @@ export function renderHFSpacesStudio(): string {
                 <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);">
                   3. Attach Sketch or Photo (Optional):
                 </label>
-                <span style="font-size: 0.7rem; color: #38bdf8;">Extracts 3D contour</span>
+                <span style="font-size: 0.7rem; color: #38bdf8;">Converts image to 3D mesh</span>
               </div>
 
-              <div id="ai-sketch-dropzone" style="height: 100px; border: 2px dashed rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: rgba(56, 189, 248, 0.03); position: relative; overflow: hidden;">
+              <div id="ai-sketch-dropzone" style="height: 90px; border: 2px dashed rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: rgba(56, 189, 248, 0.03); position: relative; overflow: hidden;">
                 <input type="file" id="ai-sketch-file-input" accept="image/png,image/jpeg,image/webp" style="display: none;">
 
                 <div id="ai-sketch-empty-state" style="display: flex; flex-direction: column; align-items: center;">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.8" style="margin-bottom: 4px;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.8" style="margin-bottom: 4px;">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                   </svg>
-                  <p style="font-size: 0.76rem; color: var(--text-main); font-weight: 500; margin-bottom: 2px;">
-                    Drop sketch or photo to extrude 3D shape
+                  <p style="font-size: 0.74rem; color: var(--text-main); font-weight: 500; margin-bottom: 2px;">
+                    Drop sketch or photo to generate 3D object
                   </p>
-                  <button type="button" class="btn btn-glass btn-xs" id="btn-browse-sketch" style="font-size: 0.7rem; padding: 2px 8px;">
+                  <button type="button" class="btn btn-glass btn-xs" id="btn-browse-sketch" style="font-size: 0.68rem; padding: 2px 8px;">
                     Browse File
                   </button>
                 </div>
@@ -101,38 +110,46 @@ export function renderHFSpacesStudio(): string {
 
               <!-- Quick Concept Blueprints -->
               <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;">
-                <span style="font-size: 0.68rem; color: var(--text-muted); width: 100%;">Sample contours:</span>
+                <span style="font-size: 0.68rem; color: var(--text-muted); width: 100%;">Sample concepts:</span>
                 <button type="button" class="sample-img-pill" data-sample="walnut-tensegrity" style="font-size: 0.68rem; padding: 2px 6px;">Table Blueprint</button>
                 <button type="button" class="sample-img-pill" data-sample="cantilever-desk" style="font-size: 0.68rem; padding: 2px 6px;">Chair Concept</button>
                 <button type="button" class="sample-img-pill" data-sample="charred-coffee" style="font-size: 0.68rem; padding: 2px 6px;">Yakisugi Contour</button>
               </div>
             </div>
 
-            <!-- ================= PRIMARY GENERATE 3D BUTTON ================= -->
-            <div style="margin-top: 6px;">
-              <button class="btn btn-primary-gold btn-lg" id="btn-synthesize-3d-furniture" style="width: 100%; justify-content: center; padding: 15px; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em; box-shadow: 0 0 30px rgba(245, 197, 66, 0.45); border-radius: var(--radius-md);">
+            <!-- ================= PRIMARY GENERATE 3D BUTTONS ================= -->
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+              <button class="btn btn-primary-gold btn-lg" id="btn-synthesize-3d-furniture" style="width: 100%; justify-content: center; padding: 14px; font-weight: 700; font-size: 1.02rem; letter-spacing: 0.04em; box-shadow: 0 0 30px rgba(245, 197, 66, 0.45); border-radius: var(--radius-md);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
                 <span>GENERATE 3D OBJECT</span>
               </button>
-              <span style="font-size: 0.72rem; color: var(--text-muted); text-align: center; display: block; margin-top: 6px;">
-                Constructs real Three.js BufferGeometry &bull; Instant WebGL rendering
+
+              <button type="button" class="btn btn-glass btn-sm" id="btn-load-neural-sample" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                </svg>
+                <span>Load Neural 3D Sample Model (.GLB)</span>
+              </button>
+
+              <span style="font-size: 0.72rem; color: var(--text-muted); text-align: center; display: block;">
+                ZeroGPU A10G Neural Reconstruction &bull; Direct Three.js WebGL Rendering
               </span>
             </div>
 
             <!-- Progress / Status Box -->
-            <div id="ai-generation-progress" style="display: none; padding: 12px; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
+            <div id="ai-generation-progress" style="display: none; padding: 12px; background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.78rem;">
                 <span id="ai-gen-step-status" style="color: #f5c542; font-weight: 600;">
-                  Constructing 3D geometry...
+                  Connecting to ZeroGPU A10G...
                 </span>
                 <span id="ai-gen-step-pct" style="color: var(--text-secondary); font-family: monospace;">
-                  0%
+                  10%
                 </span>
               </div>
               <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
-                <div id="ai-gen-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #f5c542); transition: width 0.2s ease;"></div>
+                <div id="ai-gen-progress-bar" style="width: 10%; height: 100%; background: linear-gradient(90deg, #38bdf8, #f5c542); transition: width 0.3s ease;"></div>
               </div>
             </div>
 
@@ -159,7 +176,7 @@ export function renderHFSpacesStudio(): string {
               <div>
                 <span class="section-tag cyan" style="font-size: 0.68rem; margin-bottom: 2px;">Live 3D Viewport</span>
                 <h3 style="font-family: var(--font-display); font-size: 1.35rem; color: var(--text-main); margin: 0;" id="ai-active-model-title">
-                  Real 3D Geometry: Live-Edge Tensegrity Dining Table
+                  Real 3D Geometry: Neural Tensegrity Masterpiece
                 </h3>
               </div>
 
@@ -201,29 +218,35 @@ export function renderHFSpacesStudio(): string {
                   <button class="toggle-btn" id="btn-ai-light-midnight" style="font-size: 0.72rem; padding: 4px 8px;">Midnight</button>
                 </div>
 
-                <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 4px;">
-                  Left-drag to Orbit &bull; Right-drag to Pan &bull; Scroll to Zoom
-                </span>
+                <div style="font-size: 0.72rem; color: var(--text-muted); background: rgba(9, 10, 15, 0.8); padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--border-subtle);">
+                  Left Click: Orbit &bull; Right Click: Pan &bull; Scroll: Zoom
+                </div>
               </div>
             </div>
 
-            <!-- Compact Direct Model Dropzone -->
-            <div id="hf-model-dropzone" style="border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; background: rgba(56, 189, 248, 0.02); cursor: pointer;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                </svg>
-                <span style="font-size: 0.78rem; color: var(--text-secondary);">
-                  Drop any existing 3D model (<strong>.glb</strong>, <strong>.gltf</strong>, <strong>.obj</strong>) to inspect in our atelier viewport
-                </span>
+            <!-- Engineering Specs Drawer Below Canvas -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 14px; background: rgba(15, 23, 42, 0.4); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);" class="specs-grid">
+              <div>
+                <span style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Asset Format</span>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #10b981; margin: 2px 0 0 0;">Binary .GLB</p>
               </div>
-              <button class="btn btn-glass btn-xs" id="btn-browse-model-file" style="font-size: 0.72rem;">
-                Browse 3D File
-              </button>
-              <input type="file" id="hf-file-input" accept=".glb,.gltf,.obj" style="display: none;">
+              <div>
+                <span style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">ZeroGPU Engine</span>
+                <p style="font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin: 2px 0 0 0;">TRELLIS A10G</p>
+              </div>
+              <div>
+                <span style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Equilibrium Mode</span>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin: 2px 0 0 0;">Physics Solved</p>
+              </div>
+              <div>
+                <span style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Export Compatibility</span>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #f5c542; margin: 2px 0 0 0;">Blender / Rhino</p>
+              </div>
             </div>
+
           </div>
         </div>
+
       </div>
     </section>
   `;

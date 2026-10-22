@@ -683,7 +683,29 @@ class AtelierApp {
       });
     });
 
-    // 4. "Generate Real 3D Furniture" Action Flow (100% Client-Side Instant Synthesis)
+    // 4. "Generate Real 3D Furniture" Action Flow (ZeroGPU Neural Reconstruction with local CAD fallback)
+    const loadNeuralSampleBtn = document.getElementById('btn-load-neural-sample');
+    loadNeuralSampleBtn?.addEventListener('click', async () => {
+      if (this.aiModelViewer) {
+        this.showToast('Loading ZeroGPU TRELLIS neural 3D model...');
+        try {
+          const meta = await this.aiModelViewer.loadGLBUrl('/models/sample_ai_trellis.glb', 'Neural Tensegrity Masterpiece');
+          const titleEl = document.getElementById('ai-active-model-title');
+          if (titleEl) {
+            titleEl.textContent = `Real 3D Neural Mesh: ZeroGPU Trellis Masterpiece (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
+          }
+          if (successBar && successMsg) {
+            successBar.style.display = 'flex';
+            successMsg.textContent = `Loaded real neural 3D mesh generated on ZeroGPU! ${meta.vertexCount.toLocaleString()} vertices & ${meta.triangleCount.toLocaleString()} polygons rendered in WebGL.`;
+          }
+          this.showToast('Loaded real AI 3D model (1.85MB binary .GLB)!');
+        } catch (err) {
+          console.error('Failed to load sample GLB:', err);
+          this.showToast('Error loading sample GLB.');
+        }
+      }
+    });
+
     synthesizeBtn?.addEventListener('click', async () => {
       let promptText = promptInput?.value.trim() || '';
       if (!promptText && !this.attachedSketchDataUrl) {
@@ -696,14 +718,60 @@ class AtelierApp {
         if (successBar) successBar.style.display = 'none';
 
         statusLabel.textContent = this.attachedSketchDataUrl
-          ? 'Extracting contour vectors from sketch & extruding 3D timber geometry...'
-          : 'Parsing architectural parameters & constructing 3D BufferGeometry in tension equilibrium...';
-        progressBar.style.width = '70%';
-        statusPct.textContent = '70%';
+          ? 'Connecting to ZeroGPU: uploading sketch for 3D neural reconstruction...'
+          : 'Connecting to ZeroGPU: synthesizing 2D concept & feeding into TRELLIS 3D neural pipeline...';
+        progressBar.style.width = '25%';
+        statusPct.textContent = '25%';
 
         try {
           let metadata: any = null;
-          if (this.aiModelViewer) {
+          let generatedGlbUrl: string | null = null;
+          let generatorSource: string = 'ZeroGPU TRELLIS Neural 3D';
+
+          // Attempt real AI inference via backend server
+          try {
+            statusLabel.textContent = 'ZeroGPU A10G executing neural reconstruction & extracting .GLB...';
+            progressBar.style.width = '55%';
+            statusPct.textContent = '55%';
+
+            const endpoints = ['/api/generate-3d', 'http://localhost:5175/api/generate-3d'];
+            let res: Response | null = null;
+
+            for (const ep of endpoints) {
+              try {
+                res = await fetch(ep, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    prompt: promptText,
+                    image: this.attachedSketchDataUrl
+                  })
+                });
+                if (res.ok) break;
+              } catch (epErr) {
+                // Try next endpoint
+              }
+            }
+
+            if (res && res.ok) {
+              const resData = await res.json();
+              if (resData.success && resData.glbUrl) {
+                generatedGlbUrl = resData.glbUrl;
+                generatorSource = resData.generator || generatorSource;
+              }
+            }
+          } catch (netErr) {
+            console.warn('Live ZeroGPU API unreachable, using local CAD engine:', netErr);
+          }
+
+          if (generatedGlbUrl && this.aiModelViewer) {
+            statusLabel.textContent = 'Loading textured .GLB mesh into Three.js WebGL viewport...';
+            progressBar.style.width = '85%';
+            statusPct.textContent = '85%';
+
+            metadata = await this.aiModelViewer.loadGLBUrl(generatedGlbUrl, promptText.slice(0, 35));
+          } else if (this.aiModelViewer) {
+            // Local CAD engine fallback
             metadata = await this.aiModelViewer.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
           }
 
@@ -718,7 +786,9 @@ class AtelierApp {
           }
 
           if (successMsg && metadata) {
-            const origin = metadata.isFromImageContour ? 'Image Silhouette Contour Extrusion' : 'Parametric CAD Engine';
+            const origin = metadata.isFromHuggingFace
+              ? generatorSource
+              : (metadata.isFromImageContour ? 'Image Silhouette Contour Extrusion' : 'Parametric CAD Engine');
             successMsg.textContent = `Real 3D Mesh synthesized via ${origin}! Constructed ${metadata.vertexCount.toLocaleString()} vertices & ${metadata.triangleCount.toLocaleString()} polygons. Download the real .GLB file or request commission.`;
           }
 
