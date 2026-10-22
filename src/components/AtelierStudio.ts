@@ -1,190 +1,195 @@
-export function renderAtelierStudio(): string {
+﻿export function renderAtelierStudio(): string {
   return `
     <section class="section" id="atelier-section">
       <div class="app-container">
+        
         <!-- Section Header -->
-        <div class="section-header">
-          <span class="section-tag gold">Bespoke 3D Atelier</span>
+        <div class="section-header text-center">
+          <div class="br-section-badge">
+            <span class="flag-icon-mini">🇧🇷</span>
+            <span>ATELIÊ 3D SOB MEDIDA</span>
+          </div>
           <h2 class="section-title">
-            Envision Your Commission in <span class="gold-gradient">Real-Time 3D</span>
+            Configure seu Projeto em <span class="br-gradient-text">Tempo Real</span>
           </h2>
           <p class="section-subtitle">
-            Configure your custom tensegrity furniture or timber geodesic sanctuary. Describe your vision or upload a concept sketch to generate real 3D geometry with physics equilibrium and instant investment brackets.
+            Experimente arquétipos, refine materiais com madeiras nobres brasileiras e visualize instantaneamente a estimativa de investimento e o modelo 3D para sua encomenda.
           </p>
         </div>
 
-        <!-- Unified Side-by-Side 3D Workspace -->
+        <!-- 2-Column Unified Studio Workspace -->
         <div class="atelier-workspace-grid">
-
-          <!-- Left Column: Architectural Controls -->
-          <div class="glass-panel gold-glow atelier-controls-card">
-            <div class="atelier-card-header">
-              <div class="atelier-title-group">
-                <span class="pulse-indicator gold"></span>
-                <span class="card-heading">Architectural Specification</span>
-              </div>
-              <button type="button" class="btn btn-glass btn-xs" id="btn-clear-atelier-inputs">
-                Reset
-              </button>
+          
+          <!-- Left Column: Vision & Parameter Controls -->
+          <div class="atelier-controls-panel glass-panel">
+            <div class="panel-section-title">
+              <span class="step-num">01</span>
+              <span>Escolha o Arquétipo Estrutural</span>
             </div>
 
-            <!-- Archetype Pills -->
-            <div class="control-block">
-              <label class="control-label">1. Select Archetype:</label>
-              <div class="toggle-group full-width" id="atelier-archetype-tabs">
-                <button class="toggle-btn active" data-archetype="dining-table">Dining Table</button>
-                <button class="toggle-btn" data-archetype="lounge-chair">Lounge Chair</button>
-                <button class="toggle-btn" data-archetype="geodesic-dome">Geodesic Dome</button>
-                <button class="toggle-btn" data-archetype="cantilever-desk">Executive Desk</button>
-              </div>
-            </div>
-
-            <!-- Architectural Prompt Input -->
-            <div class="control-block">
-              <div class="control-label-row">
-                <label for="atelier-prompt-input" class="control-label">2. Architectural Vision or Dimensions:</label>
-                <span class="helper-badge">Auto-parses wood &amp; scale</span>
-              </div>
-              <textarea id="atelier-prompt-input" rows="3" class="luxury-textarea" placeholder="e.g. 240x100x75cm solid American black walnut live-edge floating tensegrity dining table with PVD gold cables..."></textarea>
-
-              <div class="chips-row">
-                <button type="button" class="prompt-chip" data-phrase="240x100x75cm Dining Table">+ 240&times;100cm</button>
-                <button type="button" class="prompt-chip" data-phrase="Solid American Black Walnut">+ Walnut</button>
-                <button type="button" class="prompt-chip" data-phrase="Yakisugi Charred Cedar">+ Charred Cedar</button>
-                <button type="button" class="prompt-chip" data-phrase="PVD Gold Titanium Cables">+ Gold Cables</button>
-                <button type="button" class="prompt-chip" data-phrase="Translucent Blue River Glass">+ River Glass</button>
-              </div>
-            </div>
-
-            <!-- Sketch / Photo Reference Upload -->
-            <div class="control-block">
-              <div class="control-label-row">
-                <label class="control-label">3. Concept Sketch or Photo (Optional):</label>
-                <span class="helper-badge cyan">Neural 3D extraction</span>
-              </div>
-
-              <div id="atelier-sketch-dropzone" class="luxury-dropzone">
-                <input type="file" id="atelier-sketch-file-input" accept="image/png,image/jpeg,image/webp" style="display: none;">
-
-                <div id="atelier-sketch-empty-state" class="dropzone-empty">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            <!-- Archetype Selector Tabs -->
+            <div class="archetype-tabs-grid" id="archetype-selector">
+              <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante" data-price="R$ 38.500 – R$ 48.000">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="6" width="20" height="4" rx="1"/>
+                    <line x1="6" y1="10" x2="6" y2="20"/>
+                    <line x1="18" y1="10" x2="18" y2="20"/>
+                    <line x1="6" y1="15" x2="18" y2="15"/>
                   </svg>
-                  <span class="dropzone-text">Drop sketch, CAD drawing, or photo</span>
-                  <button type="button" class="btn btn-glass btn-xs" id="btn-browse-atelier-sketch">Browse File</button>
                 </div>
-
-                <div id="atelier-sketch-preview-wrap" class="dropzone-preview" style="display: none;">
-                  <img id="atelier-sketch-preview-img" src="" alt="Uploaded Blueprint">
-                  <button type="button" id="btn-remove-atelier-sketch" class="dropzone-remove-btn">&times;</button>
+                <div class="tab-info">
+                  <div class="tab-title">Mesa de Jantar</div>
+                  <div class="tab-desc">6 a 12 Lugares Suspensa</div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Generate Action -->
-            <div class="generate-btn-wrap">
-              <button class="btn btn-primary-gold btn-lg btn-full" id="btn-atelier-generate">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-                <span>GENERATE 3D OBJECT &amp; QUOTE</span>
               </button>
-              <div class="generator-guarantee-note">
-                Constructs genuine Three.js geometry &bull; Direct .GLB export
-              </div>
+
+              <button class="archetype-tab" data-archetype="lounge-chair" data-name="Poltrona Tensa Niemeyer" data-price="R$ 18.900 – R$ 24.500">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M7 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2zM5 12h14"/>
+                  </svg>
+                </div>
+                <div class="tab-info">
+                  <div class="tab-title">Poltrona Lounge</div>
+                  <div class="tab-desc">Freijó &amp; Couro Natural</div>
+                </div>
+              </button>
+
+              <button class="archetype-tab" data-archetype="canopy" data-name="Aparador Escultural Cerrado" data-price="R$ 26.000 – R$ 34.000">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                  </svg>
+                </div>
+                <div class="tab-info">
+                  <div class="tab-title">Aparador &amp; Buffet</div>
+                  <div class="tab-desc">Jacarandá &amp; Tirantes Latão</div>
+                </div>
+              </button>
+
+              <button class="archetype-tab" data-archetype="dome" data-name="Cúpula Geodésica Biosfera" data-price="R$ 68.000 – R$ 98.000">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/>
+                  </svg>
+                </div>
+                <div class="tab-info">
+                  <div class="tab-title">Cúpula Geodésica</div>
+                  <div class="tab-desc">Spas &amp; Pavilhões 3V</div>
+                </div>
+              </button>
             </div>
 
-            <!-- Generation Progress Box -->
-            <div id="atelier-progress-box" class="progress-box" style="display: none;">
-              <div class="progress-status-row">
-                <span id="atelier-progress-status" class="progress-status-text">Synthesizing 3D geometry...</span>
-                <span id="atelier-progress-pct" class="progress-pct-text">25%</span>
-              </div>
-              <div class="progress-track">
-                <div id="atelier-progress-bar" class="progress-bar-fill" style="width: 25%;"></div>
-              </div>
+            <!-- Vision Prompt & Material Descriptors -->
+            <div class="panel-section-title" style="margin-top: 24px;">
+              <span class="step-num">02</span>
+              <span>Diretrizes de Design &amp; Madeiras</span>
             </div>
 
-            <!-- Success Bar -->
-            <div id="atelier-success-bar" class="success-bar" style="display: none;">
-              <span class="success-icon">&#10004;</span>
-              <span id="atelier-success-msg" class="success-text">Real 3D model generated and loaded into the viewport.</span>
+            <div class="prompt-chips-wrapper">
+              <span class="prompt-chip" data-text="Madeira Cumaru maciça e cabos de aço inox naval 316">Cumaru &amp; Inox Naval</span>
+              <span class="prompt-chip" data-text="Freijó curvado no vapor com tirantes dourados em titânio PVD">Freijó &amp; Titânio Dourado</span>
+              <span class="prompt-chip" data-text="Jacarandá da Bahia com detalhes em latão escovado">Jacarandá &amp; Latão</span>
+              <span class="prompt-chip" data-text="Minimalismo modernista brasileiro com borda orgânica natural">Design Brasileiro Orgânico</span>
             </div>
+
+            <div class="input-group-atelier">
+              <textarea 
+                id="atelier-vision-input" 
+                class="atelier-textarea" 
+                rows="3" 
+                placeholder="Descreva suas dimensões ou preferências de madeira nobre (ex: Mesa de 3 metros em Cumaru com cabos discretos para living em São Paulo)..."
+              >Mesa de jantar suspensa para 10 lugares em madeira Cumaru maciça com cabos de aço inoxidável naval 316 e esticadores ocultos.</textarea>
+            </div>
+
+            <!-- Optional Image Upload Dropzone -->
+            <div class="sketch-dropzone" id="atelier-sketch-zone">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity: 0.6;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <div class="dropzone-text">
+                <span class="dropzone-main">Anexar planta, esboço ou foto do ambiente</span>
+                <span class="dropzone-sub">PNG, JPG, PDF até 25MB (Opcional)</span>
+              </div>
+              <input type="file" id="atelier-file-input" accept="image/*,.pdf" style="display: none;" />
+            </div>
+
+            <!-- Generate Button -->
+            <button class="btn btn-br-primary btn-block btn-lg" id="btn-generate-3d" style="margin-top: 16px;">
+              <span>✨ Gerar Visualização 3D &amp; Orçamento</span>
+              <div class="spinner-sm" id="generate-spinner" style="display: none;"></div>
+            </button>
           </div>
 
-          <!-- Right Column: Live 3D Visualizer & Deal Closing Card -->
-          <div class="glass-panel cyan-glow atelier-viewport-card">
-            <div class="viewport-card-header">
-              <div>
-                <span class="section-tag cyan" style="font-size: 0.68rem; margin-bottom: 2px;">Interactive 3D Stage</span>
-                <h3 class="viewport-title" id="atelier-active-model-title">
-                  Real 3D Geometry: Leviton Tensegrity Dining Table
-                </h3>
+          <!-- Right Column: Live 3D Mesh Stage & Deal Closing Card -->
+          <div class="atelier-visualizer-column">
+            
+            <!-- 3D Canvas Stage -->
+            <div class="atelier-canvas-wrapper glass-panel">
+              <div class="atelier-canvas-header">
+                <div class="stage-status-indicator">
+                  <span class="pulse-dot"></span>
+                  <span class="stage-status-text" id="atelier-status-label">Renderização 3D Concluída</span>
+                </div>
+                <div class="stage-model-pill" id="atelier-model-pill">Mesa Leviton Cumaru (GLB)</div>
               </div>
 
-              <!-- Quick Viewport Actions -->
-              <div class="viewport-header-actions">
-                <button class="btn btn-glass btn-sm" id="btn-atelier-download-glb" title="Export .GLB for Blender / Rhino / CAD">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <div class="atelier-canvas-viewport" id="atelier-3d-canvas" style="min-height: 400px; position: relative;">
+                <!-- Three.js renders here automatically -->
+              </div>
+            </div>
+
+            <!-- Deal Closing Card: Immediate Value & Reservation -->
+            <div class="deal-closing-card glass-panel" id="deal-closing-card">
+              <div class="deal-card-header">
+                <div>
+                  <div class="deal-card-tag">ESTIMATIVA DE INVESTIMENTO</div>
+                  <h3 class="deal-card-title" id="deal-project-name">Mesa de Jantar Flutuante Ipanema</h3>
+                </div>
+                <div class="deal-price-bracket" id="deal-price-bracket">
+                  R$ 38.500 – R$ 48.000
+                </div>
+              </div>
+
+              <div class="deal-inclusions-grid">
+                <div class="inclusion-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Madeira Nobre 100% FSC® com Seleção de Veios</span>
+                </div>
+                <div class="inclusion-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Cálculo Estrutural de Tensão &amp; Deflexão Zero</span>
+                </div>
+                <div class="inclusion-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Entrega White-Glove e Montagem Especializada</span>
+                </div>
+                <div class="inclusion-item">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Certificado de Autenticidade &amp; Calibração Vitalícia</span>
+                </div>
+              </div>
+
+              <div class="deal-action-buttons">
+                <button class="btn btn-br-gold btn-lg btn-reserve-slot" id="btn-reserve-atelier-slot">
+                  <span>Reservar Vaga de Produção no Ateliê →</span>
+                </button>
+                <button class="btn btn-glass-br btn-lg" id="btn-download-glb">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                   </svg>
-                  <span>Export .GLB</span>
+                  <span>Baixar Arquivo 3D (.GLB)</span>
                 </button>
               </div>
-            </div>
 
-            <!-- The WebGL Canvas -->
-            <div class="atelier-canvas-container">
-              <div id="atelier-3d-canvas" style="width: 100%; height: 100%;"></div>
-
-              <!-- Top Canvas HUD -->
-              <div class="canvas-hud-top">
-                <span class="hud-pill" id="atelier-mesh-stats-pill">
-                  <strong>Leviton Dining Table</strong> &bull; 23,763 Vertices &bull; 43,973 Polys &bull; 240&times;100&times;75 cm
-                </span>
-
-                <div class="toggle-group">
-                  <button class="toggle-btn" id="btn-atelier-wireframe">Wireframe: OFF</button>
-                  <button class="toggle-btn active" id="btn-atelier-autorotate">Spin: ON</button>
-                </div>
-              </div>
-
-              <!-- Bottom Canvas HUD -->
-              <div class="canvas-hud-bottom">
-                <div class="toggle-group">
-                  <button class="toggle-btn active" id="btn-atelier-light-studio">Studio Warm</button>
-                  <button class="toggle-btn" id="btn-atelier-light-daylight">Daylight</button>
-                  <button class="toggle-btn" id="btn-atelier-light-midnight">Midnight</button>
-                </div>
-
-                <div class="canvas-help-pill">
-                  Drag to Orbit &bull; Scroll to Zoom &bull; Right Click to Pan
-                </div>
-              </div>
-            </div>
-
-            <!-- ================= DEAL CLOSING & INVESTMENT CARD ================= -->
-            <div class="deal-closing-card">
-              <div class="deal-specs-col">
-                <span class="deal-tag">Commission Estimate</span>
-                <div class="deal-price-val" id="atelier-price-estimate">
-                  $14,800 &ndash; $19,500
-                </div>
-                <div class="deal-meta-text" id="atelier-meta-specs">
-                  Solid FSC Hardwood Slab &bull; Aerospace Dyneema/Titanium Rigging &bull; 6–8 Wks Delivery
-                </div>
-              </div>
-
-              <div class="deal-cta-col">
-                <button class="btn btn-primary-gold btn-lg btn-glow" id="btn-atelier-commission-now">
-                  <span>Reserve This Commission Slot</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
-                </button>
-                <span class="deal-guarantee-micro">
-                  Includes FEA tension certification &bull; Complimentary wood swatch kit
-                </span>
+              <div class="deal-scarcity-footnote">
+                <span class="chip-dot-green"></span>
+                <span>Restam apenas <strong>3 vagas de marcenaria</strong> disponíveis para entrega no 4º trimestre.</span>
               </div>
             </div>
 

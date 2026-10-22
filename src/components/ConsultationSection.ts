@@ -1,144 +1,141 @@
-export function renderConsultationSection(): string {
+﻿export function renderConsultationSection(): string {
   return `
-    <section class="section" id="consultation-section" style="background: linear-gradient(180deg, transparent 0%, rgba(14, 17, 23, 0.7) 100%);">
+    <section class="section" id="consultation-section">
       <div class="app-container">
+        
         <!-- Section Header -->
-        <div class="section-header">
-          <span class="section-tag gold">Private Commission Process</span>
+        <div class="section-header text-center">
+          <div class="br-section-badge">
+            <span class="flag-icon-mini">🇧🇷</span>
+            <span>PROCESSO EXCLUSIVO DE ATELIÊ</span>
+          </div>
           <h2 class="section-title">
-            From Digital Synthesis to <span class="gold-gradient">Master Joinery</span>
+            Da Concepção Digital à <span class="br-gradient-text">Instalação Impecável</span>
           </h2>
           <p class="section-subtitle">
-            Every piece is an unrepeatable fusion of organic tree slab dynamics and aerospace tensile equilibrium. We accept four private commissions per quarter to maintain uncompromising perfection.
+            Combinamos marcenaria artesanal brasileira com modelagem paramétrica de ponta. 
+            Conheça o passo a passo da encomenda de uma peça de alto padrão.
           </p>
         </div>
 
-        <!-- 4-Step Process Grid -->
+        <!-- 4-Step Bespoke Journey Grid -->
         <div class="process-steps-grid">
           <div class="process-step-card glass-panel">
-            <span class="step-num">01</span>
-            <h4 class="step-title">Spatial 3D Synthesis</h4>
-            <p class="step-desc">
-              We review your architectural plans, structural clearances, and aesthetic intentions to finalize the digital tension model.
+            <div class="step-badge">Etapa 01</div>
+            <h3 class="step-title">Síntese Espacial 3D</h3>
+            <p class="step-description">
+              Definimos as proporções ideais para seu ambiente através de modelagem digital e simulação de iluminação e circulação.
             </p>
           </div>
 
           <div class="process-step-card glass-panel">
-            <span class="step-num">02</span>
-            <h4 class="step-title">Timber Swatch Box</h4>
-            <p class="step-desc">
-              A curated physical presentation box with kiln-dried timber cutoffs and cable rigging swatches dispatched to your address.
+            <div class="step-badge">Etapa 02</div>
+            <h3 class="step-title">Caixa de Amostras</h3>
+            <p class="step-description">
+              Enviamos por portador uma caixa de curadoria com amostras de Cumaru, Freijó, Jacarandá e conexões de inox/titânio.
             </p>
           </div>
 
           <div class="process-step-card glass-panel">
-            <span class="step-num">03</span>
-            <h4 class="step-title">FEA Tension Calibration</h4>
-            <p class="step-desc">
-              Each joint and cable is torque-calibrated under 1,800 kg test loads using strain gauges and aerospace turnbuckles.
+            <div class="step-badge">Etapa 03</div>
+            <h3 class="step-title">Engenharia FEA</h3>
+            <p class="step-description">
+              Simulação de Elementos Finitos que calcula a pré-tensão de cada cabo para garantir deflexão milimétrica zero.
             </p>
           </div>
 
           <div class="process-step-card glass-panel">
-            <span class="step-num">04</span>
-            <h4 class="step-title">White-Glove Delivery</h4>
-            <p class="step-desc">
-              Our master artisans oversee final placement, laser leveling, and ambient tension calibration in your private residence.
+            <div class="step-badge">Etapa 04</div>
+            <h3 class="step-title">Entrega White-Glove</h3>
+            <p class="step-description">
+              Nossa equipe de mestres marceneiros realiza o transporte seguro e a montagem técnica calibrada em sua residência.
             </p>
           </div>
         </div>
 
-        <!-- High-Converting On-Page Commission Form -->
-        <div class="glass-panel gold-glow commission-form-card">
-          <div class="commission-form-header">
-            <div>
-              <span class="section-tag gold" style="font-size: 0.7rem;">Inquire Private Commission</span>
-              <h3 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--text-main); margin-top: 4px;">
-                Reserve a Q4 Atelier Commission Slot
-              </h3>
-              <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">
-                Direct response from our lead architectural artisan within 24 hours. Includes FEA structural assessment.
-              </p>
-            </div>
-            <div class="quota-pill">
-              <span class="pulse-dot"></span>
-              <span>2 of 4 Slots Remaining</span>
-            </div>
+        <!-- Direct High-Ticket On-Page Commission Form -->
+        <div class="commission-form-card glass-panel" style="margin-top: 50px;">
+          <div class="commission-header text-center">
+            <span class="commission-badge">CANAL DIRETO COM O ATELIÊ</span>
+            <h3 class="commission-title">Solicite seu Orçamento ou Agende uma Visita Técnica</h3>
+            <p class="commission-subtitle">
+              Receba o contato direto do nosso marceneiro-chefe e diretor de engenharia em até 24 horas úteis.
+            </p>
           </div>
 
           <form id="onpage-commission-form" class="commission-form-grid">
             <div class="form-group">
-              <label class="form-label" for="comm-name">Full Name *</label>
-              <input type="text" id="comm-name" class="luxury-input" placeholder="e.g. Lord Sterling Hayes" required>
+              <label for="comm-name">Nome Completo *</label>
+              <input type="text" id="comm-name" class="form-input" placeholder="Ex: Dra. Mariana Vasconcellos" required />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="comm-email">Email Address *</label>
-              <input type="email" id="comm-email" class="luxury-input" placeholder="e.g. sterling@hayes-architects.com" required>
+              <label for="comm-email">E-mail Profissional ou Pessoal *</label>
+              <input type="email" id="comm-email" class="form-input" placeholder="mariana@arquitetura.com.br" required />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="comm-phone">Direct Phone / WhatsApp *</label>
-              <input type="tel" id="comm-phone" class="luxury-input" placeholder="+1 (555) 019-2834" required>
+              <label for="comm-phone">WhatsApp / Telefone com DDD *</label>
+              <input type="tel" id="comm-phone" class="form-input" placeholder="(11) 98765-4321" required />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="comm-category">Commission Category</label>
-              <select id="comm-category" class="luxury-select">
-                <option value="tensegrity-dining-table">Leviton Tensegrity Dining Table (8-12 Seats)</option>
-                <option value="tensegrity-lounge">Kyoto Tensegrity Ergonomic Lounge</option>
-                <option value="geodesic-dome">Timber Geodesic Dome Glamping Sanctuary (3V/4V)</option>
-                <option value="cantilever-desk">Equinox Zero-Gravity Executive Desk</option>
-                <option value="bespoke-architectural">Fully Bespoke Architectural Commission</option>
+              <label for="comm-archetype">Peça de Interesse *</label>
+              <select id="comm-archetype" class="form-select" required>
+                <option value="Mesa de Jantar Flutuante Ipanema">Mesa de Jantar Flutuante Ipanema (Cumaru)</option>
+                <option value="Poltrona Tensa Niemeyer">Poltrona Tensa Niemeyer (Freijó &amp; Couro)</option>
+                <option value="Aparador Escultural Cerrado">Aparador Escultural Cerrado (Jacarandá)</option>
+                <option value="Mesa de Centro Tupi">Mesa de Centro Tupi (Pequiá &amp; Vidro)</option>
+                <option value="Cúpula Geodésica Biosfera">Cúpula Geodésica Biosfera / Pavilhão</option>
+                <option value="Projeto Corporativo ou Residencial Sob Medida">Projeto Residencial Sob Medida</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="comm-budget">Planned Investment Bracket</label>
-              <select id="comm-budget" class="luxury-select">
-                <option value="12k-25k">$12,000 &ndash; $25,000 (Signature Furniture)</option>
-                <option value="25k-50k">$25,000 &ndash; $50,000 (Large Slabs &amp; Geodesics)</option>
-                <option value="50k-plus">$50,000+ (Masterpiece Sanctuary / Estate Installation)</option>
+              <label for="comm-budget">Faixa de Investimento Prevista</label>
+              <select id="comm-budget" class="form-select">
+                <option value="R$ 15.000 a R$ 25.000">R$ 15.000 a R$ 25.000</option>
+                <option value="R$ 25.000 a R$ 50.000" selected>R$ 25.000 a R$ 50.000</option>
+                <option value="R$ 50.000 a R$ 100.000">R$ 50.000 a R$ 100.000</option>
+                <option value="Acima de R$ 100.000">Acima de R$ 100.000 (Grandes Projetos)</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="comm-timeline">Target Completion Window</label>
-              <select id="comm-timeline" class="luxury-select">
-                <option value="expedited">Expedited (6–8 Weeks)</option>
-                <option value="standard">Standard Atelier (8–12 Weeks)</option>
-                <option value="future">Next Quarter / In Construction</option>
-              </select>
+              <label for="comm-city">Cidade / Estado</label>
+              <input type="text" id="comm-city" class="form-input" placeholder="São Paulo - SP, Rio de Janeiro - RJ..." />
             </div>
 
             <div class="form-group full-width">
-              <label class="form-label" for="comm-notes">Project Location &amp; Architectural Context</label>
-              <textarea id="comm-notes" rows="2" class="luxury-textarea" placeholder="e.g. Penthouse terrace in Manhattan, or mountain retreat in Aspen. Mention specific hardwood or dimension preferences..."></textarea>
+              <label for="comm-notes">Dimensões do Espaço ou Detalhes Especiais</label>
+              <textarea id="comm-notes" class="form-textarea" rows="3" placeholder="Conte-nos sobre o ambiente, estilo decorativo, medidas ou prazos específicos..."></textarea>
             </div>
 
-            <div class="form-group full-width submit-row">
-              <button type="submit" class="btn btn-primary-gold btn-lg btn-glow" id="btn-submit-onpage-commission">
-                <span>Request Private Architectural Consultation</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <div class="form-submit-row full-width">
+              <button type="submit" class="btn btn-br-gold btn-lg btn-block" id="comm-submit-btn">
+                <span>Enviar Solicitação de Encomenda para o Ateliê</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </button>
-              <div class="privacy-guarantee">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                <span>Strict Non-Disclosure &bull; Direct Artisan Communication &bull; No Obligation</span>
-              </div>
             </div>
           </form>
 
-          <div id="onpage-form-success" class="onpage-success-card" style="display: none;">
-            <div class="success-check-badge">&#10004;</div>
-            <h4 style="font-family: var(--font-serif); font-size: 1.4rem; color: #10b981;">Commission Inquiry Received</h4>
-            <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 520px; margin: 8px auto 16px auto;">
-              Our master artisan will review your spatial and timber specifications and reach out within 24 hours with your preliminary CAD review and timber swatch shipment confirmation.
+          <!-- Success Message State (Hidden Initially) -->
+          <div id="commission-success-state" class="commission-success-box" style="display: none;">
+            <div class="success-icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <h4 class="success-title">Sua Solicitação foi Recebida pelo Nosso Marceneiro-Chefe</h4>
+            <p class="success-desc">
+              Sua vaga de produção preliminar no trimestre foi reservada. Nossa equipe técnica entrará em contato via WhatsApp e e-mail com as diretrizes e catálogo em até 24 horas úteis.
             </p>
-            <button type="button" class="btn btn-glass btn-sm" id="btn-reset-onpage-form">Submit Another Inquiry</button>
+            <div class="success-contact-badge">
+              <span>Atendimento Direto: contato@tensortimber.com.br • WhatsApp: (11) 98921-4400</span>
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { LeadSubmission } from '../types';
+﻿import { LeadSubmission } from '../types';
 
 export class AdminLeadsDrawer {
   private drawerEl: HTMLElement | null = null;
@@ -49,15 +49,18 @@ export class AdminLeadsDrawer {
 
     const leads = this.getLeads();
     const totalPipelineValue = leads.reduce((sum, l) => {
-      return sum + (l.estimate?.totalEstimate || 25000);
+      return sum + (l.estimate?.totalEstimate ? l.estimate.totalEstimate * 2.5 : 38500);
     }, 0);
 
     drawer.innerHTML = `
       <div class="drawer-header">
         <div>
-          <span class="section-tag gold" style="font-size: 0.7rem; margin-bottom: 4px;">Atelier Management CRM</span>
-          <h3 style="font-family: var(--font-display); font-size: 1.3rem; color: var(--text-main);">
-            Commission Pipeline &amp; Inquiries
+          <div class="br-section-badge" style="font-size: 0.7rem; margin-bottom: 4px;">
+            <span class="flag-icon-mini">🇧🇷</span>
+            <span>GESTÃO DE ATELIÊ &amp; PIPELINE COMERCIAL</span>
+          </div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--text-main);">
+            Encomendas &amp; Propostas Recebidas
           </h3>
         </div>
         <button class="modal-close-btn" id="btn-close-admin-drawer">&times;</button>
@@ -65,120 +68,64 @@ export class AdminLeadsDrawer {
 
       <div class="drawer-body">
         <!-- Pipeline Metrics Bar -->
-        <div class="pipeline-metrics-bar">
-          <div style="padding: 12px; background: rgba(12,15,22,0.8); border-radius: var(--radius-sm); border: 1px solid var(--border-gold);">
-            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Pipeline Value</div>
-            <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--gold-light);">
-              $${totalPipelineValue.toLocaleString()}
+        <div class="pipeline-metrics-bar" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+          <div style="padding: 12px; background: rgba(7, 31, 19, 0.8); border-radius: var(--radius-sm); border: 1px solid var(--border-gold);">
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Valor em Pipeline</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--gold-light);">
+              R$ ${totalPipelineValue.toLocaleString('pt-BR')}
             </div>
           </div>
-
-          <div style="padding: 12px; background: rgba(12,15,22,0.8); border-radius: var(--radius-sm); border: 1px solid var(--border-cyan);">
-            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Active Inquiries</div>
-            <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--cyan-high-tensile);">
-              ${leads.length} Leads
+          <div style="padding: 12px; background: rgba(7, 31, 19, 0.8); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Total de Solicitações</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);">
+              ${leads.length} Encomendas
             </div>
           </div>
-
-          <div style="padding: 12px; background: rgba(12,15,22,0.8); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Build Slots</div>
-            <div style="font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: #10b981;">
-              2 Left
-            </div>
-          </div>
-        </div>
-
-        <!-- Export Actions -->
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-          <button class="btn btn-glass btn-sm" id="btn-export-leads-csv" style="flex: 1;">
-            Export CSV
-          </button>
-          <button class="btn btn-glass btn-sm" id="btn-export-leads-json" style="flex: 1;">
-            Export JSON
-          </button>
         </div>
 
         <!-- Leads List -->
-        <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="leads-list">
           ${leads.length === 0 ? `
-            <div style="text-align: center; color: var(--text-muted); padding: 40px;">No leads recorded yet.</div>
-          ` : leads.map(lead => `
-            <div class="lead-admin-card">
-              <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
-                  ${lead.clientName}
-                </span>
-                <span style="font-family: monospace; font-size: 0.75rem; color: var(--gold-light);">
-                  ${lead.id}
-                </span>
-              </div>
-
-              <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                <div><strong>Email:</strong> ${lead.clientEmail} &bull; <strong>Phone:</strong> ${lead.clientPhone}</div>
-                <div><strong>Location:</strong> ${lead.clientLocation} &bull; <strong>Type:</strong> ${lead.clientType}</div>
-                <div><strong>Budget:</strong> ${lead.budgetBracket} &bull; <strong>Target:</strong> ${lead.targetTimeline}</div>
-              </div>
-
-              <div style="padding: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 0.78rem; color: var(--text-muted);">
-                ${lead.projectSummary || (lead.configuration ? `${lead.configuration.title || lead.configuration.category} in ${lead.configuration.woodSpeciesId}` : 'Custom Project')}
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-                <span class="hud-pill" style="color: ${lead.status === 'consultation-scheduled' ? '#10b981' : '#f5c542'};">
-                  ${lead.status.toUpperCase()}
-                </span>
-                <span style="color: var(--text-muted);">
-                  ${new Date(lead.createdAt).toLocaleDateString()}
-                </span>
-              </div>
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+              Nenhuma solicitação registrada ainda.
             </div>
-          `).join('')}
+          ` : leads.map(lead => {
+            const dateStr = lead.submittedAt || lead.createdAt || new Date().toISOString();
+            const locStr = lead.projectLocation || lead.clientLocation || 'Brasil';
+            return `
+              <div class="lead-item-card glass-panel" style="padding: 14px; margin-bottom: 12px; border-left: 3px solid #009c3b;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                  <div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${lead.clientName}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${lead.clientEmail} &bull; ${lead.clientPhone}</div>
+                  </div>
+                  <span class="badge-status-new" style="font-size: 0.7rem; padding: 3px 8px; border-radius: 9999px; background: rgba(0, 156, 59, 0.2); color: #10b981; border: 1px solid rgba(0, 156, 59, 0.4);">
+                    Novo Pedido
+                  </span>
+                </div>
+                <div style="font-size: 0.82rem; color: var(--gold-light); margin-top: 4px;">
+                  <strong>Interesse:</strong> ${lead.configuration?.title || 'Mobiliário em Tensegridade'}
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                  ${locStr} &bull; Faixa: ${lead.budgetBracket || 'R$ 30.000 – R$ 60.000'}
+                </div>
+                ${lead.notes ? `
+                  <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 6px; font-style: italic; background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px;">
+                    "${lead.notes}"
+                  </div>
+                ` : ''}
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; text-align: right;">
+                  ${new Date(dateStr).toLocaleDateString('pt-BR')} às ${new Date(dateStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
 
-    this.bindEvents();
-  }
-
-  private bindEvents(): void {
-    this.drawerEl?.querySelector('#btn-close-admin-drawer')?.addEventListener('click', () => this.close());
-    this.overlayEl?.addEventListener('click', () => this.close());
-
-    this.drawerEl?.querySelector('#btn-export-leads-csv')?.addEventListener('click', () => {
-      const leads = this.getLeads();
-      const headers = ['ID', 'Date', 'Client Name', 'Email', 'Phone', 'Location', 'Client Type', 'Budget', 'Timeline', 'Estimate Total'];
-      const rows = leads.map(l => [
-        l.id,
-        l.createdAt,
-        `"${l.clientName}"`,
-        l.clientEmail,
-        `"${l.clientPhone}"`,
-        `"${l.clientLocation}"`,
-        l.clientType,
-        `"${l.budgetBracket}"`,
-        l.targetTimeline,
-        l.estimate?.totalEstimate || 0
-      ]);
-
-      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tensor-and-timber-leads-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    this.drawerEl?.querySelector('#btn-export-leads-json')?.addEventListener('click', () => {
-      const leads = this.getLeads();
-      const blob = new Blob([JSON.stringify(leads, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `tensor-and-timber-leads-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    const closeBtn = document.getElementById('btn-close-admin-drawer');
+    if (closeBtn) closeBtn.onclick = () => this.close();
+    if (this.overlayEl) this.overlayEl.onclick = () => this.close();
   }
 }

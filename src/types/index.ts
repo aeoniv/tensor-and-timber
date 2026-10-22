@@ -1,4 +1,4 @@
-export type ProjectCategory =
+﻿export type ProjectCategory =
   | 'tensegrity-dining-table'
   | 'tensegrity-coffee-table'
   | 'tensegrity-executive-desk'
@@ -110,15 +110,18 @@ export interface EstimateResult {
 
 export interface LeadSubmission {
   id: string;
-  createdAt: string;
+  createdAt?: string;
+  submittedAt?: string;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
-  clientLocation: string;
-  clientType: 'private-homeowner' | 'architect' | 'resort-glamping' | 'commercial-corporate';
-  budgetBracket: '$5k - $15k' | '$15k - $35k' | '$35k - $75k' | '$75k+';
-  targetTimeline: 'urgent-30days' | 'standard-60-90days' | 'flexible-6months';
-  consultationType: 'virtual-3d-walkthrough' | 'in-person-atelier' | 'on-site-architectural';
+  clientLocation?: string;
+  projectLocation?: string;
+  clientType: 'private-homeowner' | 'architect' | 'resort-glamping' | 'commercial-corporate' | string;
+  budgetBracket: '$5k - $15k' | '$15k - $35k' | '$35k - $75k' | '$75k+' | string;
+  targetTimeline?: 'urgent-30days' | 'standard-60-90days' | 'flexible-6months' | string;
+  timeline?: string;
+  consultationType?: 'virtual-3d-walkthrough' | 'in-person-atelier' | 'on-site-architectural' | string;
   configuration: ProjectConfiguration;
   estimate: EstimateResult;
   projectSummary?: string;
