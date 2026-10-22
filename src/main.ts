@@ -216,90 +216,52 @@ class AtelierApp {
   }
 
   private initAIViewerEvents(): void {
-    // 1. Model Preset Switcher Tabs in AI 3D Stage
+    // 1. Archetype Quick Switcher Tabs in AI 3D Stage
     const modelTabs = document.getElementById('ai-viewer-model-tabs');
     const titleEl = document.getElementById('ai-active-model-title');
 
-    const updateModelPreset = (preset: string, title?: string) => {
-      if (this.aiModelViewer) {
-        this.aiModelViewer.loadPresetModel(preset);
-      }
+    const updateArchetype = async (archetype: string) => {
       modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', (btn as HTMLElement).dataset.preset === preset);
+        btn.classList.toggle('active', (btn as HTMLElement).dataset.archetype === archetype);
       });
-      if (titleEl) {
-        if (title) {
-          titleEl.textContent = title;
-        } else {
-          switch (preset) {
-            case 'trellis-tensegrity':
-              titleEl.textContent = 'TRELLIS.2 • Floating Tensegrity Coffee Table';
-              break;
-            case 'triposr-geodesic':
-              titleEl.textContent = 'TripoSR • Instant 3D Timber Geodesic Pavilion';
-              break;
-            case 'interior-loft':
-              titleEl.textContent = 'InteriorGen3D • Staged Architectural Loft';
-              break;
-            case 'instant4d-splat':
-              titleEl.textContent = 'Instant4D / Splatv • Gaussian Point Cloud Scan';
-              break;
-          }
+
+      let prompt = 'American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
+      switch (archetype) {
+        case 'dining-table':
+          prompt = '240x100x75cm Solid American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
+          break;
+        case 'lounge-chair':
+          prompt = 'Ergonomic floating tensegrity lounge chair in European White Oak with curved seat and stainless cables';
+          break;
+        case 'shelving-unit':
+          prompt = '4-Tier suspended tensegrity shelving unit in Reclaimed Brazilian Teak with marine stainless cables';
+          break;
+        case 'geodesic-dome':
+          prompt = '6m Handcrafted Timber Geodesic Dome with CNC aluminum hubs and stargazing glass crown';
+          break;
+        case 'cantilever-desk':
+          prompt = 'Zero-gravity cantilever executive desk in European White Oak with floating drawer pedestal';
+          break;
+      }
+
+      if (this.aiModelViewer) {
+        this.showToast('Generating real 3D geometry...');
+        const meta = await this.aiModelViewer.generateCustom3DObject(prompt);
+        if (titleEl) {
+          titleEl.textContent = `Real 3D Geometry: ${meta.name} (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
         }
+        this.showToast(`Synthesized ${meta.name} (${meta.vertexCount.toLocaleString()} vertices)!`);
       }
     };
 
     modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const preset = (e.currentTarget as HTMLElement).dataset.preset || 'trellis-tensegrity';
-        updateModelPreset(preset);
+        const archetype = (e.currentTarget as HTMLElement).dataset.archetype || 'dining-table';
+        updateArchetype(archetype);
       });
     });
 
-    // 2. "Display 3D Object on Site" buttons on space cards
-    document.querySelectorAll('.btn-display-3d-model').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement;
-        const preset = target.dataset.preset || 'trellis-tensegrity';
-        const title = target.dataset.title;
-        updateModelPreset(preset, title);
-
-        // Smooth scroll directly to the 3D canvas on the website
-        document.getElementById('ai-active-model-title')?.scrollIntoView({ behavior: 'smooth' });
-        this.showToast(`Displaying 3D object for ${title || preset} directly on page!`);
-      });
-    });
-
-    // 3. In-Page Embedded Space Generator Modal
-    const hfModalOverlay = document.getElementById('hf-embedded-modal-overlay');
-    const hfIframe = document.getElementById('hf-embedded-iframe') as HTMLIFrameElement;
-    const hfModalTitle = document.getElementById('hf-embedded-modal-title');
-
-    document.querySelectorAll('.btn-embed-space-modal').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement;
-        const embedUrl = target.dataset.embedUrl || '';
-        const title = target.dataset.title || 'Hugging Face Space';
-
-        if (hfIframe && hfModalOverlay) {
-          hfIframe.src = embedUrl;
-          if (hfModalTitle) hfModalTitle.textContent = `${title} • In-Page Generator`;
-          hfModalOverlay.classList.add('active');
-        }
-      });
-    });
-
-    const closeHfModal = () => {
-      if (hfModalOverlay && hfIframe) {
-        hfIframe.src = '';
-        hfModalOverlay.classList.remove('active');
-      }
-    };
-
-    document.getElementById('btn-close-hf-embedded-modal')?.addEventListener('click', closeHfModal);
-    document.getElementById('btn-done-hf-embedded')?.addEventListener('click', closeHfModal);
-
-    // 4. AI 3D Canvas Controls (Wireframe, Auto-spin, Lighting)
+    // 2. Wireframe, Auto-rotate, Lighting
     document.getElementById('btn-ai-wireframe')?.addEventListener('click', (e) => {
       if (this.aiModelViewer) {
         const isWire = this.aiModelViewer.toggleWireframe();
@@ -336,7 +298,7 @@ class AtelierApp {
         this.showToast('Compiling binary .GLB file from 3D scene...');
         try {
           await this.aiModelViewer.exportCurrentModelToGLB('tensor-timber-custom-piece.glb');
-          this.showToast('Downloaded real .GLB file! You can open it in Blender or Windows 3D Viewer.');
+          this.showToast('Downloaded real .GLB file! You can open it in Blender, AutoCAD, or Windows 3D Viewer.');
         } catch (err) {
           console.error('Export GLB error:', err);
           this.showToast('Failed to export .GLB file.');
@@ -348,10 +310,15 @@ class AtelierApp {
     document.getElementById('btn-ai-order-design')?.addEventListener('click', () => {
       const cfg = this.planner.getConfig();
       const est = this.planner.calculateEstimate();
+      const meta = this.aiModelViewer?.getMetadata();
+      if (meta) {
+        cfg.title = meta.name;
+        cfg.customNotes = `Commissioning ${meta.name} (${meta.dimensions.lengthCm}x${meta.dimensions.widthCm}x${meta.dimensions.heightCm} cm) in ${meta.timberSpecies} with ${meta.tensionHardware}.`;
+      }
       this.leadModal.open(cfg, est);
     });
 
-    // 5. File upload / Dropzone for .glb / .obj
+    // 3. File upload / Dropzone for .glb / .obj directly to canvas
     const fileInput = document.getElementById('hf-file-input') as HTMLInputElement;
     const dropzone = document.getElementById('hf-model-dropzone');
     const browseBtn = document.getElementById('btn-browse-model-file');
@@ -589,6 +556,7 @@ class AtelierApp {
     const removeSketchBtn = document.getElementById('btn-remove-sketch');
     const promptInput = document.getElementById('ai-custom-prompt-input') as HTMLTextAreaElement;
     const synthesizeBtn = document.getElementById('btn-synthesize-3d-furniture');
+    const clearBtn = document.getElementById('btn-clear-ai-inputs');
     const progressBox = document.getElementById('ai-generation-progress');
     const progressBar = document.getElementById('ai-gen-progress-bar');
     const statusLabel = document.getElementById('ai-gen-step-status');
@@ -596,6 +564,16 @@ class AtelierApp {
     const successBar = document.getElementById('ai-generation-success-bar');
     const successMsg = document.getElementById('ai-success-msg');
     const commissionGenBtn = document.getElementById('btn-commission-generated-piece');
+    const engineSelect = document.getElementById('ai-generator-engine-select') as HTMLSelectElement;
+    const hfTokenRow = document.getElementById('hf-token-row');
+    const hfTokenInput = document.getElementById('ai-hf-token-input') as HTMLInputElement;
+
+    // Toggle HF Token Row when engine changes
+    engineSelect?.addEventListener('change', () => {
+      if (hfTokenRow) {
+        hfTokenRow.style.display = engineSelect.value === 'hf-trellis' ? 'block' : 'none';
+      }
+    });
 
     // 1. File browsing & image loading
     browseSketchBtn?.addEventListener('click', () => sketchInput?.click());
@@ -639,57 +617,63 @@ class AtelierApp {
       });
     }
 
-    removeSketchBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
+    const clearSketch = () => {
       this.attachedSketchDataUrl = null;
       if (previewWrap && emptyState && sketchInput) {
         previewWrap.style.display = 'none';
         emptyState.style.display = 'flex';
         sketchInput.value = '';
       }
+    };
+
+    removeSketchBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearSketch();
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      clearSketch();
+      if (promptInput) promptInput.value = '';
+      if (progressBox) progressBox.style.display = 'none';
+      if (successBar) successBar.style.display = 'none';
+      this.showToast('Reset generator inputs.');
     });
 
     // 2. Sample Image Inspiration Pills
-    const sampleImages: Record<string, { prompt: string; color: string; label: string }> = {
+    const sampleBlueprints: Record<string, { prompt: string; shape: string }> = {
       'walnut-tensegrity': {
-        prompt: 'Solid American black walnut floating tensegrity dining table with 6mm stainless steel tension cables and live-edge contour',
-        color: '#3d2b1f',
-        label: 'Tensegrity Table Sketch'
+        prompt: '240x100x75cm Solid American black walnut live-edge floating tensegrity dining table with PVD gold cables',
+        shape: '<ellipse cx="150" cy="100" rx="110" ry="55" fill="#3d2b1f" stroke="#d4af37" stroke-width="3"/>'
       },
       'cantilever-desk': {
-        prompt: 'Cantilevered zero-gravity executive desk in European White Oak with gold titanium rigging and wireless power',
-        color: '#b8976b',
-        label: 'Cantilever Desk Concept'
+        prompt: 'Ergonomic floating tensegrity lounge chair in European White Oak with curved seat and aerospace cables',
+        shape: '<path d="M70 140 Q 110 150 150 130 Q 180 110 210 140 L 230 110 Q 180 70 130 90 Z" fill="#b8976b" stroke="#38bdf8" stroke-width="3"/>'
       },
       'geodesic-dome': {
-        prompt: 'Handcrafted 3V timber geodesic dome glamping sanctuary with triangular stargazing crown and Douglas Fir framing',
-        color: '#c8894d',
-        label: 'Geodesic Timber Dome'
+        prompt: '6m Handcrafted 3V timber geodesic dome glamping sanctuary with CNC hubs and stargazing glass crown',
+        shape: '<polygon points="150,30 220,70 240,150 150,170 60,150 80,70" fill="#c8894d" stroke="#f5c542" stroke-width="3"/>'
       },
       'charred-coffee': {
-        prompt: 'Sculptural Yakisugi charred cedar coffee table with matte carbon fiber cables and minimalist Japanese joinery',
-        color: '#18191c',
-        label: 'Yakisugi Coffee Table'
+        prompt: '130x75x42cm Sculptural Yakisugi charred cedar coffee table with matte carbon fiber cables and live edge',
+        shape: '<path d="M60 100 Q 100 50 180 60 Q 250 80 230 130 Q 180 160 100 140 Z" fill="#18191c" stroke="#555" stroke-width="3"/>'
       }
     };
 
     document.querySelectorAll('.sample-img-pill').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const sampleKey = (e.currentTarget as HTMLElement).dataset.sample || 'walnut-tensegrity';
-        const sample = sampleImages[sampleKey];
+        const sample = sampleBlueprints[sampleKey];
         if (sample && promptInput) {
           promptInput.value = sample.prompt;
 
-          // Generate an elegant SVG placeholder representing the attached concept
-          const svgData = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%23111520"/><rect x="40" y="50" width="220" height="20" rx="4" fill="${encodeURIComponent(sample.color)}"/><line x1="150" y1="70" x2="150" y2="130" stroke="%2338bdf8" stroke-width="4"/><line x1="60" y1="70" x2="80" y2="150" stroke="%23d4af37" stroke-width="2"/><line x1="240" y1="70" x2="220" y2="150" stroke="%23d4af37" stroke-width="2"/><rect x="60" y="150" width="180" height="15" rx="4" fill="${encodeURIComponent(sample.color)}"/><text x="150" y="185" fill="%23ffffff" font-size="12" font-family="sans-serif" text-anchor="middle">${encodeURIComponent(sample.label)}</text></svg>`;
-
+          const svgData = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230b0f19"/>${sample.shape}</svg>`;
           this.attachedSketchDataUrl = svgData;
           if (previewImg && previewWrap && emptyState) {
             previewImg.src = svgData;
             previewWrap.style.display = 'block';
             emptyState.style.display = 'none';
           }
-          this.showToast(`Loaded sample concept: ${sample.label}`);
+          this.showToast(`Loaded blueprint concept: ${sampleKey}`);
         }
       });
     });
@@ -709,7 +693,7 @@ class AtelierApp {
       });
     });
 
-    // 4. "Generate Real 3D Furniture" Action Flow (Real Three.js Parametric CAD + Hugging Face ZeroGPU API)
+    // 4. "Generate Real 3D Furniture" Action Flow (NO FAKE TIMERS)
     synthesizeBtn?.addEventListener('click', async () => {
       let promptText = promptInput?.value.trim() || '';
       if (!promptText && !this.attachedSketchDataUrl) {
@@ -717,35 +701,33 @@ class AtelierApp {
         if (promptInput) promptInput.value = promptText;
       }
 
-      const engineSelect = document.getElementById('ai-generator-engine-select') as HTMLSelectElement;
       const selectedEngine = engineSelect?.value || 'parametric-cad';
+      const userHfToken = hfTokenInput?.value.trim() || undefined;
 
       if (progressBox && progressBar && statusLabel && statusPct) {
         progressBox.style.display = 'block';
         if (successBar) successBar.style.display = 'none';
 
         if (selectedEngine === 'hf-trellis' && this.attachedSketchDataUrl) {
-          // Attempt Live Hugging Face Space generation
           try {
-            progressBar.style.width = '20%';
+            progressBar.style.width = '25%';
             statusLabel.textContent = 'Connecting to Hugging Face ZeroGPU cluster (trellis-community/TRELLIS)...';
-            statusPct.textContent = '20%';
+            statusPct.textContent = '25%';
 
-            // Convert dataUrl to blob
             const res = await fetch(this.attachedSketchDataUrl);
             const blob = await res.blob();
 
             const { Real3DGeneratorService } = await import('./services/real3DGenerator');
             const svc = new Real3DGeneratorService();
 
-            const { glbUrl } = await svc.generateFromHuggingFaceSpace(blob, (msg, pct) => {
+            const { glbUrl } = await svc.generateFromHuggingFaceSpace(blob, userHfToken, (msg, pct) => {
               statusLabel.textContent = msg;
               statusPct.textContent = `${pct}%`;
               progressBar.style.width = `${pct}%`;
             });
 
             if (this.aiModelViewer) {
-              const meta = await this.aiModelViewer.loadGLBUrl(glbUrl, `TRELLIS.2 • ${promptText.slice(0, 40)}`);
+              const meta = await this.aiModelViewer.loadGLBUrl(glbUrl, `TRELLIS 3D • ${promptText.slice(0, 40)}`);
               progressBox.style.display = 'none';
               if (successBar) successBar.style.display = 'flex';
               if (successMsg) {
@@ -756,45 +738,39 @@ class AtelierApp {
             document.getElementById('ai-studio-3d-canvas')?.scrollIntoView({ behavior: 'smooth' });
             this.showToast('Real 3D GLB generated from Hugging Face Space!');
             return;
-          } catch (hfErr) {
+          } catch (hfErr: any) {
             console.warn('Hugging Face ZeroGPU fallback to Real CAD Synthesizer:', hfErr);
-            statusLabel.textContent = 'ZeroGPU queue busy; generating via Atelier Real Parametric 3D CAD Engine...';
+            statusLabel.textContent = 'ZeroGPU queue busy; synthesizing via Atelier Spatial Computer Vision & CAD Synthesizer...';
             progressBar.style.width = '60%';
           }
         }
 
-        // Real Three.js Parametric 3D CAD Geometry Synthesis
-        const steps = [
-          { pct: '30%', text: '1/3: Computing parametric curve splines & live-edge boundary noise...', delay: 200 },
-          { pct: '70%', text: '2/3: Calculating center-of-mass & physical cable tension equilibrium...', delay: 700 },
-          { pct: '100%', text: '3/3: Constructing real BufferGeometry with PBR timber & turnbuckle rigging...', delay: 1300 }
-        ];
+        // REAL Client-Side Spatial Geometry Synthesizer (NO FAKE DELAY)
+        statusLabel.textContent = this.attachedSketchDataUrl
+          ? 'Extracting contour vectors from image & computing 3D extruded geometry...'
+          : 'Parsing architectural parameters & constructing 3D BufferGeometry in physical tension equilibrium...';
+        progressBar.style.width = '75%';
+        statusPct.textContent = '75%';
 
-        steps.forEach(({ pct, text, delay }) => {
-          setTimeout(() => {
-            progressBar.style.width = pct;
-            statusLabel.textContent = text;
-            statusPct.textContent = pct;
-          }, delay);
-        });
+        try {
+          let metadata: any = null;
+          if (this.aiModelViewer) {
+            metadata = await this.aiModelViewer.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
+          }
 
-        setTimeout(() => {
+          progressBar.style.width = '100%';
+          statusPct.textContent = '100%';
           progressBox.style.display = 'none';
           if (successBar) successBar.style.display = 'flex';
 
-          let metadata: any = null;
-          if (this.aiModelViewer) {
-            metadata = this.aiModelViewer.generateFromPrompt(promptText, this.attachedSketchDataUrl);
-          }
-
-          // Update active title
           const titleEl = document.getElementById('ai-active-model-title');
           if (titleEl && metadata) {
             titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} × ${metadata.dimensions.widthCm} × ${metadata.dimensions.heightCm} cm)`;
           }
 
           if (successMsg && metadata) {
-            successMsg.textContent = `Real 3D Mesh synthesized! Constructed ${metadata.vertexCount.toLocaleString()} real vertices & ${metadata.triangleCount.toLocaleString()} polygons. Download the real .GLB file or request commission.`;
+            const origin = metadata.isFromImageContour ? 'Image Silhouette Contour Extrusion' : 'Parametric CAD Engine';
+            successMsg.textContent = `Real 3D Mesh synthesized via ${origin}! Constructed ${metadata.vertexCount.toLocaleString()} vertices & ${metadata.triangleCount.toLocaleString()} polygons. Download the real .GLB file or request commission.`;
           }
 
           // Synchronize with Project Planner
@@ -820,7 +796,11 @@ class AtelierApp {
 
           document.getElementById('ai-studio-3d-canvas')?.scrollIntoView({ behavior: 'smooth' });
           this.showToast(`Real 3D Mesh generated (${metadata?.vertexCount?.toLocaleString()} vertices)!`);
-        }, 1800);
+        } catch (genErr) {
+          console.error('Geometry synthesis error:', genErr);
+          progressBox.style.display = 'none';
+          this.showToast('Error synthesizing 3D geometry.');
+        }
       }
     });
 
@@ -828,11 +808,14 @@ class AtelierApp {
     commissionGenBtn?.addEventListener('click', () => {
       const cfg = this.planner.getConfig();
       const est = this.planner.calculateEstimate();
-      cfg.customNotes = promptInput?.value || cfg.customNotes;
+      const meta = this.aiModelViewer?.getMetadata();
+      if (meta) {
+        cfg.title = meta.name;
+        cfg.customNotes = `Commissioning ${meta.name} (${meta.dimensions.lengthCm}x${meta.dimensions.widthCm}x${meta.dimensions.heightCm} cm) in ${meta.timberSpecies} with ${meta.tensionHardware}. User Prompt: ${promptInput?.value || 'N/A'}`;
+      }
       this.leadModal.open(cfg, est);
     });
   }
-
 }
 
 // Initialize on DOM load

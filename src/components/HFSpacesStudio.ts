@@ -1,198 +1,186 @@
-import { HUGGING_FACE_SPACES } from '../data/constants';
-
 export function renderHFSpacesStudio(): string {
-  const spacesCards = HUGGING_FACE_SPACES.map(space => {
-    const modelPresetKey = space.id.includes('trellis')
-      ? 'trellis-tensegrity'
-      : space.id.includes('triposr')
-      ? 'triposr-geodesic'
-      : space.id.includes('interior')
-      ? 'interior-loft'
-      : space.id.includes('splat')
-      ? 'instant4d-splat'
-      : 'trellis-tensegrity';
-
-    return `
-      <div class="glass-panel hf-space-card cyan-glow">
-        <div class="hf-space-header">
-          <div>
-            <h4 class="hf-space-title">${space.name}</h4>
-            <span class="hf-space-author">by @${space.author}</span>
-          </div>
-          <span class="hf-badge-tier">${space.hardwareTier.split('/')[0]}</span>
-        </div>
-
-        <p class="hf-space-desc">${space.description}</p>
-
-        <div style="font-size: 0.8rem; margin-bottom: 12px; color: var(--text-main);">
-          <strong>Visualization Role:</strong> <span style="color: var(--cyan-high-tensile);">${space.primaryUse}</span>
-        </div>
-
-        <div class="hf-space-tags">
-          ${space.tags.map(tag => `<span class="hf-tag">${tag}</span>`).join('')}
-        </div>
-
-        <!-- Sample Prompt -->
-        <div class="hf-prompt-box">
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">
-            Synthesized AI Prompt:
-          </div>
-          <span class="prompt-text">${space.samplePrompt}</span>
-          <button class="hf-copy-prompt-btn btn-copy-hf-prompt" data-prompt="${space.samplePrompt.replace(/"/g, '&quot;')}" title="Copy Prompt">
-            Copy
-          </button>
-        </div>
-
-        <!-- Actions: Display 3D Object Directly on Website or Launch In-Page Generator -->
-        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
-          <button class="btn btn-primary-cyan btn-sm btn-display-3d-model" data-preset="${modelPresetKey}" data-title="${space.name}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-              <polyline points="2 17 12 22 22 17"/>
-              <polyline points="2 12 12 17 22 12"/>
-            </svg>
-            <span>Display 3D Object on Site</span>
-          </button>
-
-          <button class="btn btn-glass btn-sm btn-embed-space-modal" data-embed-url="${space.directEmbedUrl}" data-title="${space.name}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-            <span>Launch Generator in Modal</span>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-
   return `
     <section class="section" id="hf-spaces-section">
       <div class="app-container">
+        <!-- Section Header -->
         <div class="section-header">
-          <span class="section-tag cyan">AI 3D Synthesis &amp; Virtual Staging</span>
-          <h2 class="section-title">Attach a <span class="gold-gradient">Prompt or Image</span> to Generate 3D Furniture</h2>
+          <span class="section-tag cyan">Spatial 3D Synthesis Studio</span>
+          <h2 class="section-title">
+            Generate <span class="cyan-gradient">Real 3D Objects</span> From Prompt or Image
+          </h2>
           <p class="section-subtitle">
-            Input your custom architectural vision or upload a sketch, reference photo, or room picture. Our on-page 3D engine synthesizes and displays your custom piece directly in WebGL.
+            Synthesize genuine, mathematically balanced 3D furniture models from your custom prompt or uploaded sketch. Every model computes real BufferGeometry, physical cable vectors, and exportable binary .GLB files.
           </p>
         </div>
 
         <!-- =================================================================
-             PROMPT & IMAGE ATTACHMENT GENERATOR CONSOLE
+             AI 3D FURNITURE GENERATOR CONSOLE (DUAL-INPUT: IMAGE + PROMPT)
              ================================================================= -->
-        <div class="ai-generator-console">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px;">
+        <div class="glass-panel cyan-glow" style="padding: 32px; margin-bottom: 36px; border-radius: var(--radius-xl); border: 1px solid rgba(56, 189, 248, 0.25);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
             <div>
-              <span class="section-tag gold" style="font-size: 0.72rem; margin-bottom: 4px;">ZeroGPU 3D Synthesizer</span>
-              <h3 style="font-family: var(--font-display); font-size: 1.45rem; color: var(--text-main);">
-                Generate Custom 3D Furniture from Prompt or Photo
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <span class="pulse-indicator cyan"></span>
+                <span class="section-tag cyan" style="font-size: 0.72rem; letter-spacing: 0.12em;">Spatial CAD &amp; Computer Vision Engine</span>
+              </div>
+              <h3 style="font-family: var(--font-display); font-size: 1.65rem; color: var(--text-main);">
+                Parametric 3D Furniture &amp; Structure Generator
               </h3>
+              <p style="color: var(--text-secondary); font-size: 0.92rem; max-width: 680px; margin-top: 4px;">
+                Describe your bespoke furniture vision in natural language or upload an architectural sketch. Our computer vision engine extracts the exact perimeter contour and surface relief to build a real 3D timber piece in physical tension equilibrium.
+              </p>
             </div>
-            <div style="font-size: 0.8rem; color: var(--cyan-high-tensile); font-weight: 600;">
-              &bull; Powered by Microsoft TRELLIS.2 &amp; TripoSR Architecture
+
+            <!-- Engine Selector -->
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+              <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">
+                Synthesis Pipeline:
+              </span>
+              <select id="ai-generator-engine-select" style="background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border-medium); color: var(--text-main); font-size: 0.82rem; padding: 7px 12px; border-radius: var(--radius-md); outline: none; cursor: pointer;">
+                <option value="parametric-cad" selected>Client-Side Spatial 3D Synthesizer (Instant &bull; No Quotas)</option>
+                <option value="hf-trellis">Hugging Face ZeroGPU Cloud (trellis-community/TRELLIS)</option>
+              </select>
             </div>
           </div>
 
-          <div class="generator-columns">
-            <!-- Left Column: Image / Sketch Upload -->
-            <div>
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
-                1. Attach Image, Sketch, or Room Photo (Optional)
-              </label>
+          <!-- Dual Input Columns: Left = Sketch / Image, Right = Text Prompt -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px;">
 
-              <!-- Upload Dropzone -->
-              <div class="image-attach-box" id="ai-sketch-dropzone">
-                <div id="ai-sketch-empty-state">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.6" style="margin-bottom: 10px;">
+            <!-- Column 1: Attach Sketch or Photo -->
+            <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                     <polyline points="21 15 16 10 5 21"/>
                   </svg>
-                  <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 4px;">
-                    Drop your sketch, photo, or room picture here
-                  </div>
-                  <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;">
-                    Supports PNG, JPG, WEBP &bull; Max 25 MB
-                  </div>
-                  <button class="btn btn-glass btn-sm" id="btn-browse-sketch" type="button">
+                  1. Attach Sketch, Blueprint or Photo
+                </label>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">PNG, JPG, WEBP</span>
+              </div>
+
+              <!-- Upload Drag-and-Drop Area -->
+              <div id="ai-sketch-dropzone" style="flex: 1; min-height: 140px; border: 2px dashed rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; cursor: pointer; transition: all 0.25s ease; background: rgba(56, 189, 248, 0.03); position: relative; overflow: hidden;">
+                <input type="file" id="ai-sketch-file-input" accept="image/png,image/jpeg,image/webp" style="display: none;">
+
+                <div id="ai-sketch-empty-state" style="display: flex; flex-direction: column; align-items: center;">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.6" style="margin-bottom: 8px;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                  </svg>
+                  <p style="font-size: 0.82rem; color: var(--text-main); font-weight: 500; margin-bottom: 4px;">
+                    Drag &amp; drop sketch or room photo here
+                  </p>
+                  <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
+                    Contour is automatically traced and extruded into 3D
+                  </p>
+                  <button type="button" class="btn btn-glass btn-xs" id="btn-browse-sketch" style="font-size: 0.75rem;">
                     Browse Image
                   </button>
-                  <input type="file" id="ai-sketch-file-input" accept="image/*" style="display: none;">
                 </div>
 
-                <!-- Preview State (when attached) -->
-                <div class="image-preview-wrapper" id="ai-sketch-preview-wrap" style="display: none;">
-                  <img id="ai-sketch-preview-img" src="" alt="Attached inspiration" />
-                  <button class="image-remove-btn" id="btn-remove-sketch" title="Remove Image">&times;</button>
+                <!-- Preview State (Hidden by default) -->
+                <div id="ai-sketch-preview-wrap" style="display: none; width: 100%; height: 100%; position: absolute; inset: 0; background: #0b0f19;">
+                  <img id="ai-sketch-preview-img" src="" alt="Attached Concept Sketch" style="width: 100%; height: 100%; object-fit: contain;">
+                  <button type="button" id="btn-remove-sketch" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">&times;</button>
                 </div>
               </div>
 
-              <!-- Quick Sample Inspirations -->
+              <!-- Quick Blueprint Inspiration Pills -->
               <div style="margin-top: 10px;">
-                <span style="font-size: 0.74rem; color: var(--text-muted);">Or try sample concept sketch:</span>
-                <div class="sample-pills-row">
-                  <button class="sample-img-pill" data-sample="walnut-tensegrity" type="button">Walnut Tensegrity Table</button>
-                  <button class="sample-img-pill" data-sample="cantilever-desk" type="button">Cantilever Desk</button>
-                  <button class="sample-img-pill" data-sample="geodesic-dome" type="button">Timber Geodesic Pod</button>
-                  <button class="sample-img-pill" data-sample="charred-coffee" type="button">Yakisugi Coffee Table</button>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px;">
+                  Or click sample concept blueprint:
+                </span>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="sample-img-pill" data-sample="walnut-tensegrity">Tensegrity Table</button>
+                  <button type="button" class="sample-img-pill" data-sample="cantilever-desk">Lounge Chair</button>
+                  <button type="button" class="sample-img-pill" data-sample="geodesic-dome">3V Timber Dome</button>
+                  <button type="button" class="sample-img-pill" data-sample="charred-coffee">Yakisugi Table</button>
                 </div>
               </div>
             </div>
 
-            <!-- Right Column: Prompt Input & Engine -->
-            <div style="display: flex; flex-direction: column;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
-                2. Enter Custom Prompt Description
-              </label>
-
-              <textarea id="ai-custom-prompt-input" rows="3" placeholder="Describe your custom furniture (e.g. 'Solid American black walnut floating tensegrity dining table with 6mm stainless steel tension cables and live-edge contour for an architectural loft')..."></textarea>
-
-              <!-- Quick Prompt Keyword Chips -->
-              <div class="prompt-chips-row">
-                <button class="prompt-chip" data-phrase="American Black Walnut with rich grain">+ Black Walnut</button>
-                <button class="prompt-chip" data-phrase="floating tensegrity dining table with continuous cable suspension">+ Floating Tensegrity</button>
-                <button class="prompt-chip" data-phrase="PVD Gold titanium aircraft cables with brass turnbuckles">+ PVD Gold Rigging</button>
-                <button class="prompt-chip" data-phrase="3V timber geodesic dome with triangular skylights">+ Geodesic Dome (3V)</button>
-                <button class="prompt-chip" data-phrase="sculptural charred Yakisugi cedar with matte carbon cordage">+ Yakisugi Charred</button>
-                <button class="prompt-chip" data-phrase="cantilevered executive desk with floating drawers">+ Cantilever Desk</button>
+            <!-- Column 2: Prompt Input & Engineering Directives -->
+            <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label for="ai-custom-prompt-input" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f5c542" stroke-width="2">
+                    <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                  2. Architectural Prompt Specification
+                </label>
+                <span style="font-size: 0.72rem; color: #f5c542;">Auto-parses dimensions &amp; species</span>
               </div>
 
-              <!-- Engine & Action Row -->
-              <div style="display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; margin-top: auto;">
-                <div>
-                  <label style="display: block; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 4px;">AI Generation Engine</label>
-                  <select id="ai-generator-engine-select" style="width: 100%; font-size: 0.85rem;">
-                    <option value="parametric-cad">Real Parametric CAD Engine &bull; Instant Three.js BufferGeometry &bull; Downloadable GLB</option>
-                    <option value="hf-trellis">Hugging Face TRELLIS.2 Live API &bull; ZeroGPU Dense PBR Mesh Extraction</option>
-                    <option value="triposr">TripoSR (Stability AI) &bull; Rapid 3D Volumetric Mesh</option>
-                  </select>
-                </div>
+              <textarea id="ai-custom-prompt-input" rows="4" style="width: 100%; flex: 1; background: rgba(9, 10, 15, 0.7); border: 1px solid var(--border-medium); border-radius: var(--radius-md); padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.88rem; line-height: 1.5; resize: none; outline: none;" placeholder="e.g. 240x100x75cm solid American black walnut live-edge floating tensegrity dining table with PVD gold cables, turnbuckles, and epoxy glass river inlay..."></textarea>
 
-                <div style="padding-top: 18px;">
-                  <button class="btn btn-primary-gold" id="btn-synthesize-3d-furniture" style="padding: 14px 28px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                    <span>Generate 3D Furniture</span>
-                  </button>
+              <!-- Quick Prompt Keyword Chips -->
+              <div style="margin-top: 10px;">
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 6px;">
+                  Append architectural parameters:
+                </span>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="prompt-chip" data-phrase="240x100x75cm Dining Table">+ Dining Table (240x100cm)</button>
+                  <button type="button" class="prompt-chip" data-phrase="Tensegrity Ergonomic Lounge Chair">+ Lounge Chair</button>
+                  <button type="button" class="prompt-chip" data-phrase="4-Tier Floating Tension Bookshelf">+ 4-Tier Shelves</button>
+                  <button type="button" class="prompt-chip" data-phrase="8m Timber Geodesic Dome">+ 8m Geodesic Dome</button>
+                  <button type="button" class="prompt-chip" data-phrase="Yakisugi Charred Cedar">+ Charred Cedar</button>
+                  <button type="button" class="prompt-chip" data-phrase="PVD Gold Titanium Cables">+ Gold Cables</button>
+                  <button type="button" class="prompt-chip" data-phrase="Translucent Blue River Glass Inlay">+ River Glass</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Dynamic Progress Notification Box -->
-          <div class="generation-progress-box" id="ai-generation-progress" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 700; font-size: 0.9rem; color: var(--cyan-high-tensile);" id="ai-gen-step-status">
-                Analyzing prompt and attached sketch geometry...
-              </span>
-              <span style="font-family: monospace; font-size: 0.82rem; color: var(--gold-light);" id="ai-gen-step-pct">
-                15%
+          <!-- Optional Hugging Face Token Row (Expandable) -->
+          <div id="hf-token-row" style="display: none; margin-bottom: 18px; padding: 12px 16px; background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 240px;">
+                <label for="ai-hf-token-input" style="font-size: 0.78rem; font-weight: 600; color: #38bdf8; display: block; margin-bottom: 4px;">
+                  Hugging Face Access Token (Optional &bull; Bypasses ZeroGPU Quota Limits):
+                </label>
+                <input type="password" id="ai-hf-token-input" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxx" style="width: 100%; background: rgba(11, 15, 25, 0.9); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 6px 10px; color: var(--text-main); font-size: 0.8rem; outline: none;">
+              </div>
+              <span style="font-size: 0.74rem; color: var(--text-muted); max-width: 320px;">
+                Get a free read token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">huggingface.co/settings/tokens</a>.
               </span>
             </div>
-            <div class="gen-progress-bar-wrap">
-              <div class="gen-progress-bar-fill" id="ai-gen-progress-bar"></div>
+          </div>
+
+          <!-- Bottom Action Row: Synthesize Button & Status -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <button class="btn btn-primary-cyan btn-lg" id="btn-synthesize-3d-furniture" style="box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span>Synthesize Real 3D Furniture</span>
+              </button>
+
+              <span style="font-size: 0.82rem; color: var(--text-muted);">
+                Generates real BufferGeometry &bull; Direct .GLB export
+              </span>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-glass btn-sm" id="btn-clear-ai-inputs" style="font-size: 0.78rem;">
+                Reset Inputs
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Alert Bar -->
+          <div id="ai-generation-progress" style="display: none; margin-top: 20px; padding: 16px; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border-medium); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.84rem;">
+              <span id="ai-gen-step-status" style="color: #38bdf8; font-weight: 600;">
+                Initializing spatial geometry engine...
+              </span>
+              <span id="ai-gen-step-pct" style="color: var(--text-secondary); font-family: monospace;">
+                0%
+              </span>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+              <div id="ai-gen-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #f5c542); transition: width 0.25s ease;"></div>
             </div>
           </div>
 
@@ -201,7 +189,7 @@ export function renderHFSpacesStudio(): string {
             <div style="display: flex; align-items: center; gap: 10px;">
               <span style="color: #10b981; font-size: 1.2rem;">&#10004;</span>
               <span style="font-size: 0.88rem; color: var(--text-main); font-weight: 600;" id="ai-success-msg">
-                Custom 3D Furniture synthesized successfully! Displayed in the WebGL viewport below.
+                Real 3D Furniture synthesized successfully! Displayed in the WebGL viewport below.
               </span>
             </div>
             <button class="btn btn-primary-gold btn-sm" id="btn-commission-generated-piece">
@@ -221,21 +209,22 @@ export function renderHFSpacesStudio(): string {
             <div>
               <span class="section-tag gold" style="font-size: 0.7rem; margin-bottom: 4px;">Live In-Page WebGL Renderer</span>
               <h3 style="font-family: var(--font-display); font-size: 1.5rem; color: var(--text-main);" id="ai-active-model-title">
-                TRELLIS.2 &bull; Floating Tensegrity Coffee Table
+                Real 3D Geometry: Live-Edge Tensegrity Dining Table
               </h3>
             </div>
 
-            <!-- Model Presets Selector Tabs -->
+            <!-- Real Archetype Quick Switches -->
             <div class="toggle-group" id="ai-viewer-model-tabs" style="flex-wrap: wrap;">
-              <button class="toggle-btn active" data-preset="trellis-tensegrity">TRELLIS Table</button>
-              <button class="toggle-btn" data-preset="triposr-geodesic">TripoSR Dome</button>
-              <button class="toggle-btn" data-preset="interior-loft">InteriorGen3D Loft</button>
-              <button class="toggle-btn" data-preset="instant4d-splat">4D Splat Cloud</button>
+              <button class="toggle-btn active" data-archetype="dining-table">Dining Table</button>
+              <button class="toggle-btn" data-archetype="lounge-chair">Lounge Chair</button>
+              <button class="toggle-btn" data-archetype="shelving-unit">Shelving Unit</button>
+              <button class="toggle-btn" data-archetype="geodesic-dome">Geodesic Dome</button>
+              <button class="toggle-btn" data-archetype="cantilever-desk">Executive Desk</button>
             </div>
           </div>
 
           <!-- 3D Canvas Box -->
-          <div style="height: 520px; width: 100%; border-radius: var(--radius-lg); position: relative; overflow: hidden; border: 1px solid var(--border-medium); background: radial-gradient(circle at center, #181d29 0%, #090a0f 100%);">
+          <div style="height: 540px; width: 100%; border-radius: var(--radius-lg); position: relative; overflow: hidden; border: 1px solid var(--border-medium); background: radial-gradient(circle at center, #181d29 0%, #090a0f 100%);">
             <div id="ai-studio-3d-canvas" style="width: 100%; height: 100%;"></div>
 
             <!-- Canvas Top HUD -->
@@ -276,21 +265,16 @@ export function renderHFSpacesStudio(): string {
           </div>
         </div>
 
-        <!-- Curated HF Spaces Cards Grid -->
-        <div class="hf-spaces-grid">
-          ${spacesCards}
-        </div>
-
         <!-- 3D Model Dropzone: Loads files directly into WebGL canvas -->
         <div class="dropzone-box" id="hf-model-dropzone">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5" style="margin-bottom: 12px;">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
           </svg>
           <h4 style="font-family: var(--font-display); font-size: 1.25rem; color: var(--text-main); margin-bottom: 6px;">
-            Upload Your 3D Model (.glb, .gltf, .obj) Directly to the Canvas
+            Drop Any 3D Asset (.glb, .gltf, .obj) Directly onto the Stage
           </h4>
           <p style="color: var(--text-secondary); font-size: 0.88rem; max-width: 540px; margin: 0 auto 18px;">
-            Drag &amp; drop any 3D asset generated from Hugging Face TRELLIS, TripoSR, or CAD to inspect geometry, materials, and scale directly in our Atelier 3D viewport.
+            Inspect any 3D asset generated from TRELLIS, Blender, or Rhino directly in our Atelier WebGL viewport with real vertex count, polygon metrics, and lighting simulations.
           </p>
           <button class="btn btn-glass btn-sm" id="btn-browse-model-file">
             Browse 3D File (.glb / .obj)
@@ -299,29 +283,5 @@ export function renderHFSpacesStudio(): string {
         </div>
       </div>
     </section>
-
-    <!-- Embedded In-Page Hugging Face Generator Modal (Zero External Redirects) -->
-    <div class="modal-overlay" id="hf-embedded-modal-overlay">
-      <div class="modal-card" style="max-width: 960px; height: 85vh; display: flex; flex-direction: column; padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <div>
-            <span class="section-tag cyan" style="font-size: 0.7rem; margin-bottom: 2px;">In-Page Embedded AI Generator</span>
-            <h3 style="font-family: var(--font-display); font-size: 1.35rem; color: var(--text-main);" id="hf-embedded-modal-title">
-              Hugging Face Space Generator
-            </h3>
-          </div>
-          <button class="modal-close-btn" id="btn-close-hf-embedded-modal">&times;</button>
-        </div>
-
-        <div style="flex: 1; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-medium); background: #000; position: relative;">
-          <iframe id="hf-embedded-iframe" src="" style="width: 100%; height: 100%; border: none;" allow="accelerometer; camera; microphone; gyroscope; xr-spatial-tracking"></iframe>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.82rem; color: var(--text-muted);">
-          <span>Tip: After exporting your 3D GLB file, drag it into our 3D canvas above to inspect it in high-fidelity PBR!</span>
-          <button class="btn btn-primary-cyan btn-sm" id="btn-done-hf-embedded">Done Generating</button>
-        </div>
-      </div>
-    </div>
   `;
 }

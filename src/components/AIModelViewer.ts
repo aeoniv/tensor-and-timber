@@ -24,7 +24,6 @@ export class AIModelViewer {
   private groundPlane: THREE.Mesh;
 
   // State
-  private activeModelKey: string = 'trellis-tensegrity';
   private isWireframe: boolean = false;
   private isAutoRotating: boolean = true;
   private lightingPreset: 'studio' | 'daylight' | 'midnight' = 'studio';
@@ -89,19 +88,24 @@ export class AIModelViewer {
     this.scene.add(this.groundPlane);
 
     // Load initial real parametric model
-    this.generateFromPrompt('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
+    this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
 
     this.setupResizeListener();
     this.render();
   }
 
   /**
-   * Generates a REAL 3D Object from a custom prompt string using custom parametric Three.js geometry.
+   * Generates a REAL 3D Object from a prompt and/or attached image.
    */
-  public generateFromPrompt(prompt: string, attachedImage?: string | null): Generated3DMetadata {
-    const { object, metadata } = this.generatorService.generateParametric3DObject(prompt, attachedImage);
+  public async generateCustom3DObject(prompt: string, attachedImage?: string | null): Promise<Generated3DMetadata> {
+    const { object, metadata } = await this.generatorService.generateCustom3DObject(prompt, attachedImage);
     this.displayRealGeneratedObject(object, metadata);
     return metadata;
+  }
+
+  // Alias for backward compatibility
+  public generateFromPrompt(prompt: string, attachedImage?: string | null): Promise<Generated3DMetadata> {
+    return this.generateCustom3DObject(prompt, attachedImage);
   }
 
   /**
@@ -121,7 +125,7 @@ export class AIModelViewer {
   /**
    * Loads a raw GLB binary or URL into the viewer.
    */
-  public loadGLBUrl(url: string, name: string = 'Hugging Face Generated 3D Asset'): Promise<Generated3DMetadata> {
+  public loadGLBUrl(url: string, name: string = 'Generated 3D Asset'): Promise<Generated3DMetadata> {
     return new Promise((resolve, reject) => {
       this.gltfLoader.load(
         url,
@@ -130,18 +134,25 @@ export class AIModelViewer {
           let triangleCount = 0;
           gltf.scene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
-              const geom = (child as THREE.Mesh).geometry;
-              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
-              if (geom.index) triangleCount += geom.index.count / 3;
+              const mesh = child as THREE.Mesh;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+              const geom = mesh.geometry;
+              if (geom && geom.attributes.position) {
+                vertexCount += geom.attributes.position.count;
+                if (geom.index) triangleCount += geom.index.count / 3;
+                else triangleCount += geom.attributes.position.count / 3;
+              }
             }
           });
 
           const box = new THREE.Box3().setFromObject(gltf.scene);
-          const size = box.getSize(new THREE.Vector3());
+          const size = new THREE.Vector3();
+          box.getSize(size);
 
-          const metadata: Generated3DMetadata = {
+          const meta: Generated3DMetadata = {
             name,
-            category: 'AI ZeroGPU Generated 3D Asset',
+            category: 'Hugging Face ZeroGPU Asset',
             dimensions: {
               lengthCm: Math.round(size.x * 100),
               widthCm: Math.round(size.z * 100),
@@ -149,96 +160,64 @@ export class AIModelViewer {
             },
             vertexCount,
             triangleCount: Math.round(triangleCount),
-            timberSpecies: 'AI Generated Texture',
-            tensionHardware: 'Engineered Topology',
+            timberSpecies: 'Neural 3D Texture',
+            tensionHardware: 'Standard Rigging',
+            isFromImageContour: false,
             isFromHuggingFace: true
           };
 
-          this.displayRealGeneratedObject(gltf.scene, metadata);
-          resolve(metadata);
+          this.displayRealGeneratedObject(gltf.scene, meta);
+          resolve(meta);
         },
         undefined,
-        (err) => {
-          console.error('Failed to load GLB:', err);
-          reject(err);
-        }
+        (err) => reject(err)
       );
     });
   }
 
   /**
-   * Exports the currently displayed real 3D model to a downloadable .GLB file.
+   * Loads a custom user-dropped 3D file (.glb, .gltf, .obj).
    */
-  public exportCurrentModelToGLB(filename?: string): Promise<Blob> {
-    const name = filename || `${this.currentMetadata?.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'custom-furniture'}.glb`;
-    return this.generatorService.exportToGLBFile(this.currentModelGroup, name);
-  }
+  public loadFromFile(file: File, onLoad?: () => void, onError?: (err: any) => void): void {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const objectUrl = URL.createObjectURL(file);
 
-  private updateStatsHud(metadata: Generated3DMetadata): void {
-    const statsPill = document.getElementById('ai-mesh-stats-pill');
-    if (statsPill) {
-      statsPill.innerHTML = `
-        <strong>Real 3D Mesh</strong> &bull;
-        ${metadata.vertexCount.toLocaleString()} Vertices &bull;
-        ${metadata.triangleCount.toLocaleString()} Polygons &bull;
-        ${metadata.dimensions.lengthCm} &times; ${metadata.dimensions.widthCm} &times; ${metadata.dimensions.heightCm} cm
-      `;
-    }
-  }
-
-  public loadPresetModel(key: string): void {
-    this.activeModelKey = key;
-    switch (key) {
-      case 'trellis-tensegrity':
-        this.generateFromPrompt('Solid American Black Walnut floating tensegrity dining table with PVD gold titanium cables and live-edge contour');
-        break;
-      case 'triposr-geodesic':
-        this.generateFromPrompt('6m diameter timber geodesic dome pavilion with Douglas Fir struts and triangular glass facets');
-        break;
-      case 'interior-loft':
-        this.generateFromPrompt('Architectural loft floating tensegrity table in quarter-sawn European White Oak 240cm');
-        break;
-      case 'instant4d-splat':
-        this.generateFromPrompt('Sculptural Yakisugi charred cedar tensegrity coffee table with matte carbon cables');
-        break;
-      default:
-        this.generateFromPrompt(key);
-    }
-  }
-
-  private clearModel(): void {
-    while (this.currentModelGroup.children.length > 0) {
-      const child = this.currentModelGroup.children[0];
-      this.currentModelGroup.remove(child);
-    }
-  }
-
-  /* Load Custom File (.glb / .gltf / .obj) */
-  public loadFromFile(file: File, onSuccess?: () => void, onError?: (err: any) => void): void {
-    const extension = file.name.split('.').pop()?.toLowerCase();
-    const url = URL.createObjectURL(file);
-
-    this.clearModel();
-
-    if (extension === 'glb' || extension === 'gltf') {
-      this.gltfLoader.load(
-        url,
-        (gltf) => {
+    if (ext === 'glb' || ext === 'gltf') {
+      this.loadGLBUrl(objectUrl, file.name)
+        .then(() => {
+          if (onLoad) onLoad();
+        })
+        .catch(err => {
+          if (onError) onError(err);
+        });
+    } else if (ext === 'obj') {
+      this.objLoader.load(
+        objectUrl,
+        (obj) => {
           let vertexCount = 0;
           let triangleCount = 0;
-          gltf.scene.traverse((child) => {
+          obj.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
-              const geom = (child as THREE.Mesh).geometry;
-              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
-              if (geom.index) triangleCount += geom.index.count / 3;
+              const mesh = child as THREE.Mesh;
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
+              mesh.material = new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 0.4 });
+              const geom = mesh.geometry;
+              if (geom && geom.attributes.position) {
+                vertexCount += geom.attributes.position.count;
+                if (geom.index) triangleCount += geom.index.count / 3;
+                else triangleCount += geom.attributes.position.count / 3;
+              }
             }
           });
-          const box = new THREE.Box3().setFromObject(gltf.scene);
-          const size = box.getSize(new THREE.Vector3());
 
-          const metadata: Generated3DMetadata = {
+          const box = new THREE.Box3().setFromObject(obj);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+
+          const meta: Generated3DMetadata = {
             name: file.name,
-            category: 'Uploaded 3D Mesh',
+            category: 'Imported CAD Mesh',
             dimensions: {
               lengthCm: Math.round(size.x * 100),
               widthCm: Math.round(size.z * 100),
@@ -246,86 +225,37 @@ export class AIModelViewer {
             },
             vertexCount,
             triangleCount: Math.round(triangleCount),
-            timberSpecies: 'Imported Materials',
-            tensionHardware: 'Imported Geometry',
+            timberSpecies: 'Raw Mesh Material',
+            tensionHardware: 'Hardware As Modelled',
+            isFromImageContour: false,
             isFromHuggingFace: false
           };
 
-          this.displayRealGeneratedObject(gltf.scene, metadata);
-          URL.revokeObjectURL(url);
-          if (onSuccess) onSuccess();
+          this.displayRealGeneratedObject(obj, meta);
+          if (onLoad) onLoad();
         },
         undefined,
         (err) => {
-          console.error('Error loading GLTF/GLB:', err);
-          URL.revokeObjectURL(url);
-          if (onError) onError(err);
-        }
-      );
-    } else if (extension === 'obj') {
-      this.objLoader.load(
-        url,
-        (obj) => {
-          let vertexCount = 0;
-          obj.traverse((child) => {
-            if ((child as THREE.Mesh).isMesh) {
-              const geom = (child as THREE.Mesh).geometry;
-              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
-            }
-          });
-          const box = new THREE.Box3().setFromObject(obj);
-          const size = box.getSize(new THREE.Vector3());
-
-          const metadata: Generated3DMetadata = {
-            name: file.name,
-            category: 'Uploaded OBJ Mesh',
-            dimensions: {
-              lengthCm: Math.round(size.x * 100),
-              widthCm: Math.round(size.z * 100),
-              heightCm: Math.round(size.y * 100)
-            },
-            vertexCount,
-            triangleCount: Math.round(vertexCount / 3),
-            timberSpecies: 'Imported OBJ Geometry',
-            tensionHardware: 'Imported Geometry',
-            isFromHuggingFace: false
-          };
-
-          this.displayRealGeneratedObject(obj, metadata);
-          URL.revokeObjectURL(url);
-          if (onSuccess) onSuccess();
-        },
-        undefined,
-        (err) => {
-          console.error('Error loading OBJ:', err);
-          URL.revokeObjectURL(url);
           if (onError) onError(err);
         }
       );
     }
   }
 
-  private fitModelInView(object: THREE.Object3D): void {
-    const box = new THREE.Box3().setFromObject(object);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
+  /**
+   * Exports the currently displayed 3D object to a real binary .GLB file.
+   */
+  public async exportCurrentModelToGLB(filename?: string): Promise<Blob> {
+    const name = filename || `${(this.currentMetadata?.name || 'custom-piece').toLowerCase().replace(/\s+/g, '-')}.glb`;
+    return this.generatorService.exportToGLBFile(this.currentModelGroup, name);
+  }
 
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = 2.4 / (maxDim || 1);
-    object.scale.set(scale, scale, scale);
+  public getExportableGroup(): THREE.Group {
+    return this.currentModelGroup;
+  }
 
-    // Re-center
-    box.setFromObject(object);
-    box.getCenter(center);
-    object.position.sub(center);
-    object.position.y += (size.y * scale) / 2;
-
-    object.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
+  public getMetadata(): Generated3DMetadata | null {
+    return this.currentMetadata;
   }
 
   public toggleWireframe(): boolean {
@@ -337,11 +267,11 @@ export class AIModelViewer {
   private applyWireframeState(): void {
     this.currentModelGroup.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach(m => (m as any).wireframe = this.isWireframe);
-        } else if (mesh.material) {
-          (mesh.material as any).wireframe = this.isWireframe;
+        const mat = (child as THREE.Mesh).material;
+        if (Array.isArray(mat)) {
+          mat.forEach(m => (m as any).wireframe = this.isWireframe);
+        } else if (mat) {
+          (mat as any).wireframe = this.isWireframe;
         }
       }
     });
@@ -357,33 +287,72 @@ export class AIModelViewer {
     this.lightingPreset = preset;
     switch (preset) {
       case 'studio':
+        this.ambientLight.color.setHex(0xffffff);
         this.ambientLight.intensity = 0.9;
-        this.dirLight1.intensity = 2.2;
         this.dirLight1.color.setHex(0xfffaed);
-        this.dirLight2.intensity = 1.2;
+        this.dirLight1.intensity = 2.2;
         this.dirLight2.color.setHex(0x38bdf8);
+        this.dirLight2.intensity = 1.2;
         break;
       case 'daylight':
+        this.ambientLight.color.setHex(0xf0fdf4);
         this.ambientLight.intensity = 1.3;
-        this.dirLight1.intensity = 2.8;
         this.dirLight1.color.setHex(0xffffff);
-        this.dirLight2.intensity = 0.8;
+        this.dirLight1.intensity = 2.8;
         this.dirLight2.color.setHex(0x93c5fd);
+        this.dirLight2.intensity = 0.8;
         break;
       case 'midnight':
-        this.ambientLight.intensity = 0.35;
-        this.dirLight1.intensity = 1.5;
-        this.dirLight1.color.setHex(0xd4af37);
-        this.dirLight2.intensity = 1.8;
-        this.dirLight2.color.setHex(0x0284c7);
+        this.ambientLight.color.setHex(0x1e1b4b);
+        this.ambientLight.intensity = 0.4;
+        this.dirLight1.color.setHex(0xf59e0b);
+        this.dirLight1.intensity = 1.8;
+        this.dirLight2.color.setHex(0x6366f1);
+        this.dirLight2.intensity = 1.6;
         break;
     }
   }
 
-  public resetCameraForModel(): void {
-    this.camera.position.set(2.8, 1.8, 2.8);
-    this.controls.target.set(0, 0.5, 0);
+  private updateStatsHud(metadata: Generated3DMetadata): void {
+    const pill = document.getElementById('ai-mesh-stats-pill');
+    if (pill) {
+      const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Vision Contour Extruded]</span>' : '';
+      pill.innerHTML = `<strong>${metadata.name}</strong>${contourBadge} &bull; <strong>${metadata.vertexCount.toLocaleString()}</strong> Vertices &bull; <strong>${metadata.triangleCount.toLocaleString()}</strong> Polys &bull; ${metadata.dimensions.lengthCm}&times;${metadata.dimensions.widthCm}&times;${metadata.dimensions.heightCm} cm`;
+    }
+  }
+
+  private fitModelInView(object: THREE.Object3D): void {
+    const box = new THREE.Box3().setFromObject(object);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    object.position.x -= center.x;
+    object.position.z -= center.z;
+
+    // Place bottom at y = 0
+    const newBox = new THREE.Box3().setFromObject(object);
+    object.position.y -= newBox.min.y;
+  }
+
+  private resetCameraForModel(): void {
+    const box = new THREE.Box3().setFromObject(this.currentModelGroup);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z, 1.0);
+
+    this.camera.position.set(maxDim * 1.4, maxDim * 1.1, maxDim * 1.6);
+    this.controls.target.set(0, size.y * 0.45, 0);
     this.controls.update();
+  }
+
+  private clearModel(): void {
+    while (this.currentModelGroup.children.length > 0) {
+      const child = this.currentModelGroup.children[0];
+      this.currentModelGroup.remove(child);
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+      }
+    }
   }
 
   private setupResizeListener(): void {
@@ -391,6 +360,8 @@ export class AIModelViewer {
       if (!this.container) return;
       const width = this.container.clientWidth;
       const height = this.container.clientHeight;
+      if (width === 0 || height === 0) return;
+
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
@@ -399,18 +370,16 @@ export class AIModelViewer {
 
   private render = (): void => {
     this.animFrameId = requestAnimationFrame(this.render);
-    this.controls.autoRotate = this.isAutoRotating;
-    this.controls.autoRotateSpeed = 1.2;
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };
 
   public destroy(): void {
     cancelAnimationFrame(this.animFrameId);
-    this.controls.dispose();
     this.renderer.dispose();
-    if (this.container && this.renderer.domElement) {
-      this.container.removeChild(this.renderer.domElement);
+    this.controls.dispose();
+    if (this.renderer.domElement && this.renderer.domElement.parentElement) {
+      this.renderer.domElement.parentElement.removeChild(this.renderer.domElement);
     }
   }
 }
