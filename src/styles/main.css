@@ -1669,3 +1669,9 @@ input[type=range]::-webkit-slider-thumb:hover {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 992px) {
+  .generator-workspace-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
