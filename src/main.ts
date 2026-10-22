@@ -1,43 +1,33 @@
 import './styles/main.css';
+import confetti from 'canvas-confetti';
 import { renderNavbar } from './components/Navbar';
 import { renderHero } from './components/Hero';
+import { renderAtelierStudio } from './components/AtelierStudio';
 import { renderInnovativeProjects } from './components/InnovativeProjects';
-import { renderHFSpacesStudio } from './components/HFSpacesStudio';
+import { renderConsultationSection } from './components/ConsultationSection';
 import { renderFooter } from './components/Footer';
-import { TensegrityViewer } from './components/TensegrityViewer';
-import { GeodesicViewer } from './components/GeodesicViewer';
 import { AIModelViewer } from './components/AIModelViewer';
-import { ProjectPlanner } from './components/ProjectPlanner';
 import { LeadCaptureModal } from './components/LeadCaptureModal';
 import { AdminLeadsDrawer } from './components/AdminLeadsDrawer';
-import { INNOVATIVE_PROJECTS, WOOD_SPECIES } from './data/constants';
+import { INNOVATIVE_PROJECTS } from './data/constants';
+import { LeadSubmission, ProjectConfiguration, EstimateResult } from './types';
 
 class AtelierApp {
-  // Hero Visualizer
+  // 3D Viewers
   private heroAIViewer: AIModelViewer | null = null;
-  private heroTensegrityViewer: TensegrityViewer | null = null;
-  private heroGeodesicViewer: GeodesicViewer | null = null;
-  private heroActiveMode: 'ai' | 'tensegrity' | 'geodesic' = 'ai';
+  private atelierAIViewer: AIModelViewer | null = null;
 
-  // Studio Visualizer (Configurator Section)
-  private studioAIViewer: AIModelViewer | null = null;
-  private studioTensegrityViewer: TensegrityViewer | null = null;
-  private studioGeodesicViewer: GeodesicViewer | null = null;
-  private studioActiveMode: 'ai' | 'tensegrity' | 'geodesic' = 'ai';
-
-  // Spatial 3D Synthesis Studio Viewport
-  private aiModelViewer: AIModelViewer | null = null;
-
-  // Track latest generated GLB
+  // Active Model State
   private currentGlbUrl: string = '/models/sample_ai_trellis.glb';
+  private currentModelName: string = 'Leviton Tensegrity Dining Table';
+  private currentEstimatedBracket: string = '$14,800 – $19,500';
 
-  private planner: ProjectPlanner;
+  // Lead Management
   private leadModal: LeadCaptureModal;
   private adminDrawer: AdminLeadsDrawer;
   private attachedSketchDataUrl: string | null = null;
 
   constructor() {
-    this.planner = new ProjectPlanner();
     this.leadModal = new LeadCaptureModal();
     this.adminDrawer = new AdminLeadsDrawer();
     this.initDOM();
@@ -51,576 +41,300 @@ class AtelierApp {
       ${renderNavbar()}
       <main>
         ${renderHero()}
+        ${renderAtelierStudio()}
         ${renderInnovativeProjects()}
-
-        <!-- Interactive 3D Studio & Configurator Section -->
-        <section class="section" id="planner-section">
-          <div class="app-container">
-            <div class="section-header">
-              <span class="section-tag gold">Engineering Configurator</span>
-              <h2 class="section-title">Interactive <span class="gold-gradient">3D Studio</span> &amp; Cost Estimator</h2>
-              <p class="section-subtitle">
-                Configure your bespoke structure with live dimensional physics, material swatches, and certified load-bearing calculations.
-              </p>
-            </div>
-
-            <div class="studio-layout">
-              <!-- Left: Sticky 3D WebGL Viewport -->
-              <div class="studio-viewport-panel">
-                <div class="studio-3d-canvas-wrap">
-                  <div class="studio-hud-top">
-                    <span class="hud-pill" id="studio-active-title">
-                      ✨ Real 3D AI Model (TRELLIS 3D)
-                    </span>
-                    <div class="toggle-group">
-                      <button class="toggle-btn active" id="studio-toggle-ai" style="color: #f5c542; font-weight: 700;">✨ Real 3D AI Model</button>
-                      <button class="toggle-btn" id="studio-toggle-tensegrity">Table</button>
-                      <button class="toggle-btn" id="studio-toggle-geodesic">Dome</button>
-                    </div>
-                  </div>
-
-                  <div id="studio-3d-canvas" style="width: 100%; height: 100%;"></div>
-
-                  <div class="studio-hud-bottom">
-                    <div class="studio-slider-bar">
-                      <span id="studio-mode-label" style="font-size: 0.74rem; color: #10b981; font-weight: 600;">✨ Real Binary .GLB Rendered</span>
-                    </div>
-
-                    <div class="toggle-group">
-                      <button class="toggle-btn" id="studio-toggle-wireframe">Wireframe</button>
-                      <button class="toggle-btn active" id="studio-btn-autorotate">Spin: ON</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); padding: 0 8px;">
-                  <span>&bull; Left Click: Rotate</span>
-                  <span>&bull; Right Click / Scroll: Pan &amp; Zoom</span>
-                  <span>&bull; Physically Calibrated PBR</span>
-                </div>
-              </div>
-
-              <!-- Right: Interactive Configurator Controls & Bill of Materials -->
-              <div id="configurator-container"></div>
-            </div>
-          </div>
-        </section>
-
-        ${renderHFSpacesStudio()}
+        ${renderConsultationSection()}
       </main>
       ${renderFooter()}
     `;
 
     this.initViewers();
-    this.planner.render('configurator-container');
-    this.bindGlobalEvents();
-    this.initPromptCrafter();
-    this.initAIViewerEvents();
-    this.initCustomPromptAndImageGenerator();
+    this.bindEvents();
+    this.initAtelierGenerator();
+    this.initOnPageCommissionForm();
   }
 
   private initViewers(): void {
-    // 1. Hero 3D Viewer (defaults to Real AI 3D Model!)
+    // 1. Hero 3D Stage (Auto-renders real 3D model on initial page load)
     try {
       this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
         hudPillId: 'hero-model-pill',
         defaultModelUrl: this.currentGlbUrl,
-        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
+        modelName: this.currentModelName
       });
     } catch (e) {
-      console.warn('Hero viewer init error:', e);
+      console.warn('Hero 3D viewer init error:', e);
     }
 
-    // 2. Studio 3D Viewer in Configurator (defaults to Real AI 3D Model!)
+    // 2. Main Bespoke Atelier 3D Stage (Auto-renders real 3D model on load)
     try {
-      this.studioAIViewer = new AIModelViewer('studio-3d-canvas', {
-        titleId: 'studio-active-title',
+      this.atelierAIViewer = new AIModelViewer('atelier-3d-canvas', {
+        hudPillId: 'atelier-mesh-stats-pill',
+        titleId: 'atelier-active-model-title',
         defaultModelUrl: this.currentGlbUrl,
-        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
+        modelName: this.currentModelName
       });
     } catch (e) {
-      console.warn('Studio viewer init error:', e);
-    }
-
-    // 3. AI Studio 3D Model Viewer in Generator Section
-    try {
-      this.aiModelViewer = new AIModelViewer('ai-studio-3d-canvas', {
-        hudPillId: 'ai-mesh-stats-pill',
-        titleId: 'ai-active-model-title',
-        defaultModelUrl: this.currentGlbUrl,
-        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
-      });
-    } catch (e) {
-      console.warn('AI 3D model viewer init error:', e);
-    }
-
-    // Sync planner config changes to 3D viewers
-    this.planner.setOnConfigChange((config, _estimate) => {
-      const isDome = config.category.includes('geodesic');
-
-      if (isDome && this.studioActiveMode !== 'geodesic') {
-        this.switchStudioMode('geodesic');
-      } else if (!isDome && this.studioActiveMode === 'geodesic') {
-        this.switchStudioMode('tensegrity');
-      }
-
-      if (!isDome && this.studioTensegrityViewer) {
-        this.studioTensegrityViewer.setWoodSpecies(config.woodSpeciesId);
-        this.studioTensegrityViewer.setTensionSystem(config.tensionSystemId);
-      } else if (isDome && this.studioGeodesicViewer) {
-        this.studioGeodesicViewer.setFrequency(config.domeFrequency);
-        if (config.dimensions.diameter) {
-          this.studioGeodesicViewer.setDiameter(config.dimensions.diameter);
-        }
-        this.studioGeodesicViewer.setGlazingMode(config.glazingCoverage);
-        const wood = WOOD_SPECIES.find(w => w.id === config.woodSpeciesId);
-        if (wood) this.studioGeodesicViewer.setTimberColor(wood.threeColor);
-      }
-    });
-  }
-
-  private switchHeroMode(mode: 'ai' | 'tensegrity' | 'geodesic'): void {
-    if (this.heroActiveMode === mode && (this.heroAIViewer || this.heroTensegrityViewer || this.heroGeodesicViewer)) return;
-    this.heroActiveMode = mode;
-
-    const canvasContainer = document.getElementById('hero-3d-canvas');
-    if (!canvasContainer) return;
-
-    if (this.heroAIViewer) { this.heroAIViewer.destroy(); this.heroAIViewer = null; }
-    if (this.heroTensegrityViewer) { this.heroTensegrityViewer.destroy(); this.heroTensegrityViewer = null; }
-    if (this.heroGeodesicViewer) { this.heroGeodesicViewer.destroy(); this.heroGeodesicViewer = null; }
-
-    document.getElementById('hero-toggle-ai')?.classList.toggle('active', mode === 'ai');
-    document.getElementById('hero-toggle-tensegrity')?.classList.toggle('active', mode === 'tensegrity');
-    document.getElementById('hero-toggle-geodesic')?.classList.toggle('active', mode === 'geodesic');
-
-    const pill = document.getElementById('hero-model-pill');
-
-    if (mode === 'ai') {
-      this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
-        autoLoadSample: true,
-        defaultModelUrl: this.currentGlbUrl,
-        hudPillId: 'hero-model-pill'
-      });
-      if (pill) pill.innerHTML = '<strong>✨ Real 3D Generated Object (TRELLIS 3D)</strong> &bull; Interactive WebGL';
-    } else if (mode === 'tensegrity') {
-      this.heroTensegrityViewer = new TensegrityViewer('hero-3d-canvas');
-      if (pill) pill.innerHTML = '<strong>Floating Leviton Model</strong> &bull; Interactive 3D WebGL';
-    } else {
-      this.heroGeodesicViewer = new GeodesicViewer('hero-3d-canvas');
-      if (pill) pill.innerHTML = '<strong>Timber Geodesic Dome (3V)</strong> &bull; Interactive 3D WebGL';
+      console.warn('Atelier 3D viewer init error:', e);
     }
   }
 
-  private switchStudioMode(mode: 'ai' | 'tensegrity' | 'geodesic'): void {
-    if (this.studioActiveMode === mode && (this.studioAIViewer || this.studioTensegrityViewer || this.studioGeodesicViewer)) return;
-    this.studioActiveMode = mode;
-
-    const canvasContainer = document.getElementById('studio-3d-canvas');
-    if (!canvasContainer) return;
-
-    if (this.studioAIViewer) { this.studioAIViewer.destroy(); this.studioAIViewer = null; }
-    if (this.studioTensegrityViewer) { this.studioTensegrityViewer.destroy(); this.studioTensegrityViewer = null; }
-    if (this.studioGeodesicViewer) { this.studioGeodesicViewer.destroy(); this.studioGeodesicViewer = null; }
-
-    document.getElementById('studio-toggle-ai')?.classList.toggle('active', mode === 'ai');
-    document.getElementById('studio-toggle-tensegrity')?.classList.toggle('active', mode === 'tensegrity');
-    document.getElementById('studio-toggle-geodesic')?.classList.toggle('active', mode === 'geodesic');
-
-    const title = document.getElementById('studio-active-title');
-
-    if (mode === 'ai') {
-      this.studioAIViewer = new AIModelViewer('studio-3d-canvas', {
-        autoLoadSample: true,
-        defaultModelUrl: this.currentGlbUrl,
-        titleId: 'studio-active-title'
-      });
-      if (title) title.textContent = '✨ Real 3D Neural Mesh (TRELLIS 3D)';
-    } else if (mode === 'tensegrity') {
-      this.studioTensegrityViewer = new TensegrityViewer('studio-3d-canvas');
-      if (title) title.textContent = 'Tensegrity Equilibrium';
-    } else {
-      this.studioGeodesicViewer = new GeodesicViewer('studio-3d-canvas');
-      if (title) title.textContent = 'Geodesic Icosahedron Shell';
-    }
-  }
-
-  public async displayGeneratedModelInAllViewers(glbUrl: string, name: string = 'Generated 3D Asset'): Promise<void> {
+  private async updateBothViewers(glbUrl: string, name: string): Promise<void> {
     this.currentGlbUrl = glbUrl;
+    this.currentModelName = name;
 
-    // 1. Update AI Studio Viewer
-    if (this.aiModelViewer) {
-      await this.aiModelViewer.loadGLBUrl(glbUrl, name);
+    if (this.atelierAIViewer) {
+      await this.atelierAIViewer.loadGLBUrl(glbUrl, name);
     }
-
-    // 2. Ensure Studio Viewer is in 'ai' mode and loads the model
-    if (this.studioActiveMode !== 'ai') {
-      this.switchStudioMode('ai');
-    } else if (this.studioAIViewer) {
-      await this.studioAIViewer.loadGLBUrl(glbUrl, name);
-    }
-
-    // 3. Ensure Hero Viewer is in 'ai' mode and loads the model
-    if (this.heroActiveMode !== 'ai') {
-      this.switchHeroMode('ai');
-    } else if (this.heroAIViewer) {
+    if (this.heroAIViewer) {
       await this.heroAIViewer.loadGLBUrl(glbUrl, name);
     }
 
-    this.showToast('✨ Real 3D Generated Object displayed automatically on visualizer!');
-  }
+    // Update titles and stats
+    const heroPill = document.getElementById('hero-model-pill');
+    if (heroPill) {
+      heroPill.innerHTML = `<strong>✨ ${name}</strong> &bull; Real 3D Neural Mesh`;
+    }
 
-  private initAIViewerEvents(): void {
-    const modelTabs = document.getElementById('ai-viewer-model-tabs');
-    const titleEl = document.getElementById('ai-active-model-title');
-
-    const updateArchetype = async (archetype: string) => {
-      modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', (btn as HTMLElement).dataset.archetype === archetype);
-      });
-
-      let prompt = 'American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
-      switch (archetype) {
-        case 'dining-table':
-          prompt = '240x100x75cm Solid American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
-          break;
-        case 'lounge-chair':
-          prompt = 'Ergonomic floating tensegrity lounge chair in European White Oak with curved seat and stainless cables';
-          break;
-        case 'shelving-unit':
-          prompt = '4-Tier suspended tensegrity shelving unit in Reclaimed Brazilian Teak with marine stainless cables';
-          break;
-        case 'geodesic-dome':
-          prompt = '6m Handcrafted Timber Geodesic Dome with CNC aluminum hubs and stargazing glass crown';
-          break;
-        case 'cantilever-desk':
-          prompt = 'Zero-gravity cantilever executive desk in European White Oak with floating drawer pedestal';
-          break;
-      }
-
-      if (this.aiModelViewer) {
-        this.showToast('Generating real 3D geometry...');
-        const meta = await this.aiModelViewer.generateCustom3DObject(prompt);
-        if (titleEl) {
-          titleEl.textContent = `Real 3D Geometry: ${meta.name} (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
-        }
-        this.showToast(`Synthesized ${meta.name} (${meta.vertexCount.toLocaleString()} vertices)!`);
-      }
-    };
-
-    modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const archetype = (e.currentTarget as HTMLElement).dataset.archetype || 'dining-table';
-        updateArchetype(archetype);
-      });
-    });
-
-    // Wireframe, Auto-rotate, Lighting
-    document.getElementById('btn-ai-wireframe')?.addEventListener('click', (e) => {
-      if (this.aiModelViewer) {
-        const isWire = this.aiModelViewer.toggleWireframe();
-        (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
-        (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
-      }
-    });
-
-    document.getElementById('btn-ai-autorotate')?.addEventListener('click', (e) => {
-      if (this.aiModelViewer) {
-        const isSpin = this.aiModelViewer.toggleAutoRotate();
-        (e.currentTarget as HTMLElement).textContent = `Spin: ${isSpin ? 'ON' : 'OFF'}`;
-        (e.currentTarget as HTMLElement).classList.toggle('active', isSpin);
-      }
-    });
-
-    // Lighting Presets
-    const lightBtns = ['btn-ai-light-studio', 'btn-ai-light-daylight', 'btn-ai-light-midnight'];
-    lightBtns.forEach(id => {
-      document.getElementById(id)?.addEventListener('click', (e) => {
-        lightBtns.forEach(b => document.getElementById(b)?.classList.remove('active'));
-        (e.currentTarget as HTMLElement).classList.add('active');
-        if (this.aiModelViewer) {
-          if (id.includes('studio')) this.aiModelViewer.setLightingPreset('studio');
-          else if (id.includes('daylight')) this.aiModelViewer.setLightingPreset('daylight');
-          else if (id.includes('midnight')) this.aiModelViewer.setLightingPreset('midnight');
-        }
-      });
-    });
-
-    // Download Real .GLB File
-    document.getElementById('btn-ai-download-glb')?.addEventListener('click', async () => {
-      if (this.aiModelViewer) {
-        this.showToast('Compiling binary .GLB file from 3D scene...');
-        try {
-          await this.aiModelViewer.exportCurrentModelToGLB('tensor-timber-custom-piece.glb');
-          this.showToast('Downloaded real .GLB file! You can open it in Blender, AutoCAD, or Windows 3D Viewer.');
-        } catch (err) {
-          console.error('Export GLB error:', err);
-          this.showToast('Failed to export .GLB file.');
-        }
-      }
-    });
-
-    // Commission this 3D design CTA
-    document.getElementById('btn-ai-order-design')?.addEventListener('click', () => {
-      const cfg = this.planner.getConfig();
-      const est = this.planner.calculateEstimate();
-      const meta = this.aiModelViewer?.getMetadata();
-      if (meta) {
-        cfg.title = meta.name;
-        cfg.customNotes = `Commissioning ${meta.name} (${meta.dimensions.lengthCm}x${meta.dimensions.widthCm}x${meta.dimensions.heightCm} cm) in ${meta.timberSpecies} with ${meta.tensionHardware}.`;
-      }
-      this.leadModal.open(cfg, est);
-    });
-
-    // File upload / Dropzone for .glb / .obj directly to canvas
-    const fileInput = document.getElementById('hf-file-input') as HTMLInputElement;
-    const dropzone = document.getElementById('hf-model-dropzone');
-    const browseBtn = document.getElementById('btn-browse-model-file');
-
-    const handleFile = (file: File) => {
-      if (this.aiModelViewer) {
-        this.showToast(`Loading 3D asset ${file.name}...`);
-        this.aiModelViewer.loadFromFile(
-          file,
-          () => {
-            this.showToast(`Successfully loaded ${file.name} directly into 3D viewer!`);
-            if (titleEl) titleEl.textContent = `Custom Upload • ${file.name}`;
-            document.getElementById('ai-active-model-title')?.scrollIntoView({ behavior: 'smooth' });
-          },
-          (err) => {
-            console.error('File load error:', err);
-            this.showToast(`Failed to parse 3D file: ${file.name}`);
-          }
-        );
-      }
-    };
-
-    browseBtn?.addEventListener('click', () => fileInput?.click());
-    fileInput?.addEventListener('change', () => {
-      if (fileInput.files && fileInput.files[0]) {
-        handleFile(fileInput.files[0]);
-      }
-    });
-
-    if (dropzone) {
-      dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-      });
-      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-      dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        if (e.dataTransfer && e.dataTransfer.files[0]) {
-          handleFile(e.dataTransfer.files[0]);
-        }
-      });
+    const atelierTitle = document.getElementById('atelier-active-model-title');
+    if (atelierTitle) {
+      atelierTitle.textContent = `Real 3D Geometry: ${name}`;
     }
   }
 
-  private bindGlobalEvents(): void {
-    // Hero toggles
-    document.getElementById('hero-toggle-ai')?.addEventListener('click', () => this.switchHeroMode('ai'));
-    document.getElementById('hero-toggle-tensegrity')?.addEventListener('click', () => this.switchHeroMode('tensegrity'));
-    document.getElementById('hero-toggle-geodesic')?.addEventListener('click', () => this.switchHeroMode('geodesic'));
-
+  private bindEvents(): void {
+    // Hero Controls
     document.getElementById('hero-btn-autorotate')?.addEventListener('click', (e) => {
-      if (this.heroActiveMode === 'ai' && this.heroAIViewer) {
+      if (this.heroAIViewer) {
         const state = this.heroAIViewer.toggleAutoRotate();
-        (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
-      } else if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
-        const state = this.heroTensegrityViewer.toggleAutoRotate();
-        (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
-      } else if (this.heroGeodesicViewer) {
-        const state = this.heroGeodesicViewer.toggleAutoRotate();
         (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
       }
     });
 
     document.getElementById('hero-btn-wireframe')?.addEventListener('click', (e) => {
-      if (this.heroActiveMode === 'ai' && this.heroAIViewer) {
+      if (this.heroAIViewer) {
         const isWire = this.heroAIViewer.toggleWireframe();
         (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
         (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
-      } else if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
-        const state = this.heroTensegrityViewer.toggleVectors();
-        (e.currentTarget as HTMLElement).classList.toggle('active', state);
       }
     });
 
-    // Studio toggles
-    document.getElementById('studio-toggle-ai')?.addEventListener('click', () => this.switchStudioMode('ai'));
-    document.getElementById('studio-toggle-tensegrity')?.addEventListener('click', () => this.switchStudioMode('tensegrity'));
-    document.getElementById('studio-toggle-geodesic')?.addEventListener('click', () => this.switchStudioMode('geodesic'));
+    document.getElementById('hero-light-studio')?.addEventListener('click', () => {
+      this.heroAIViewer?.setLightingPreset('studio');
+      document.getElementById('hero-light-studio')?.classList.add('active');
+      document.getElementById('hero-light-daylight')?.classList.remove('active');
+    });
 
-    document.getElementById('studio-toggle-wireframe')?.addEventListener('click', (e) => {
-      if (this.studioActiveMode === 'ai' && this.studioAIViewer) {
-        const isWire = this.studioAIViewer.toggleWireframe();
+    document.getElementById('hero-light-daylight')?.addEventListener('click', () => {
+      this.heroAIViewer?.setLightingPreset('daylight');
+      document.getElementById('hero-light-daylight')?.classList.add('active');
+      document.getElementById('hero-light-studio')?.classList.remove('active');
+    });
+
+    // Atelier Viewport Controls
+    document.getElementById('btn-atelier-wireframe')?.addEventListener('click', (e) => {
+      if (this.atelierAIViewer) {
+        const isWire = this.atelierAIViewer.toggleWireframe();
         (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
         (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
       }
     });
 
-    document.getElementById('studio-btn-autorotate')?.addEventListener('click', (e) => {
-      if (this.studioActiveMode === 'ai' && this.studioAIViewer) {
-        const isSpin = this.studioAIViewer.toggleAutoRotate();
+    document.getElementById('btn-atelier-autorotate')?.addEventListener('click', (e) => {
+      if (this.atelierAIViewer) {
+        const isSpin = this.atelierAIViewer.toggleAutoRotate();
         (e.currentTarget as HTMLElement).textContent = `Spin: ${isSpin ? 'ON' : 'OFF'}`;
         (e.currentTarget as HTMLElement).classList.toggle('active', isSpin);
       }
     });
 
-    // Lead Modal Open Triggers
-    const openModal = () => {
-      const cfg = this.planner.getConfig();
-      const est = this.planner.calculateEstimate();
-      this.leadModal.open(cfg, est);
+    const lightPresets: Record<string, 'studio' | 'daylight' | 'midnight'> = {
+      'btn-atelier-light-studio': 'studio',
+      'btn-atelier-light-daylight': 'daylight',
+      'btn-atelier-light-midnight': 'midnight'
     };
 
-    document.getElementById('btn-open-lead-modal')?.addEventListener('click', openModal);
-    document.getElementById('footer-btn-consultation')?.addEventListener('click', openModal);
+    Object.entries(lightPresets).forEach(([btnId, preset]) => {
+      document.getElementById(btnId)?.addEventListener('click', (e) => {
+        Object.keys(lightPresets).forEach(id => document.getElementById(id)?.classList.remove('active'));
+        (e.currentTarget as HTMLElement).classList.add('active');
+        this.atelierAIViewer?.setLightingPreset(preset);
+      });
+    });
 
-    // Planner Book Consultation CTA
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('#btn-planner-book-consultation')) {
-        openModal();
+    // Export .GLB from Atelier Viewport
+    document.getElementById('btn-atelier-download-glb')?.addEventListener('click', async () => {
+      if (this.atelierAIViewer) {
+        this.showToast('Compiling binary .GLB file...');
+        try {
+          await this.atelierAIViewer.exportCurrentModelToGLB(`${this.currentModelName.toLowerCase().replace(/\s+/g, '-')}.glb`);
+          this.showToast('Downloaded real .GLB! Compatible with Blender & Rhino CAD.');
+        } catch (err) {
+          console.error('Export GLB error:', err);
+          this.showToast('Error exporting .GLB file.');
+        }
       }
     });
 
-    // Admin drawer trigger
+    // Lead Modal Open Triggers
+    const openLeadModalWithConfig = (title?: string, notes?: string) => {
+      const cfg: ProjectConfiguration = {
+        category: 'tensegrity-dining-table',
+        title: title || this.currentModelName,
+        dimensions: { length: 240, width: 100, height: 75, diameter: 6.0, domeHeight: 3.6 },
+        woodSpeciesId: 'american-black-walnut',
+        tensionSystemId: 'marine-stainless-316',
+        joineryId: 'kanawa-tsugi',
+        domeFrequency: 'v3',
+        glazingCoverage: 'stargazing',
+        finishType: 'organic-matte-oil',
+        addons: {
+          integratedLedLighting: true,
+          hiddenWirelessCharging: false,
+          marineWeatherproofing: false,
+          insulatedCanvasEnvelope: false,
+          titaniumTurnbuckles: true,
+          whiteGloveInstallation: true
+        },
+        customNotes: notes || `Inquiring on: ${title || this.currentModelName} (Bracket: ${this.currentEstimatedBracket})`
+      };
+      const est: EstimateResult = {
+        lumberBoardFeet: 120,
+        cableLengthMeters: 28,
+        hubConnectorsCount: 10,
+        artisanHours: 110,
+        estimatedWeeks: 7,
+        materialsCost: 8500,
+        craftsmanshipCost: 4800,
+        hardwareCost: 3200,
+        addonsCost: 1500,
+        subtotal: 18000,
+        estimatedTax: 1200,
+        totalEstimate: parseInt(this.currentEstimatedBracket.replace(/[^0-9]/g, '').slice(0, 5)) || 16500,
+        bom: [],
+        loadCapacityKg: 850
+      };
+      this.leadModal.open(cfg, est);
+    };
+
+    document.getElementById('btn-open-lead-modal')?.addEventListener('click', () => openLeadModalWithConfig());
+    document.getElementById('hero-btn-commission')?.addEventListener('click', () => openLeadModalWithConfig());
+    document.getElementById('btn-atelier-commission-now')?.addEventListener('click', () => {
+      openLeadModalWithConfig(this.currentModelName, `Commission inquiry for ${this.currentModelName} (${this.currentEstimatedBracket}). Custom prompt: ${(document.getElementById('atelier-prompt-input') as HTMLTextAreaElement)?.value || 'N/A'}`);
+    });
+
+    // Open Admin Drawer
     document.getElementById('btn-open-admin-drawer')?.addEventListener('click', () => {
       this.adminDrawer.open();
     });
 
-    // Project card "Load in 3D" buttons
+    // Project Cards - "Customize in 3D"
     document.querySelectorAll('.btn-load-project').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const pId = (e.currentTarget as HTMLElement).dataset.projectId;
         const project = INNOVATIVE_PROJECTS.find(p => p.id === pId);
-        if (project && project.defaultConfig) {
-          this.planner.updateConfig(project.defaultConfig);
-          this.planner.render('configurator-container');
-          document.getElementById('planner-section')?.scrollIntoView({ behavior: 'smooth' });
+        if (project) {
+          const promptInput = document.getElementById('atelier-prompt-input') as HTMLTextAreaElement;
+          if (promptInput) promptInput.value = `${project.title}: ${project.subtitle} in ${project.materials.join(', ')}`;
+
+          // Switch archetype tab
+          const archetypeTabs = document.getElementById('atelier-archetype-tabs');
+          archetypeTabs?.querySelectorAll('.toggle-btn').forEach(b => {
+            const isMatch = (b as HTMLElement).textContent?.toLowerCase().includes(project.category === 'geodesic' ? 'dome' : 'table');
+            b.classList.toggle('active', isMatch);
+          });
+
+          this.showToast(`Loaded ${project.title} into 3D Atelier`);
+          document.getElementById('atelier-section')?.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
 
-    // Project card "Inquire Piece" buttons
+    // Project Cards - "Inquire Piece"
     document.querySelectorAll('.btn-inquire-project').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const title = (e.currentTarget as HTMLElement).dataset.projectTitle;
-        const project = INNOVATIVE_PROJECTS.find(p => p.title === title);
-        if (project && project.defaultConfig) {
-          this.planner.updateConfig(project.defaultConfig);
-        }
-        openModal();
+        const title = (e.currentTarget as HTMLElement).dataset.projectTitle || 'Signature Piece';
+        openLeadModalWithConfig(title, `Direct inquiry for ${title} from Portfolio Showcase.`);
       });
     });
+  }
 
-    // Project filters
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  private initAtelierGenerator(): void {
+    const promptInput = document.getElementById('atelier-prompt-input') as HTMLTextAreaElement;
+    const sketchInput = document.getElementById('atelier-sketch-file-input') as HTMLInputElement;
+    const sketchDropzone = document.getElementById('atelier-sketch-dropzone');
+    const browseSketchBtn = document.getElementById('btn-browse-atelier-sketch');
+    const previewWrap = document.getElementById('atelier-sketch-preview-wrap');
+    const previewImg = document.getElementById('atelier-sketch-preview-img') as HTMLImageElement;
+    const emptyState = document.getElementById('atelier-sketch-empty-state');
+    const removeSketchBtn = document.getElementById('btn-remove-atelier-sketch');
+    const generateBtn = document.getElementById('btn-atelier-generate');
+    const clearBtn = document.getElementById('btn-clear-atelier-inputs');
+    const progressBox = document.getElementById('atelier-progress-box');
+    const progressBar = document.getElementById('atelier-progress-bar');
+    const statusLabel = document.getElementById('atelier-progress-status');
+    const statusPct = document.getElementById('atelier-progress-pct');
+    const successBar = document.getElementById('atelier-success-bar');
+    const successMsg = document.getElementById('atelier-success-msg');
+    const priceEl = document.getElementById('atelier-price-estimate');
+    const metaEl = document.getElementById('atelier-meta-specs');
+
+    // Archetype Switcher
+    const archetypeTabs = document.getElementById('atelier-archetype-tabs');
+    archetypeTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        archetypeTabs.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
         const target = e.currentTarget as HTMLElement;
         target.classList.add('active');
-        const filter = target.dataset.filter;
+        const archetype = target.dataset.archetype || 'dining-table';
 
-        document.querySelectorAll('.project-card').forEach(card => {
-          const c = (card as HTMLElement).dataset.category;
-          if (filter === 'all' || c === filter) {
-            (card as HTMLElement).style.display = 'flex';
-          } else {
-            (card as HTMLElement).style.display = 'none';
-          }
-        });
+        let prompt = 'American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
+        let bracket = '$14,800 – $19,500';
+        let meta = 'Solid FSC Hardwood Slab • Aerospace Dyneema/Titanium Rigging • 6–8 Wks Delivery';
+        let modelTitle = 'Leviton Tensegrity Dining Table';
+
+        switch (archetype) {
+          case 'dining-table':
+            prompt = '240x100x75cm Solid American Black Walnut live-edge floating tensegrity dining table with PVD gold cables';
+            bracket = '$14,800 – $19,500';
+            meta = 'Solid FSC Walnut Slab • Aerospace Dyneema/Titanium Rigging • 6–8 Wks Delivery';
+            modelTitle = 'Leviton Tensegrity Dining Table';
+            break;
+          case 'lounge-chair':
+            prompt = 'Ergonomic floating tensegrity lounge chair in European White Oak with curved seat and stainless cables';
+            bracket = '$8,500 – $12,200';
+            meta = 'Bavarian White Oak • Hand-Sculpted Contour • Stainless 316 Rigging';
+            modelTitle = 'Kyoto Ergonomic Lounge Chair';
+            break;
+          case 'geodesic-dome':
+            prompt = '6m Handcrafted Timber Geodesic Dome with CNC aluminum hubs and stargazing glass crown';
+            bracket = '$28,000 – $46,000';
+            meta = '6.0m Architectural Dome • CNC 6061 Star Hubs • Low-E Triangles';
+            modelTitle = 'Stargazer 3V Geodesic Sanctuary';
+            break;
+          case 'cantilever-desk':
+            prompt = 'Zero-gravity cantilever executive desk in European White Oak with floating drawer pedestal';
+            bracket = '$16,500 – $22,000';
+            meta = 'Continuous Tension Cantilever • Hidden Cable Ducting • Italian Leather Pad';
+            modelTitle = 'Equinox Zero-Gravity Executive Desk';
+            break;
+        }
+
+        if (promptInput) promptInput.value = prompt;
+        if (priceEl) priceEl.textContent = bracket;
+        if (metaEl) metaEl.textContent = meta;
+        this.currentEstimatedBracket = bracket;
+        this.currentModelName = modelTitle;
+
+        if (this.atelierAIViewer) {
+          this.showToast(`Synthesizing 3D ${modelTitle}...`);
+          await this.atelierAIViewer.generateCustom3DObject(prompt);
+          this.updateBothViewers(this.currentGlbUrl, modelTitle);
+        }
       });
     });
 
-    // HF Copy sample prompts
-    document.querySelectorAll('.btn-copy-hf-prompt').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const text = (e.currentTarget as HTMLElement).dataset.prompt || '';
-        navigator.clipboard.writeText(text).then(() => {
-          this.showToast('Prompt copied to clipboard!');
-        });
-      });
-    });
-  }
-
-  private initPromptCrafter(): void {
-    const roomSelect = document.getElementById('crafter-room') as HTMLSelectElement;
-    const typeSelect = document.getElementById('crafter-type') as HTMLSelectElement;
-    const woodSelect = document.getElementById('crafter-wood') as HTMLSelectElement;
-    const lightSelect = document.getElementById('crafter-lighting') as HTMLSelectElement;
-    const resultText = document.getElementById('crafter-result-text');
-    const copyBtn = document.getElementById('btn-copy-crafter-prompt');
-
-    const updatePrompt = () => {
-      if (!resultText) return;
-      const prompt = `High-end architectural photography of a ${typeSelect.value} placed within a ${roomSelect.value}. Handcrafted from ${woodSelect.value}, aerospace tension cables, sub-millimeter joinery, ${lightSelect.value}.`;
-      resultText.textContent = prompt;
-    };
-
-    [roomSelect, typeSelect, woodSelect, lightSelect].forEach(sel => {
-      sel?.addEventListener('change', updatePrompt);
-    });
-    updatePrompt();
-
-    copyBtn?.addEventListener('click', () => {
-      if (resultText?.textContent) {
-        navigator.clipboard.writeText(resultText.textContent).then(() => {
-          this.showToast('Crafted prompt copied to clipboard!');
-        });
-      }
-    });
-  }
-
-  private showToast(message: string): void {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'toast-container';
-      container.className = 'toast-container';
-      document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5c542" stroke-width="2.5">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-      <span>${message}</span>
-    `;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(100%)';
-      setTimeout(() => container?.removeChild(toast), 300);
-    }, 3500);
-  }
-
-  private initCustomPromptAndImageGenerator(): void {
-    const sketchInput = document.getElementById('ai-sketch-file-input') as HTMLInputElement;
-    const sketchDropzone = document.getElementById('ai-sketch-dropzone');
-    const browseSketchBtn = document.getElementById('btn-browse-sketch');
-    const previewWrap = document.getElementById('ai-sketch-preview-wrap');
-    const previewImg = document.getElementById('ai-sketch-preview-img') as HTMLImageElement;
-    const emptyState = document.getElementById('ai-sketch-empty-state');
-    const removeSketchBtn = document.getElementById('btn-remove-sketch');
-    const promptInput = document.getElementById('ai-custom-prompt-input') as HTMLTextAreaElement;
-    const synthesizeBtn = document.getElementById('btn-synthesize-3d-furniture');
-    const clearBtn = document.getElementById('btn-clear-ai-inputs');
-    const progressBox = document.getElementById('ai-generation-progress');
-    const progressBar = document.getElementById('ai-gen-progress-bar');
-    const statusLabel = document.getElementById('ai-gen-step-status');
-    const statusPct = document.getElementById('ai-gen-step-pct');
-    const successBar = document.getElementById('ai-generation-success-bar');
-    const successMsg = document.getElementById('ai-success-msg');
-    const commissionGenBtn = document.getElementById('btn-commission-generated-piece');
-
-    // 1. File browsing & image loading
+    // File browsing & upload
     browseSketchBtn?.addEventListener('click', () => sketchInput?.click());
 
     const loadAttachedImage = (file: File) => {
@@ -635,7 +349,7 @@ class AtelierApp {
           previewImg.src = this.attachedSketchDataUrl;
           previewWrap.style.display = 'block';
           emptyState.style.display = 'none';
-          this.showToast(`Attached image: ${file.name}`);
+          this.showToast(`Attached reference: ${file.name}`);
         }
       };
       reader.readAsDataURL(file);
@@ -681,49 +395,10 @@ class AtelierApp {
       if (promptInput) promptInput.value = '';
       if (progressBox) progressBox.style.display = 'none';
       if (successBar) successBar.style.display = 'none';
-      this.showToast('Reset generator inputs.');
+      this.showToast('Reset specification inputs.');
     });
 
-    // 2. Sample Image Inspiration Pills
-    const sampleBlueprints: Record<string, { prompt: string; shape: string }> = {
-      'walnut-tensegrity': {
-        prompt: '240x100x75cm Solid American black walnut live-edge floating tensegrity dining table with PVD gold cables',
-        shape: '<ellipse cx="150" cy="100" rx="110" ry="55" fill="#3d2b1f" stroke="#d4af37" stroke-width="3"/>'
-      },
-      'cantilever-desk': {
-        prompt: 'Ergonomic floating tensegrity lounge chair in European White Oak with curved seat and aerospace cables',
-        shape: '<path d="M70 140 Q 110 150 150 130 Q 180 110 210 140 L 230 110 Q 180 70 130 90 Z" fill="#b8976b" stroke="#38bdf8" stroke-width="3"/>'
-      },
-      'geodesic-dome': {
-        prompt: '6m Handcrafted 3V timber geodesic dome glamping sanctuary with CNC hubs and stargazing glass crown',
-        shape: '<polygon points="150,30 220,70 240,150 150,170 60,150 80,70" fill="#c8894d" stroke="#f5c542" stroke-width="3"/>'
-      },
-      'charred-coffee': {
-        prompt: '130x75x42cm Sculptural Yakisugi charred cedar coffee table with matte carbon fiber cables and live edge',
-        shape: '<path d="M60 100 Q 100 50 180 60 Q 250 80 230 130 Q 180 160 100 140 Z" fill="#18191c" stroke="#555" stroke-width="3"/>'
-      }
-    };
-
-    document.querySelectorAll('.sample-img-pill').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const sampleKey = (e.currentTarget as HTMLElement).dataset.sample || 'walnut-tensegrity';
-        const sample = sampleBlueprints[sampleKey];
-        if (sample && promptInput) {
-          promptInput.value = sample.prompt;
-
-          const svgData = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230b0f19"/>${sample.shape}</svg>`;
-          this.attachedSketchDataUrl = svgData;
-          if (previewImg && previewWrap && emptyState) {
-            previewImg.src = svgData;
-            previewWrap.style.display = 'block';
-            emptyState.style.display = 'none';
-          }
-          this.showToast(`Loaded blueprint concept: ${sampleKey}`);
-        }
-      });
-    });
-
-    // 3. Prompt Keyword Chips
+    // Prompt Keyword Chips
     document.querySelectorAll('.prompt-chip').forEach(chip => {
       chip.addEventListener('click', (e) => {
         const phrase = (e.currentTarget as HTMLElement).dataset.phrase || '';
@@ -738,24 +413,8 @@ class AtelierApp {
       });
     });
 
-    // 4. "Load Neural 3D Sample Model" Action
-    const loadNeuralSampleBtn = document.getElementById('btn-load-neural-sample');
-    loadNeuralSampleBtn?.addEventListener('click', async () => {
-      this.showToast('Loading ZeroGPU TRELLIS neural 3D model into visualizers...');
-      try {
-        await this.displayGeneratedModelInAllViewers('/models/sample_ai_trellis.glb', 'Neural Tensegrity Masterpiece');
-        if (successBar && successMsg) {
-          successBar.style.display = 'flex';
-          successMsg.textContent = `Loaded real neural 3D mesh generated on ZeroGPU! Displayed automatically in 3D visualizers.`;
-        }
-      } catch (err) {
-        console.error('Failed to load sample GLB:', err);
-        this.showToast('Error loading sample GLB.');
-      }
-    });
-
-    // 5. "Generate Real 3D Furniture" Action Flow (ZeroGPU Neural Reconstruction)
-    synthesizeBtn?.addEventListener('click', async () => {
+    // Generate Action Flow
+    generateBtn?.addEventListener('click', async () => {
       let promptText = promptInput?.value.trim() || '';
       if (!promptText && !this.attachedSketchDataUrl) {
         promptText = 'Solid American black walnut live-edge floating tensegrity dining table with PVD Gold cables';
@@ -767,21 +426,20 @@ class AtelierApp {
         if (successBar) successBar.style.display = 'none';
 
         statusLabel.textContent = this.attachedSketchDataUrl
-          ? 'Connecting to ZeroGPU: uploading sketch for 3D neural reconstruction...'
-          : 'Connecting to ZeroGPU: synthesizing 2D concept & feeding into TRELLIS 3D neural pipeline...';
-        progressBar.style.width = '25%';
-        statusPct.textContent = '25%';
+          ? 'Extracting contour vectors & constructing 3D tension equilibrium...'
+          : 'Synthesizing 2D architectural concept & generating 3D neural mesh...';
+        progressBar.style.width = '30%';
+        statusPct.textContent = '30%';
 
         try {
-          let metadata: any = null;
           let generatedGlbUrl: string | null = null;
           let generatorSource: string = 'ZeroGPU TRELLIS Neural 3D';
 
           // Attempt real AI inference via backend server
           try {
-            statusLabel.textContent = 'ZeroGPU A10G executing neural reconstruction & extracting .GLB...';
-            progressBar.style.width = '55%';
-            statusPct.textContent = '55%';
+            statusLabel.textContent = 'ZeroGPU A10G extracting textured binary .GLB mesh...';
+            progressBar.style.width = '60%';
+            statusPct.textContent = '60%';
 
             const endpoints = ['/api/generate-3d', 'http://localhost:5175/api/generate-3d'];
             let res: Response | null = null;
@@ -810,19 +468,21 @@ class AtelierApp {
               }
             }
           } catch (netErr) {
-            console.warn('Live ZeroGPU API unreachable, using local CAD engine:', netErr);
+            console.warn('Backend inference fallback to CAD engine:', netErr);
           }
 
-          if (generatedGlbUrl) {
-            statusLabel.textContent = 'Loading textured .GLB mesh into Three.js WebGL visualizers...';
-            progressBar.style.width = '85%';
-            statusPct.textContent = '85%';
+          const modelName = promptText.length > 38 ? promptText.slice(0, 38) + '...' : promptText;
+          this.currentModelName = modelName;
 
-            await this.displayGeneratedModelInAllViewers(generatedGlbUrl, promptText.slice(0, 35));
-            metadata = this.aiModelViewer?.getMetadata();
-          } else if (this.aiModelViewer) {
-            // Local CAD engine fallback
-            metadata = await this.aiModelViewer.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
+          if (generatedGlbUrl) {
+            statusLabel.textContent = 'Rendering real .GLB mesh into Three.js WebGL viewport...';
+            progressBar.style.width = '90%';
+            statusPct.textContent = '90%';
+
+            await this.updateBothViewers(generatedGlbUrl, modelName);
+          } else if (this.atelierAIViewer) {
+            await this.atelierAIViewer.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
+            await this.heroAIViewer?.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
           }
 
           progressBar.style.width = '100%';
@@ -830,61 +490,159 @@ class AtelierApp {
           progressBox.style.display = 'none';
           if (successBar) successBar.style.display = 'flex';
 
-          const titleEl = document.getElementById('ai-active-model-title');
-          if (titleEl && metadata) {
-            titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} × ${metadata.dimensions.widthCm} × ${metadata.dimensions.heightCm} cm)`;
+          if (successMsg) {
+            successMsg.textContent = `Real 3D Mesh synthesized via ${generatorSource}! Displayed live in the 3D Atelier.`;
           }
 
-          if (successMsg && metadata) {
-            const origin = metadata.isFromHuggingFace
-              ? generatorSource
-              : (metadata.isFromImageContour ? 'Image Silhouette Contour Extrusion' : 'Parametric CAD Engine');
-            successMsg.textContent = `Real 3D Mesh synthesized via ${origin}! Constructed ${metadata.vertexCount.toLocaleString()} vertices & ${metadata.triangleCount.toLocaleString()} polygons. Displayed automatically in 3D visualizers.`;
-          }
-
-          // Synchronize with Project Planner
+          // Dynamic investment estimation update
           const lower = promptText.toLowerCase();
-          const isDome = lower.includes('dome') || lower.includes('geodesic');
-          let woodId = 'american-black-walnut';
-          if (lower.includes('oak')) woodId = 'european-white-oak';
-          else if (lower.includes('teak')) woodId = 'reclaimed-brazilian-teak';
-          else if (lower.includes('charred') || lower.includes('yakisugi')) woodId = 'japanese-charred-cedar';
+          if (lower.includes('dome') || lower.includes('geodesic')) {
+            this.currentEstimatedBracket = '$28,000 – $46,000';
+            if (priceEl) priceEl.textContent = this.currentEstimatedBracket;
+            if (metaEl) metaEl.textContent = '6.0m Architectural Dome • CNC Aluminum Star Hubs • Low-E Triangles';
+          } else if (lower.includes('chair') || lower.includes('lounge')) {
+            this.currentEstimatedBracket = '$8,500 – $12,200';
+            if (priceEl) priceEl.textContent = this.currentEstimatedBracket;
+            if (metaEl) metaEl.textContent = 'Ergonomic Tensile Lounge • Sculpted Hardwood • 6 Wks Delivery';
+          } else {
+            this.currentEstimatedBracket = '$14,800 – $19,500';
+            if (priceEl) priceEl.textContent = this.currentEstimatedBracket;
+            if (metaEl) metaEl.textContent = 'Solid FSC Hardwood Slab • Aerospace Dyneema/Titanium Rigging • 6–8 Wks Delivery';
+          }
 
-          let tensionId = 'marine-stainless-316';
-          if (lower.includes('gold') || lower.includes('titanium')) tensionId = 'pvd-gold-titanium';
-          else if (lower.includes('carbon')) tensionId = 'carbon-stealth-black';
-
-          this.planner.updateConfig({
-            category: isDome ? 'geodesic-glamping-dome' : 'tensegrity-dining-table',
-            title: `Custom Piece: ${promptText.slice(0, 40)}`,
-            woodSpeciesId: woodId,
-            tensionSystemId: tensionId,
-            customNotes: promptText
-          });
-          this.planner.render('configurator-container');
-
-          // Scroll visualizer into view automatically
-          document.getElementById('ai-studio-3d-canvas')?.scrollIntoView({ behavior: 'smooth' });
-          this.showToast(`Real 3D Mesh generated and displayed automatically on visualizer!`);
+          this.showToast('Real 3D Object generated & displayed in 3D Atelier!');
         } catch (genErr) {
-          console.error('Geometry synthesis error:', genErr);
+          console.error('Generation error:', genErr);
           progressBox.style.display = 'none';
-          this.showToast('Error synthesizing 3D geometry.');
+          this.showToast('Error generating 3D geometry.');
         }
       }
     });
+  }
 
-    // 6. "Commission this Generated Piece" button
-    commissionGenBtn?.addEventListener('click', () => {
-      const cfg = this.planner.getConfig();
-      const est = this.planner.calculateEstimate();
-      const meta = this.aiModelViewer?.getMetadata();
-      if (meta) {
-        cfg.title = meta.name;
-        cfg.customNotes = `Commissioning ${meta.name} (${meta.dimensions.lengthCm}x${meta.dimensions.widthCm}x${meta.dimensions.heightCm} cm) in ${meta.timberSpecies} with ${meta.tensionHardware}. User Prompt: ${promptInput?.value || 'N/A'}`;
+  private initOnPageCommissionForm(): void {
+    const form = document.getElementById('onpage-commission-form') as HTMLFormElement;
+    const successCard = document.getElementById('onpage-form-success');
+    const resetBtn = document.getElementById('btn-reset-onpage-form');
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = (document.getElementById('comm-name') as HTMLInputElement)?.value;
+      const email = (document.getElementById('comm-email') as HTMLInputElement)?.value;
+      const phone = (document.getElementById('comm-phone') as HTMLInputElement)?.value;
+      const category = (document.getElementById('comm-category') as HTMLSelectElement)?.value as any;
+      const budget = (document.getElementById('comm-budget') as HTMLSelectElement)?.value;
+      const timeline = (document.getElementById('comm-timeline') as HTMLSelectElement)?.value;
+      const notes = (document.getElementById('comm-notes') as HTMLTextAreaElement)?.value;
+
+      const newLead: LeadSubmission = {
+        id: 'LEAD-' + Math.floor(1000 + Math.random() * 9000),
+        createdAt: new Date().toISOString(),
+        clientName: name,
+        clientEmail: email,
+        clientPhone: phone,
+        clientLocation: notes || 'Private Architectural Residence',
+        clientType: 'private-homeowner',
+        budgetBracket: budget === '50k-plus' ? '$75k+' : budget === '25k-50k' ? '$35k - $75k' : '$15k - $35k',
+        targetTimeline: timeline === 'expedited' ? 'urgent-30days' : 'standard-60-90days',
+        consultationType: 'virtual-3d-walkthrough',
+        configuration: {
+          category,
+          title: this.currentModelName,
+          dimensions: { length: 240, width: 100, height: 75, diameter: 6.0, domeHeight: 3.6 },
+          woodSpeciesId: 'american-black-walnut',
+          tensionSystemId: 'marine-stainless-316',
+          joineryId: 'kanawa-tsugi',
+          domeFrequency: 'v3',
+          glazingCoverage: 'stargazing',
+          finishType: 'organic-matte-oil',
+          addons: {
+            integratedLedLighting: true,
+            hiddenWirelessCharging: false,
+            marineWeatherproofing: false,
+            insulatedCanvasEnvelope: false,
+            titaniumTurnbuckles: true,
+            whiteGloveInstallation: true
+          },
+          customNotes: `Model: ${this.currentModelName}. Bracket: ${this.currentEstimatedBracket}. Context: ${notes || 'N/A'}`
+        },
+        estimate: {
+          lumberBoardFeet: 120,
+          cableLengthMeters: 28,
+          hubConnectorsCount: 10,
+          artisanHours: 110,
+          estimatedWeeks: timeline === 'expedited' ? 6 : 8,
+          materialsCost: 8500,
+          craftsmanshipCost: 4800,
+          hardwareCost: 3200,
+          addonsCost: 1500,
+          subtotal: 18000,
+          estimatedTax: 1200,
+          totalEstimate: budget === '50k-plus' ? 65000 : budget === '25k-50k' ? 36000 : 18500,
+          bom: [],
+          loadCapacityKg: 850
+        },
+        projectSummary: `${this.currentModelName} (${category})`,
+        notes: `Model: ${this.currentModelName}. Bracket: ${this.currentEstimatedBracket}. Client notes: ${notes || 'N/A'}`,
+        status: 'new'
+      };
+
+      // Save to localStorage
+      try {
+        const stored = localStorage.getItem('tensor_timber_leads');
+        const leads: LeadSubmission[] = stored ? JSON.parse(stored) : [];
+        leads.unshift(newLead);
+        localStorage.setItem('tensor_timber_leads', JSON.stringify(leads));
+      } catch (err) {
+        console.warn('Could not save lead:', err);
       }
-      this.leadModal.open(cfg, est);
+
+      // Celebratory Confetti
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.7 },
+        colors: ['#f5c542', '#d4af37', '#38bdf8', '#ffffff']
+      });
+
+      // Show success
+      form.style.display = 'none';
+      if (successCard) successCard.style.display = 'block';
+      this.showToast('Commission consultation request submitted!');
     });
+
+    resetBtn?.addEventListener('click', () => {
+      form.reset();
+      form.style.display = 'grid';
+      if (successCard) successCard.style.display = 'none';
+    });
+  }
+
+  private showToast(message: string): void {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f5c542" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <span>${message}</span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(100%)';
+      setTimeout(() => container?.removeChild(toast), 300);
+    }, 3500);
   }
 }
 

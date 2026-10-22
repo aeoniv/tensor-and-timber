@@ -1675,3 +1675,519 @@ input[type=range]::-webkit-slider-thumb:hover {
     grid-template-columns: 1fr !important;
   }
 }
+/* ==========================================================================
+   MINIMALIST LUXURY ATELIER STYLES & DEAL CLOSING EXTENSIONS
+   ========================================================================== */
+
+/* Typography Upgrades */
+.section-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.section-tag-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Atelier Workspace Grid */
+.atelier-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 440px) 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.atelier-controls-card {
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.atelier-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.atelier-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-heading {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.control-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.control-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.helper-badge {
+  font-size: 0.7rem;
+  color: #f5c542;
+}
+
+.helper-badge.cyan {
+  color: #38bdf8;
+}
+
+.luxury-textarea {
+  width: 100%;
+  background: rgba(10, 12, 18, 0.85);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  resize: none;
+  outline: none;
+}
+
+.luxury-textarea:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.chips-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.luxury-dropzone {
+  height: 84px;
+  border: 2px dashed rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(212, 175, 55, 0.02);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-fast);
+}
+
+.luxury-dropzone:hover {
+  border-color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.dropzone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.dropzone-text {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.dropzone-preview {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  background: #090b10;
+}
+
+.dropzone-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.dropzone-remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.generate-btn-wrap {
+  margin-top: 4px;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.generator-guarantee-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* Atelier Viewport Card */
+.atelier-viewport-card {
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.viewport-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.viewport-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.viewport-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.atelier-canvas-container {
+  height: 480px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-medium);
+  background: radial-gradient(circle at center, #151b27 0%, #08090d 100%);
+}
+
+.canvas-hud-top {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.canvas-hud-top .hud-pill, .canvas-hud-top .toggle-group {
+  pointer-events: auto;
+}
+
+.canvas-hud-bottom {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.canvas-help-pill {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(8, 10, 15, 0.85);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ================= DEAL CLOSING CARD ================= */
+.deal-closing-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: rgba(18, 22, 31, 0.75);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--radius-md);
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.deal-specs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.deal-tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.deal-price-val {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.deal-meta-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.deal-cta-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.btn-glow {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.45);
+}
+
+.deal-guarantee-micro {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* 4-Step Process Grid */
+.process-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.process-step-card {
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-num {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1;
+}
+
+.step-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.step-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* On-Page Commission Form Card */
+.commission-form-card {
+  padding: 36px;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.commission-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.quota-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.commission-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+}
+
+.luxury-input, .luxury-select {
+  width: 100%;
+  background: rgba(10, 12, 18, 0.9);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.luxury-input:focus, .luxury-select:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
+}
+
+.submit-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.privacy-guarantee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.onpage-success-card {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.success-check-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  border: 1px solid #10b981;
+}
+
+/* Media Queries for Responsive Luxury Layout */
+@media (max-width: 1024px) {
+  .atelier-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+  .process-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .commission-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+  .deal-closing-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .deal-cta-col {
+    align-items: flex-start;
+    width: 100%;
+  }
+  .deal-cta-col .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .process-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
