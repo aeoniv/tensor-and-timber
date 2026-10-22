@@ -163,9 +163,9 @@ export function renderHFSpacesStudio(): string {
                 <div>
                   <label style="display: block; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 4px;">AI Generation Engine</label>
                   <select id="ai-generator-engine-select" style="width: 100%; font-size: 0.85rem;">
-                    <option value="trellis">TRELLIS.2 (Microsoft) &bull; Sparse Voxel PBR Mesh</option>
-                    <option value="triposr">TripoSR (Stability AI) &bull; Rapid 3D Geometry</option>
-                    <option value="interior">InteriorGen3D &bull; Spatial Room Staging</option>
+                    <option value="parametric-cad">Real Parametric CAD Engine &bull; Instant Three.js BufferGeometry &bull; Downloadable GLB</option>
+                    <option value="hf-trellis">Hugging Face TRELLIS.2 Live API &bull; ZeroGPU Dense PBR Mesh Extraction</option>
+                    <option value="triposr">TripoSR (Stability AI) &bull; Rapid 3D Volumetric Mesh</option>
                   </select>
                 </div>
 
@@ -240,8 +240,8 @@ export function renderHFSpacesStudio(): string {
 
             <!-- Canvas Top HUD -->
             <div style="position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; z-index: 10;">
-              <span class="hud-pill" style="pointer-events: auto;">
-                Orbit: Left Drag &bull; Zoom: Scroll &bull; Pan: Right Drag
+              <span class="hud-pill" style="pointer-events: auto;" id="ai-mesh-stats-pill">
+                <strong>Real 3D Mesh</strong> &bull; Loading Geometry...
               </span>
 
               <div class="toggle-group" style="pointer-events: auto;">
@@ -258,7 +258,13 @@ export function renderHFSpacesStudio(): string {
                 <button class="toggle-btn" id="btn-ai-light-midnight">Midnight</button>
               </div>
 
-              <div style="display: flex; gap: 8px;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-glass btn-sm" id="btn-ai-download-glb" title="Export real .GLB binary file for Blender / CAD">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                  </svg>
+                  <span>Download Real .GLB</span>
+                </button>
                 <button class="btn btn-primary-gold btn-sm" id="btn-ai-order-design">
                   <span>Commission this Design</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

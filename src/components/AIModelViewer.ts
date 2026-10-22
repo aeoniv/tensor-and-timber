@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { Real3DGeneratorService, Generated3DMetadata } from '../services/real3DGenerator';
 
 export class AIModelViewer {
   private container: HTMLElement;
@@ -14,6 +15,7 @@ export class AIModelViewer {
   private currentModelGroup: THREE.Group;
   private gltfLoader: GLTFLoader;
   private objLoader: OBJLoader;
+  private generatorService: Real3DGeneratorService;
 
   // Lighting
   private ambientLight: THREE.AmbientLight;
@@ -26,11 +28,14 @@ export class AIModelViewer {
   private isWireframe: boolean = false;
   private isAutoRotating: boolean = true;
   private lightingPreset: 'studio' | 'daylight' | 'midnight' = 'studio';
+  private currentMetadata: Generated3DMetadata | null = null;
 
   constructor(containerId: string) {
     const el = document.getElementById(containerId);
     if (!el) throw new Error(`Container #${containerId} not found`);
     this.container = el;
+
+    this.generatorService = new Real3DGeneratorService();
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 100);
@@ -83,34 +88,122 @@ export class AIModelViewer {
     this.groundPlane.receiveShadow = true;
     this.scene.add(this.groundPlane);
 
-    this.loadPresetModel('trellis-tensegrity');
+    // Load initial real parametric model
+    this.generateFromPrompt('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
+
     this.setupResizeListener();
     this.render();
   }
 
-  public loadPresetModel(key: string): void {
-    this.activeModelKey = key;
+  /**
+   * Generates a REAL 3D Object from a custom prompt string using custom parametric Three.js geometry.
+   */
+  public generateFromPrompt(prompt: string, attachedImage?: string | null): Generated3DMetadata {
+    const { object, metadata } = this.generatorService.generateParametric3DObject(prompt, attachedImage);
+    this.displayRealGeneratedObject(object, metadata);
+    return metadata;
+  }
+
+  /**
+   * Displays a real 3D Object (procedural or loaded from .GLB/.OBJ).
+   */
+  public displayRealGeneratedObject(object: THREE.Object3D, metadata: Generated3DMetadata): void {
     this.clearModel();
+    this.currentMetadata = metadata;
 
-    switch (key) {
-      case 'trellis-tensegrity':
-        this.buildTrellisTensegrityModel();
-        break;
-      case 'triposr-geodesic':
-        this.buildTripoSRGeodesicModel();
-        break;
-      case 'interior-loft':
-        this.buildInteriorLoftScene();
-        break;
-      case 'instant4d-splat':
-        this.buildGaussianSplatScanSimulation();
-        break;
-      default:
-        this.buildTrellisTensegrityModel();
-    }
-
+    this.fitModelInView(object);
+    this.currentModelGroup.add(object);
     this.applyWireframeState();
     this.resetCameraForModel();
+    this.updateStatsHud(metadata);
+  }
+
+  /**
+   * Loads a raw GLB binary or URL into the viewer.
+   */
+  public loadGLBUrl(url: string, name: string = 'Hugging Face Generated 3D Asset'): Promise<Generated3DMetadata> {
+    return new Promise((resolve, reject) => {
+      this.gltfLoader.load(
+        url,
+        (gltf) => {
+          let vertexCount = 0;
+          let triangleCount = 0;
+          gltf.scene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const geom = (child as THREE.Mesh).geometry;
+              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
+              if (geom.index) triangleCount += geom.index.count / 3;
+            }
+          });
+
+          const box = new THREE.Box3().setFromObject(gltf.scene);
+          const size = box.getSize(new THREE.Vector3());
+
+          const metadata: Generated3DMetadata = {
+            name,
+            category: 'AI ZeroGPU Generated 3D Asset',
+            dimensions: {
+              lengthCm: Math.round(size.x * 100),
+              widthCm: Math.round(size.z * 100),
+              heightCm: Math.round(size.y * 100)
+            },
+            vertexCount,
+            triangleCount: Math.round(triangleCount),
+            timberSpecies: 'AI Generated Texture',
+            tensionHardware: 'Engineered Topology',
+            isFromHuggingFace: true
+          };
+
+          this.displayRealGeneratedObject(gltf.scene, metadata);
+          resolve(metadata);
+        },
+        undefined,
+        (err) => {
+          console.error('Failed to load GLB:', err);
+          reject(err);
+        }
+      );
+    });
+  }
+
+  /**
+   * Exports the currently displayed real 3D model to a downloadable .GLB file.
+   */
+  public exportCurrentModelToGLB(filename?: string): Promise<Blob> {
+    const name = filename || `${this.currentMetadata?.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'custom-furniture'}.glb`;
+    return this.generatorService.exportToGLBFile(this.currentModelGroup, name);
+  }
+
+  private updateStatsHud(metadata: Generated3DMetadata): void {
+    const statsPill = document.getElementById('ai-mesh-stats-pill');
+    if (statsPill) {
+      statsPill.innerHTML = `
+        <strong>Real 3D Mesh</strong> &bull;
+        ${metadata.vertexCount.toLocaleString()} Vertices &bull;
+        ${metadata.triangleCount.toLocaleString()} Polygons &bull;
+        ${metadata.dimensions.lengthCm} &times; ${metadata.dimensions.widthCm} &times; ${metadata.dimensions.heightCm} cm
+      `;
+    }
+  }
+
+  public loadPresetModel(key: string): void {
+    this.activeModelKey = key;
+    switch (key) {
+      case 'trellis-tensegrity':
+        this.generateFromPrompt('Solid American Black Walnut floating tensegrity dining table with PVD gold titanium cables and live-edge contour');
+        break;
+      case 'triposr-geodesic':
+        this.generateFromPrompt('6m diameter timber geodesic dome pavilion with Douglas Fir struts and triangular glass facets');
+        break;
+      case 'interior-loft':
+        this.generateFromPrompt('Architectural loft floating tensegrity table in quarter-sawn European White Oak 240cm');
+        break;
+      case 'instant4d-splat':
+        this.generateFromPrompt('Sculptural Yakisugi charred cedar tensegrity coffee table with matte carbon cables');
+        break;
+      default:
+        this.generateFromPrompt(key);
+    }
   }
 
   private clearModel(): void {
@@ -118,335 +211,6 @@ export class AIModelViewer {
       const child = this.currentModelGroup.children[0];
       this.currentModelGroup.remove(child);
     }
-  }
-
-  /* Preset 1: TRELLIS.2 Synthesized Organic Tensegrity Table */
-  private buildTrellisTensegrityModel(): void {
-    const group = new THREE.Group();
-
-    // Sculpted organic walnut tabletop
-    const topGeom = new THREE.CylinderGeometry(1.2, 1.15, 0.08, 36);
-    const woodMat = new THREE.MeshStandardMaterial({
-      color: 0x3d2b1f,
-      roughness: 0.28,
-      metalness: 0.08
-    });
-    const topMesh = new THREE.Mesh(topGeom, woodMat);
-    topMesh.position.y = 0.85;
-    topMesh.castShadow = true;
-    group.add(topMesh);
-
-    // Beveled live edge rim
-    const rimGeom = new THREE.TorusGeometry(1.18, 0.04, 16, 48);
-    const rimMesh = new THREE.Mesh(rimGeom, woodMat);
-    rimMesh.rotation.x = Math.PI / 2;
-    rimMesh.position.y = 0.85;
-    group.add(rimMesh);
-
-    // Cantilever Spine reaching down from top
-    const spineTopGeom = new THREE.BoxGeometry(0.12, 0.65, 0.12);
-    const spineTop = new THREE.Mesh(spineTopGeom, woodMat);
-    spineTop.position.set(0.1, 0.52, 0);
-    spineTop.castShadow = true;
-    group.add(spineTop);
-
-    // Bottom Arm reaching under
-    const hookTopGeom = new THREE.BoxGeometry(0.42, 0.1, 0.12);
-    const hookTop = new THREE.Mesh(hookTopGeom, woodMat);
-    hookTop.position.set(0.25, 0.22, 0);
-    hookTop.castShadow = true;
-    group.add(hookTop);
-
-    // Sculpted Base
-    const baseGeom = new THREE.CylinderGeometry(1.0, 1.05, 0.08, 36);
-    const baseMesh = new THREE.Mesh(baseGeom, woodMat);
-    baseMesh.position.y = 0.04;
-    baseMesh.receiveShadow = true;
-    baseMesh.castShadow = true;
-    group.add(baseMesh);
-
-    // Base Spine reaching up
-    const spineBaseGeom = new THREE.BoxGeometry(0.12, 0.65, 0.12);
-    const spineBase = new THREE.Mesh(spineBaseGeom, woodMat);
-    spineBase.position.set(-0.1, 0.38, 0);
-    spineBase.castShadow = true;
-    group.add(spineBase);
-
-    // Base Hook reaching over top hook
-    const hookBaseGeom = new THREE.BoxGeometry(0.42, 0.1, 0.12);
-    const hookBase = new THREE.Mesh(hookBaseGeom, woodMat);
-    hookBase.position.set(-0.25, 0.68, 0);
-    hookBase.castShadow = true;
-    group.add(hookBase);
-
-    // Rigging: PVD Gold Cables + Stainless Turnbuckles
-    const cableMat = new THREE.MeshStandardMaterial({
-      color: 0xf1c40f, // PVD Gold
-      metalness: 0.95,
-      roughness: 0.15
-    });
-
-    // Center suspension cable (holding the weight!)
-    this.addRiggingCable(group, new THREE.Vector3(0.4, 0.22, 0), new THREE.Vector3(-0.4, 0.68, 0), 0.012, cableMat);
-
-    // 4 Perimeter stabilizer cables
-    const radius = 1.05;
-    for (let i = 0; i < 4; i++) {
-      const angle = (i * Math.PI) / 2 + Math.PI / 4;
-      const topX = Math.cos(angle) * radius;
-      const topZ = Math.sin(angle) * radius;
-      const baseX = Math.cos(angle) * (radius * 0.85);
-      const baseZ = Math.sin(angle) * (radius * 0.85);
-
-      this.addRiggingCable(group, new THREE.Vector3(topX, 0.82, topZ), new THREE.Vector3(baseX, 0.08, baseZ), 0.006, cableMat);
-    }
-
-    this.currentModelGroup.add(group);
-  }
-
-  /* Preset 2: TripoSR Instant 3D Geodesic Pavilion */
-  private buildTripoSRGeodesicModel(): void {
-    const group = new THREE.Group();
-
-    // Timber frame geodesic hemisphere
-    const radius = 1.8;
-    const geom = new THREE.IcosahedronGeometry(radius, 2);
-    const pos = geom.getAttribute('position');
-
-    const timberMat = new THREE.MeshStandardMaterial({
-      color: 0xc8894d,
-      roughness: 0.45,
-      metalness: 0.05
-    });
-
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0x7dd3fc,
-      transparent: true,
-      opacity: 0.4,
-      roughness: 0.1,
-      transmission: 0.8,
-      side: THREE.DoubleSide
-    });
-
-    const hubMat = new THREE.MeshStandardMaterial({
-      color: 0x38bdf8,
-      metalness: 0.9,
-      roughness: 0.2
-    });
-
-    const vertices: THREE.Vector3[] = [];
-    const edgeSet = new Set<string>();
-
-    for (let i = 0; i < pos.count; i += 3) {
-      const v1 = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
-      const v2 = new THREE.Vector3(pos.getX(i + 1), pos.getY(i + 1), pos.getZ(i + 1));
-      const v3 = new THREE.Vector3(pos.getX(i + 2), pos.getY(i + 2), pos.getZ(i + 2));
-
-      if (v1.y >= -0.1 && v2.y >= -0.1 && v3.y >= -0.1) {
-        vertices.push(v1, v2, v3);
-
-        const addEdge = (a: THREE.Vector3, b: THREE.Vector3) => {
-          const k1 = `${a.x.toFixed(2)},${a.y.toFixed(2)},${a.z.toFixed(2)}`;
-          const k2 = `${b.x.toFixed(2)},${b.y.toFixed(2)},${b.z.toFixed(2)}`;
-          const key = k1 < k2 ? `${k1}|${k2}` : `${k2}|${k1}`;
-          if (!edgeSet.has(key)) {
-            edgeSet.add(key);
-            const dir = new THREE.Vector3().subVectors(b, a);
-            const len = dir.length();
-            const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, len, 8), timberMat);
-            cylinder.position.copy(a).addScaledVector(dir, 0.5);
-            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-            cylinder.castShadow = true;
-            group.add(cylinder);
-          }
-        };
-
-        addEdge(v1, v2);
-        addEdge(v2, v3);
-        addEdge(v3, v1);
-
-        // Glass facet on top crown
-        const avgY = (v1.y + v2.y + v3.y) / 3;
-        if (avgY > radius * 0.4) {
-          const triGeom = new THREE.BufferGeometry();
-          triGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-            v1.x, v1.y, v1.z,
-            v2.x, v2.y, v2.z,
-            v3.x, v3.y, v3.z
-          ]), 3));
-          triGeom.computeVertexNormals();
-          group.add(new THREE.Mesh(triGeom, glassMat));
-        }
-      }
-    }
-
-    // Hubs
-    const hubGeom = new THREE.SphereGeometry(0.06, 12, 12);
-    vertices.forEach(v => {
-      const hub = new THREE.Mesh(hubGeom, hubMat);
-      hub.position.copy(v);
-      group.add(hub);
-    });
-
-    // Sub-floor deck
-    const deck = new THREE.Mesh(
-      new THREE.CylinderGeometry(radius * 1.1, radius * 1.1, 0.1, 32),
-      new THREE.MeshStandardMaterial({ color: 0x181a20, roughness: 0.8 })
-    );
-    deck.position.y = -0.05;
-    deck.receiveShadow = true;
-    group.add(deck);
-
-    this.currentModelGroup.add(group);
-  }
-
-  /* Preset 3: InteriorGen3D Staged Penthouse Loft Scene */
-  private buildInteriorLoftScene(): void {
-    const group = new THREE.Group();
-
-    // Floor Parquet
-    const floorGeom = new THREE.PlaneGeometry(6, 6);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x4a3424,
-      roughness: 0.35,
-      metalness: 0.05
-    });
-    const floor = new THREE.Mesh(floorGeom, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    group.add(floor);
-
-    // Back architectural concrete wall
-    const wallGeom = new THREE.PlaneGeometry(6, 3.5);
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1d24, roughness: 0.9 });
-    const wall = new THREE.Mesh(wallGeom, wallMat);
-    wall.position.set(0, 1.75, -3);
-    group.add(wall);
-
-    // Left wall with panoramic window opening
-    const sideWallGeom = new THREE.PlaneGeometry(6, 3.5);
-    const sideWall = new THREE.Mesh(sideWallGeom, wallMat);
-    sideWall.position.set(-3, 1.75, 0);
-    sideWall.rotation.y = Math.PI / 2;
-    group.add(sideWall);
-
-    // Window glass pane with skyline light
-    const windowGlass = new THREE.Mesh(
-      new THREE.PlaneGeometry(3.5, 2.4),
-      new THREE.MeshPhysicalMaterial({ color: 0xa5f3fc, transmission: 0.9, opacity: 0.5, transparent: true })
-    );
-    windowGlass.position.set(-2.95, 1.8, 0);
-    windowGlass.rotation.y = Math.PI / 2;
-    group.add(windowGlass);
-
-    // Centerpiece: Staged Tensegrity Dining Table
-    const tableGroup = new THREE.Group();
-    const tableTop = new THREE.Mesh(
-      new THREE.BoxGeometry(2.4, 0.09, 1.1),
-      new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 0.3 })
-    );
-    tableTop.position.y = 0.78;
-    tableTop.castShadow = true;
-    tableGroup.add(tableTop);
-
-    const tableBase = new THREE.Mesh(
-      new THREE.BoxGeometry(1.8, 0.08, 0.9),
-      new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 0.4 })
-    );
-    tableBase.position.y = 0.04;
-    tableBase.receiveShadow = true;
-    tableGroup.add(tableBase);
-
-    // Cantilever masts
-    const mast1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.55, 0.1), new THREE.MeshStandardMaterial({ color: 0x3d2b1f }));
-    mast1.position.set(0, 0.45, 0);
-    tableGroup.add(mast1);
-
-    // Brass cable lines
-    const cMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.95 });
-    const c1 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.75), cMat);
-    c1.position.set(0.9, 0.4, 0.4);
-    tableGroup.add(c1);
-    const c2 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.75), cMat);
-    c2.position.set(-0.9, 0.4, 0.4);
-    tableGroup.add(c2);
-    const c3 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.75), cMat);
-    c3.position.set(0.9, 0.4, -0.4);
-    tableGroup.add(c3);
-    const c4 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.75), cMat);
-    c4.position.set(-0.9, 0.4, -0.4);
-    tableGroup.add(c4);
-
-    group.add(tableGroup);
-    this.currentModelGroup.add(group);
-  }
-
-  /* Preset 4: Instant4D / Holograma Gaussian Splat Particle Cloud */
-  private buildGaussianSplatScanSimulation(): void {
-    const group = new THREE.Group();
-
-    // Generate 4,500 particles mimicking a 3D Gaussian Splatting room reconstruction
-    const particleCount = 4500;
-    const geom = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-
-    const c1 = new THREE.Color(0xd4af37); // Gold
-    const c2 = new THREE.Color(0x38bdf8); // Cyan
-    const c3 = new THREE.Color(0xc8894d); // Walnut amber
-    const c4 = new THREE.Color(0xf8fafc); // Bright specular
-
-    for (let i = 0; i < particleCount; i++) {
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      const r = Math.cbrt(Math.random()) * 1.6;
-
-      const sinPhi = Math.sin(phi);
-      const x = r * sinPhi * Math.cos(theta);
-      const y = Math.abs(r * Math.cos(phi)) + 0.1;
-      const z = r * sinPhi * Math.sin(theta);
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      // Color distribution
-      let chosenColor = c1;
-      const rand = Math.random();
-      if (rand < 0.35) chosenColor = c2;
-      else if (rand < 0.7) chosenColor = c3;
-      else if (rand < 0.9) chosenColor = c4;
-
-      colors[i * 3] = chosenColor.r;
-      colors[i * 3 + 1] = chosenColor.g;
-      colors[i * 3 + 2] = chosenColor.b;
-    }
-
-    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const pMat = new THREE.PointsMaterial({
-      size: 0.035,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.85,
-      blending: THREE.AdditiveBlending
-    });
-
-    const pointCloud = new THREE.Points(geom, pMat);
-    group.add(pointCloud);
-
-    // Central solid model representing the registered CAD object
-    const coreMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 0.08, 0.8),
-      new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 0.3 })
-    );
-    coreMesh.position.y = 0.75;
-    group.add(coreMesh);
-
-    this.currentModelGroup.add(group);
   }
 
   /* Load Custom File (.glb / .gltf / .obj) */
@@ -460,11 +224,35 @@ export class AIModelViewer {
       this.gltfLoader.load(
         url,
         (gltf) => {
-          const model = gltf.scene;
-          this.fitModelInView(model);
-          this.currentModelGroup.add(model);
+          let vertexCount = 0;
+          let triangleCount = 0;
+          gltf.scene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const geom = (child as THREE.Mesh).geometry;
+              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
+              if (geom.index) triangleCount += geom.index.count / 3;
+            }
+          });
+          const box = new THREE.Box3().setFromObject(gltf.scene);
+          const size = box.getSize(new THREE.Vector3());
+
+          const metadata: Generated3DMetadata = {
+            name: file.name,
+            category: 'Uploaded 3D Mesh',
+            dimensions: {
+              lengthCm: Math.round(size.x * 100),
+              widthCm: Math.round(size.z * 100),
+              heightCm: Math.round(size.y * 100)
+            },
+            vertexCount,
+            triangleCount: Math.round(triangleCount),
+            timberSpecies: 'Imported Materials',
+            tensionHardware: 'Imported Geometry',
+            isFromHuggingFace: false
+          };
+
+          this.displayRealGeneratedObject(gltf.scene, metadata);
           URL.revokeObjectURL(url);
-          this.applyWireframeState();
           if (onSuccess) onSuccess();
         },
         undefined,
@@ -478,10 +266,33 @@ export class AIModelViewer {
       this.objLoader.load(
         url,
         (obj) => {
-          this.fitModelInView(obj);
-          this.currentModelGroup.add(obj);
+          let vertexCount = 0;
+          obj.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const geom = (child as THREE.Mesh).geometry;
+              if (geom.attributes.position) vertexCount += geom.attributes.position.count;
+            }
+          });
+          const box = new THREE.Box3().setFromObject(obj);
+          const size = box.getSize(new THREE.Vector3());
+
+          const metadata: Generated3DMetadata = {
+            name: file.name,
+            category: 'Uploaded OBJ Mesh',
+            dimensions: {
+              lengthCm: Math.round(size.x * 100),
+              widthCm: Math.round(size.z * 100),
+              heightCm: Math.round(size.y * 100)
+            },
+            vertexCount,
+            triangleCount: Math.round(vertexCount / 3),
+            timberSpecies: 'Imported OBJ Geometry',
+            tensionHardware: 'Imported Geometry',
+            isFromHuggingFace: false
+          };
+
+          this.displayRealGeneratedObject(obj, metadata);
           URL.revokeObjectURL(url);
-          this.applyWireframeState();
           if (onSuccess) onSuccess();
         },
         undefined,
@@ -515,19 +326,6 @@ export class AIModelViewer {
         child.receiveShadow = true;
       }
     });
-
-    this.resetCameraForModel();
-  }
-
-  private addRiggingCable(group: THREE.Group, p1: THREE.Vector3, p2: THREE.Vector3, radius: number, mat: THREE.Material): void {
-    const dir = new THREE.Vector3().subVectors(p2, p1);
-    const len = dir.length();
-    const geom = new THREE.CylinderGeometry(radius, radius, len, 12);
-    const mesh = new THREE.Mesh(geom, mat);
-    mesh.position.copy(p1).addScaledVector(dir, 0.5);
-    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-    mesh.castShadow = true;
-    group.add(mesh);
   }
 
   public toggleWireframe(): boolean {
@@ -583,16 +381,8 @@ export class AIModelViewer {
   }
 
   public resetCameraForModel(): void {
-    if (this.activeModelKey === 'interior-loft') {
-      this.camera.position.set(0, 2.2, 4.2);
-      this.controls.target.set(0, 1.0, 0);
-    } else if (this.activeModelKey === 'triposr-geodesic') {
-      this.camera.position.set(3.5, 2.4, 3.8);
-      this.controls.target.set(0, 0.8, 0);
-    } else {
-      this.camera.position.set(2.8, 1.8, 2.8);
-      this.controls.target.set(0, 0.45, 0);
-    }
+    this.camera.position.set(2.8, 1.8, 2.8);
+    this.controls.target.set(0, 0.5, 0);
     this.controls.update();
   }
 
@@ -610,7 +400,7 @@ export class AIModelViewer {
   private render = (): void => {
     this.animFrameId = requestAnimationFrame(this.render);
     this.controls.autoRotate = this.isAutoRotating;
-    this.controls.autoRotateSpeed = 1.5;
+    this.controls.autoRotateSpeed = 1.2;
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };
