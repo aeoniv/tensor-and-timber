@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
@@ -144,7 +144,7 @@ export class AIModelViewer {
     const titleId = this.options.titleId || 'ai-active-model-title';
     const titleEl = document.getElementById(titleId);
     if (titleEl && metadata) {
-      titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} × ${metadata.dimensions.widthCm} × ${metadata.dimensions.heightCm} cm)`;
+      titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} Ã— ${metadata.dimensions.widthCm} Ã— ${metadata.dimensions.heightCm} cm)`;
     }
   }
 
@@ -163,6 +163,7 @@ export class AIModelViewer {
               const mesh = child as THREE.Mesh;
               mesh.castShadow = true;
               mesh.receiveShadow = true;
+              if (mesh.material) { const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material; if (!(mat as any).map) { mesh.material = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.38, metalness: 0.08 }); } }
               const geom = mesh.geometry;
               if (geom && geom.attributes.position) {
                 vertexCount += geom.attributes.position.count;
@@ -228,6 +229,7 @@ export class AIModelViewer {
               mesh.castShadow = true;
               mesh.receiveShadow = true;
               mesh.material = new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 0.4 });
+              if (mesh.material) { const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material; if (!(mat as any).map) { mesh.material = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.38, metalness: 0.08 }); } }
               const geom = mesh.geometry;
               if (geom && geom.attributes.position) {
                 vertexCount += geom.attributes.position.count;

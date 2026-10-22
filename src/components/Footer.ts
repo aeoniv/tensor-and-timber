@@ -3,7 +3,7 @@
 
   return `
     <footer class="footer">
-      <div class="app-container footer-container">
+      <div class="container footer-container">
         
         <div class="footer-brand-column">
           <div class="footer-logo">
@@ -46,7 +46,7 @@
           <p class="contact-line"><strong>Ateliê de Produção:</strong> Paraty &amp; Embu das Artes</p>
           <p class="contact-line"><strong>WhatsApp:</strong> (11) 98921-4400</p>
           <p class="contact-line"><strong>E-mail:</strong> contato@tensortimber.com.br</p>
-          <a href="#consultation-section" class="btn btn-br-gold btn-sm" style="margin-top: 12px; display: inline-flex;">
+          <a href="#consultation-section" class="btn btn-primary-gold btn-sm" style="margin-top: 14px; display: inline-flex;">
             <span>Solicitar Orçamento</span>
           </a>
         </div>
@@ -54,7 +54,7 @@
       </div>
 
       <div class="footer-bottom-bar">
-        <div class="app-container footer-bottom-flex">
+        <div class="container footer-bottom-flex">
           <p class="copyright">&copy; ${currentYear} Tensor &amp; Timber Brasil. Todos os direitos reservados. Marcenaria autoral registrada.</p>
           <div class="footer-bottom-links">
             <span class="footer-note">Fabricado artesanalmente no Brasil com padrão internacional de engenharia tensa.</span>

@@ -1,106 +1,90 @@
 ﻿export function renderHero(): string {
   return `
     <section class="hero-section" id="hero">
-      <div class="app-container hero-container">
+      <div class="container hero-content">
         
-        <!-- Left Column: Editorial Copy & Value Proposition -->
-        <div class="hero-content">
-          <div class="hero-tag-badge">
-            <span class="flag-icon-mini">🇧🇷</span>
-            <span>MARCENARIA FINA &amp; ENGENHARIA TENSA</span>
+        <!-- Left Column: Editorial & Value Proposition -->
+        <div class="hero-text-col">
+          <div class="hero-badge-row">
+            <span class="section-tag gold">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Ateliê Brasil de Marcenaria
+            </span>
+            <span class="section-tag-subtle">
+              Engenharia Tensa &bull; Madeiras Nobres
+            </span>
           </div>
 
           <h1 class="hero-title">
-            Mobiliário Escultural em <span class="br-gradient-text">Madeira Maciça &amp; Tensão</span>
+            Mobiliário Escultural.<br>
+            <span class="gold-gradient">Desafiando a Gravidade</span> por Tensão.
           </h1>
 
           <p class="hero-subtitle">
-            Projetamos e executamos mesas de jantar suspensas, poltronas flutuantes e cúpulas geodésicas autorais. 
-            Peças exclusivas esculpidas em madeiras nobres brasileiras com calibração estrutural aeroespacial que desafia a gravidade.
+            Projetamos e executamos mesas de jantar suspensas, poltronas flutuantes e cúpulas geodésicas sob encomenda para residências e projetos de arquitetura de alto padrão. Equilíbrio absoluto entre madeiras nobres brasileiras e cabos de aço aeroespacial.
           </p>
 
           <div class="hero-cta-group">
-            <a href="#real-furniture-section" class="btn btn-br-primary btn-lg">
-              <span>Ver Mobiliário Real</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <a href="#real-furniture-section" class="btn btn-primary-gold btn-lg">
+              <span>Explorar Peças Reais</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
             </a>
-            <a href="#atelier-section" class="btn btn-glass-br btn-lg">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
+            <a href="#atelier-section" class="btn btn-glass btn-lg">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
               </svg>
               <span>Ateliê 3D Interativo</span>
             </a>
           </div>
 
           <!-- Trust & Value Signals -->
-          <div class="hero-prestige-metrics">
-            <div class="metric-card">
-              <span class="metric-number font-serif">6–8 Sem</span>
-              <span class="metric-label">Produção Sob Medida</span>
+          <div class="hero-stats-row">
+            <div class="stat-item">
+              <span class="stat-val font-serif">6–8 Sem</span>
+              <span class="stat-label">Produção Artesanal</span>
             </div>
-            <div class="metric-divider"></div>
-            <div class="metric-card">
-              <span class="metric-number font-serif">1.800 kg</span>
-              <span class="metric-label">Carga de Ruptura</span>
+            <div class="stat-item">
+              <span class="stat-val cyan">1.800 kg</span>
+              <span class="stat-label">Carga de Ruptura</span>
             </div>
-            <div class="metric-divider"></div>
-            <div class="metric-card">
-              <span class="metric-number font-serif">100% FSC®</span>
-              <span class="metric-label">Madeiras Brasileiras</span>
+            <div class="stat-item">
+              <span class="stat-val font-serif">100% FSC®</span>
+              <span class="stat-label">Madeiras Nacionais</span>
             </div>
-            <div class="metric-divider"></div>
-            <div class="metric-card">
-              <span class="metric-number font-serif text-accent-gold">3 Vagas</span>
-              <span class="metric-label">Ateliê Q4 Restantes</span>
+            <div class="stat-item">
+              <span class="stat-val font-serif" style="color: var(--gold-light);">3 Vagas</span>
+              <span class="stat-label">Ateliê Q4</span>
             </div>
           </div>
         </div>
 
         <!-- Right Column: Auto-Loaded Three.js 3D Visualizer -->
-        <div class="hero-stage-column">
-          <div class="hero-stage-wrapper glass-panel">
-            <div class="hero-stage-header">
-              <div class="stage-status-indicator">
-                <span class="pulse-dot"></span>
-                <span class="stage-status-text">Visualizador 3D em Tempo Real</span>
-              </div>
-              <div class="stage-model-pill" id="hero-model-pill">Mesa Leviton Cumaru (GLB)</div>
-            </div>
+        <div class="hero-visual-stage">
+          <div class="stage-overlay-hud">
+            <span class="hud-pill" id="hero-model-pill">
+              <strong>✨ Mesa Ipanema em Cumaru</strong> &bull; Malha 3D Real
+            </span>
+            <span class="hud-pill">
+              Arraste para Girar &bull; Scroll para Zoom
+            </span>
+          </div>
 
-            <!-- Canvas Container -->
-            <div class="hero-canvas-viewport" id="hero-3d-canvas" style="min-height: 480px; position: relative;">
-              <!-- Three.js renders here automatically on page load -->
-            </div>
+          <!-- Canvas Container -->
+          <div id="hero-3d-canvas" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
 
-            <!-- Stage Interaction Controls -->
-            <div class="stage-controls-bar">
-              <button class="stage-ctrl-btn" id="hero-btn-autorotate" title="Alternar Rotação Automática">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                </svg>
-                <span>Girar</span>
-              </button>
-              <button class="stage-ctrl-btn" id="hero-btn-wireframe" title="Alternar Modo Aramado Estrutural">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
-                </svg>
-                <span>Aramado</span>
-              </button>
-              <button class="stage-ctrl-btn" id="hero-btn-light" title="Alternar Iluminação de Estúdio">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-                </svg>
-                <span>Luz</span>
-              </button>
-              <div class="stage-controls-spacer"></div>
-              <a href="#atelier-section" class="stage-link-atelier">
-                <span>Personalizar no Ateliê</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </a>
+          <!-- Stage Interaction Controls -->
+          <div class="stage-bottom-controls">
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="hero-btn-autorotate">Girar: ON</button>
+              <button class="toggle-btn" id="hero-btn-wireframe">Aramado</button>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="hero-light-studio">Estúdio</button>
+              <button class="toggle-btn" id="hero-light-daylight">Luz Natural</button>
             </div>
           </div>
         </div>

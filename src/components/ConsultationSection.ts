@@ -1,16 +1,18 @@
 ﻿export function renderConsultationSection(): string {
   return `
     <section class="section" id="consultation-section">
-      <div class="app-container">
+      <div class="container">
         
         <!-- Section Header -->
         <div class="section-header text-center">
-          <div class="br-section-badge">
-            <span class="flag-icon-mini">🇧🇷</span>
-            <span>PROCESSO EXCLUSIVO DE ATELIÊ</span>
-          </div>
+          <span class="section-tag gold">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Processo Exclusivo de Ateliê
+          </span>
           <h2 class="section-title">
-            Da Concepção Digital à <span class="br-gradient-text">Instalação Impecável</span>
+            Da Concepção Digital à <span class="gold-gradient">Instalação Impecável</span>
           </h2>
           <p class="section-subtitle">
             Combinamos marcenaria artesanal brasileira com modelagem paramétrica de ponta. 
@@ -54,7 +56,7 @@
         </div>
 
         <!-- Direct High-Ticket On-Page Commission Form -->
-        <div class="commission-form-card glass-panel" style="margin-top: 50px;">
+        <div class="commission-form-card glass-panel" style="margin-top: 64px;">
           <div class="commission-header text-center">
             <span class="commission-badge">CANAL DIRETO COM O ATELIÊ</span>
             <h3 class="commission-title">Solicite seu Orçamento ou Agende uma Visita Técnica</h3>
@@ -112,7 +114,7 @@
             </div>
 
             <div class="form-submit-row full-width">
-              <button type="submit" class="btn btn-br-gold btn-lg btn-block" id="comm-submit-btn">
+              <button type="submit" class="btn btn-primary-gold btn-lg btn-block" id="comm-submit-btn">
                 <span>Enviar Solicitação de Encomenda para o Ateliê</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M5 12h14M12 5l7 7-7 7"/>

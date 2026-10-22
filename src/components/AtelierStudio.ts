@@ -1,16 +1,18 @@
 ﻿export function renderAtelierStudio(): string {
   return `
     <section class="section" id="atelier-section">
-      <div class="app-container">
+      <div class="container">
         
         <!-- Section Header -->
         <div class="section-header text-center">
-          <div class="br-section-badge">
-            <span class="flag-icon-mini">🇧🇷</span>
-            <span>ATELIÊ 3D SOB MEDIDA</span>
-          </div>
+          <span class="section-tag gold">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Ateliê 3D Sob Medida 🇧🇷
+          </span>
           <h2 class="section-title">
-            Configure seu Projeto em <span class="br-gradient-text">Tempo Real</span>
+            Configure seu Projeto em <span class="gold-gradient">Tempo Real</span>
           </h2>
           <p class="section-subtitle">
             Experimente arquétipos, refine materiais com madeiras nobres brasileiras e visualize instantaneamente a estimativa de investimento e o modelo 3D para sua encomenda.
@@ -29,7 +31,7 @@
 
             <!-- Archetype Selector Tabs -->
             <div class="archetype-tabs-grid" id="archetype-selector">
-              <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante" data-price="R$ 38.500 – R$ 48.000">
+              <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante Ipanema" data-price="R$ 38.500 – R$ 48.000">
                 <div class="tab-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="6" width="20" height="4" rx="1"/>
@@ -91,9 +93,9 @@
 
             <div class="prompt-chips-wrapper">
               <span class="prompt-chip" data-text="Madeira Cumaru maciça e cabos de aço inox naval 316">Cumaru &amp; Inox Naval</span>
-              <span class="prompt-chip" data-text="Freijó curvado no vapor com tirantes dourados em titânio PVD">Freijó &amp; Titânio Dourado</span>
+              <span class="prompt-chip" data-text="Freijó curvado no vapor com tirantes dourados em titânio PVD">Freijó &amp; Titânio</span>
               <span class="prompt-chip" data-text="Jacarandá da Bahia com detalhes em latão escovado">Jacarandá &amp; Latão</span>
-              <span class="prompt-chip" data-text="Minimalismo modernista brasileiro com borda orgânica natural">Design Brasileiro Orgânico</span>
+              <span class="prompt-chip" data-text="Minimalismo modernista brasileiro com borda orgânica natural">Design Brasileiro</span>
             </div>
 
             <div class="input-group-atelier">
@@ -120,7 +122,7 @@
             </div>
 
             <!-- Generate Button -->
-            <button class="btn btn-br-primary btn-block btn-lg" id="btn-generate-3d" style="margin-top: 16px;">
+            <button class="btn btn-primary-gold btn-block btn-lg" id="btn-generate-3d" style="margin-top: 16px;">
               <span>✨ Gerar Visualização 3D &amp; Orçamento</span>
               <div class="spinner-sm" id="generate-spinner" style="display: none;"></div>
             </button>
@@ -136,7 +138,7 @@
                   <span class="pulse-dot"></span>
                   <span class="stage-status-text" id="atelier-status-label">Renderização 3D Concluída</span>
                 </div>
-                <div class="stage-model-pill" id="atelier-model-pill">Mesa Leviton Cumaru (GLB)</div>
+                <div class="stage-model-pill" id="atelier-model-pill">Mesa Ipanema em Cumaru (GLB)</div>
               </div>
 
               <div class="atelier-canvas-viewport" id="atelier-3d-canvas" style="min-height: 400px; position: relative;">
@@ -176,10 +178,10 @@
               </div>
 
               <div class="deal-action-buttons">
-                <button class="btn btn-br-gold btn-lg btn-reserve-slot" id="btn-reserve-atelier-slot">
+                <button class="btn btn-primary-gold btn-lg btn-reserve-slot" id="btn-reserve-atelier-slot">
                   <span>Reservar Vaga de Produção no Ateliê →</span>
                 </button>
-                <button class="btn btn-glass-br btn-lg" id="btn-download-glb">
+                <button class="btn btn-glass btn-lg" id="btn-download-glb">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                   </svg>
