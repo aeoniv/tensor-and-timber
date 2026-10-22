@@ -61,7 +61,7 @@ export function renderHero(): string {
           <div class="hero-visual-stage">
             <div class="stage-overlay-hud">
               <span class="hud-pill" id="hero-model-pill">
-                <strong>Floating Leviton Model</strong> &bull; Interactive 3D WebGL
+                <strong>✨ Real 3D Generated Object (TRELLIS 3D)</strong> &bull; Interactive WebGL
               </span>
               <span class="hud-pill">
                 Drag to Rotate &bull; Scroll to Zoom
@@ -72,13 +72,14 @@ export function renderHero(): string {
 
             <div class="stage-bottom-controls">
               <div class="toggle-group">
-                <button class="toggle-btn active" id="hero-toggle-tensegrity">Tensegrity Table</button>
+                <button class="toggle-btn active" id="hero-toggle-ai" style="color: #f5c542; font-weight: 700;">✨ Real 3D AI Model</button>
+                <button class="toggle-btn" id="hero-toggle-tensegrity">Tensegrity Table</button>
                 <button class="toggle-btn" id="hero-toggle-geodesic">Geodesic Dome</button>
               </div>
 
               <div class="toggle-group">
-                <button class="toggle-btn" id="hero-btn-autorotate" title="Toggle Auto-Spin">Auto-Spin: ON</button>
-                <button class="toggle-btn" id="hero-btn-vectors" title="Toggle Physics Vectors">Physics Vectors</button>
+                <button class="toggle-btn active" id="hero-btn-autorotate" title="Toggle Auto-Spin">Spin: ON</button>
+                <button class="toggle-btn" id="hero-btn-wireframe" title="Toggle Wireframe">Wireframe</button>
               </div>
             </div>
           </div>

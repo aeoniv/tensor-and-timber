@@ -13,19 +13,28 @@ import { AdminLeadsDrawer } from './components/AdminLeadsDrawer';
 import { INNOVATIVE_PROJECTS, WOOD_SPECIES } from './data/constants';
 
 class AtelierApp {
+  // Hero Visualizer
+  private heroAIViewer: AIModelViewer | null = null;
   private heroTensegrityViewer: TensegrityViewer | null = null;
   private heroGeodesicViewer: GeodesicViewer | null = null;
-  private heroActiveMode: 'tensegrity' | 'geodesic' = 'tensegrity';
+  private heroActiveMode: 'ai' | 'tensegrity' | 'geodesic' = 'ai';
 
+  // Studio Visualizer (Configurator Section)
+  private studioAIViewer: AIModelViewer | null = null;
   private studioTensegrityViewer: TensegrityViewer | null = null;
   private studioGeodesicViewer: GeodesicViewer | null = null;
-  private studioActiveMode: 'tensegrity' | 'geodesic' = 'tensegrity';
+  private studioActiveMode: 'ai' | 'tensegrity' | 'geodesic' = 'ai';
 
+  // Spatial 3D Synthesis Studio Viewport
   private aiModelViewer: AIModelViewer | null = null;
+
+  // Track latest generated GLB
+  private currentGlbUrl: string = '/models/sample_ai_trellis.glb';
 
   private planner: ProjectPlanner;
   private leadModal: LeadCaptureModal;
   private adminDrawer: AdminLeadsDrawer;
+  private attachedSketchDataUrl: string | null = null;
 
   constructor() {
     this.planner = new ProjectPlanner();
@@ -61,10 +70,11 @@ class AtelierApp {
                 <div class="studio-3d-canvas-wrap">
                   <div class="studio-hud-top">
                     <span class="hud-pill" id="studio-active-title">
-                      Tensegrity Equilibrium
+                      ✨ Real 3D AI Model (TRELLIS 3D)
                     </span>
                     <div class="toggle-group">
-                      <button class="toggle-btn active" id="studio-toggle-tensegrity">Table</button>
+                      <button class="toggle-btn active" id="studio-toggle-ai" style="color: #f5c542; font-weight: 700;">✨ Real 3D AI Model</button>
+                      <button class="toggle-btn" id="studio-toggle-tensegrity">Table</button>
                       <button class="toggle-btn" id="studio-toggle-geodesic">Dome</button>
                     </div>
                   </div>
@@ -73,14 +83,12 @@ class AtelierApp {
 
                   <div class="studio-hud-bottom">
                     <div class="studio-slider-bar">
-                      <span>Explode:</span>
-                      <input type="range" id="studio-explode-slider" min="0" max="1" step="0.01" value="0" style="width: 90px;">
+                      <span id="studio-mode-label" style="font-size: 0.74rem; color: #10b981; font-weight: 600;">✨ Real Binary .GLB Rendered</span>
                     </div>
 
                     <div class="toggle-group">
-                      <button class="toggle-btn" id="studio-cam-iso">Iso</button>
-                      <button class="toggle-btn" id="studio-cam-top">Top</button>
-                      <button class="toggle-btn" id="studio-cam-front">Front</button>
+                      <button class="toggle-btn" id="studio-toggle-wireframe">Wireframe</button>
+                      <button class="toggle-btn active" id="studio-btn-autorotate">Spin: ON</button>
                     </div>
                   </div>
                 </div>
@@ -112,23 +120,36 @@ class AtelierApp {
   }
 
   private initViewers(): void {
-    // 1. Hero 3D Viewer
+    // 1. Hero 3D Viewer (defaults to Real AI 3D Model!)
     try {
-      this.heroTensegrityViewer = new TensegrityViewer('hero-3d-canvas');
+      this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
+        hudPillId: 'hero-model-pill',
+        defaultModelUrl: this.currentGlbUrl,
+        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
+      });
     } catch (e) {
       console.warn('Hero viewer init error:', e);
     }
 
-    // 2. Studio 3D Viewer
+    // 2. Studio 3D Viewer in Configurator (defaults to Real AI 3D Model!)
     try {
-      this.studioTensegrityViewer = new TensegrityViewer('studio-3d-canvas');
+      this.studioAIViewer = new AIModelViewer('studio-3d-canvas', {
+        titleId: 'studio-active-title',
+        defaultModelUrl: this.currentGlbUrl,
+        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
+      });
     } catch (e) {
       console.warn('Studio viewer init error:', e);
     }
 
-    // 3. AI Studio 3D Model Viewer (Displays 3D objects directly on the page!)
+    // 3. AI Studio 3D Model Viewer in Generator Section
     try {
-      this.aiModelViewer = new AIModelViewer('ai-studio-3d-canvas');
+      this.aiModelViewer = new AIModelViewer('ai-studio-3d-canvas', {
+        hudPillId: 'ai-mesh-stats-pill',
+        titleId: 'ai-active-model-title',
+        defaultModelUrl: this.currentGlbUrl,
+        modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)'
+      });
     } catch (e) {
       console.warn('AI 3D model viewer init error:', e);
     }
@@ -139,7 +160,7 @@ class AtelierApp {
 
       if (isDome && this.studioActiveMode !== 'geodesic') {
         this.switchStudioMode('geodesic');
-      } else if (!isDome && this.studioActiveMode !== 'tensegrity') {
+      } else if (!isDome && this.studioActiveMode === 'geodesic') {
         this.switchStudioMode('tensegrity');
       }
 
@@ -158,65 +179,98 @@ class AtelierApp {
     });
   }
 
-  private switchHeroMode(mode: 'tensegrity' | 'geodesic'): void {
-    if (this.heroActiveMode === mode) return;
+  private switchHeroMode(mode: 'ai' | 'tensegrity' | 'geodesic'): void {
+    if (this.heroActiveMode === mode && (this.heroAIViewer || this.heroTensegrityViewer || this.heroGeodesicViewer)) return;
     this.heroActiveMode = mode;
 
     const canvasContainer = document.getElementById('hero-3d-canvas');
     if (!canvasContainer) return;
 
-    if (mode === 'tensegrity') {
-      if (this.heroGeodesicViewer) {
-        this.heroGeodesicViewer.destroy();
-        this.heroGeodesicViewer = null;
-      }
+    if (this.heroAIViewer) { this.heroAIViewer.destroy(); this.heroAIViewer = null; }
+    if (this.heroTensegrityViewer) { this.heroTensegrityViewer.destroy(); this.heroTensegrityViewer = null; }
+    if (this.heroGeodesicViewer) { this.heroGeodesicViewer.destroy(); this.heroGeodesicViewer = null; }
+
+    document.getElementById('hero-toggle-ai')?.classList.toggle('active', mode === 'ai');
+    document.getElementById('hero-toggle-tensegrity')?.classList.toggle('active', mode === 'tensegrity');
+    document.getElementById('hero-toggle-geodesic')?.classList.toggle('active', mode === 'geodesic');
+
+    const pill = document.getElementById('hero-model-pill');
+
+    if (mode === 'ai') {
+      this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
+        autoLoadSample: true,
+        defaultModelUrl: this.currentGlbUrl,
+        hudPillId: 'hero-model-pill'
+      });
+      if (pill) pill.innerHTML = '<strong>✨ Real 3D Generated Object (TRELLIS 3D)</strong> &bull; Interactive WebGL';
+    } else if (mode === 'tensegrity') {
       this.heroTensegrityViewer = new TensegrityViewer('hero-3d-canvas');
-      document.getElementById('hero-toggle-tensegrity')?.classList.add('active');
-      document.getElementById('hero-toggle-geodesic')?.classList.remove('active');
-      const pill = document.getElementById('hero-model-pill');
       if (pill) pill.innerHTML = '<strong>Floating Leviton Model</strong> &bull; Interactive 3D WebGL';
     } else {
-      if (this.heroTensegrityViewer) {
-        this.heroTensegrityViewer.destroy();
-        this.heroTensegrityViewer = null;
-      }
       this.heroGeodesicViewer = new GeodesicViewer('hero-3d-canvas');
-      document.getElementById('hero-toggle-geodesic')?.classList.add('active');
-      document.getElementById('hero-toggle-tensegrity')?.classList.remove('active');
-      const pill = document.getElementById('hero-model-pill');
       if (pill) pill.innerHTML = '<strong>Timber Geodesic Dome (3V)</strong> &bull; Interactive 3D WebGL';
     }
   }
 
-  private switchStudioMode(mode: 'tensegrity' | 'geodesic'): void {
-    if (this.studioActiveMode === mode) return;
+  private switchStudioMode(mode: 'ai' | 'tensegrity' | 'geodesic'): void {
+    if (this.studioActiveMode === mode && (this.studioAIViewer || this.studioTensegrityViewer || this.studioGeodesicViewer)) return;
     this.studioActiveMode = mode;
 
-    if (mode === 'tensegrity') {
-      if (this.studioGeodesicViewer) {
-        this.studioGeodesicViewer.destroy();
-        this.studioGeodesicViewer = null;
-      }
+    const canvasContainer = document.getElementById('studio-3d-canvas');
+    if (!canvasContainer) return;
+
+    if (this.studioAIViewer) { this.studioAIViewer.destroy(); this.studioAIViewer = null; }
+    if (this.studioTensegrityViewer) { this.studioTensegrityViewer.destroy(); this.studioTensegrityViewer = null; }
+    if (this.studioGeodesicViewer) { this.studioGeodesicViewer.destroy(); this.studioGeodesicViewer = null; }
+
+    document.getElementById('studio-toggle-ai')?.classList.toggle('active', mode === 'ai');
+    document.getElementById('studio-toggle-tensegrity')?.classList.toggle('active', mode === 'tensegrity');
+    document.getElementById('studio-toggle-geodesic')?.classList.toggle('active', mode === 'geodesic');
+
+    const title = document.getElementById('studio-active-title');
+
+    if (mode === 'ai') {
+      this.studioAIViewer = new AIModelViewer('studio-3d-canvas', {
+        autoLoadSample: true,
+        defaultModelUrl: this.currentGlbUrl,
+        titleId: 'studio-active-title'
+      });
+      if (title) title.textContent = '✨ Real 3D Neural Mesh (TRELLIS 3D)';
+    } else if (mode === 'tensegrity') {
       this.studioTensegrityViewer = new TensegrityViewer('studio-3d-canvas');
-      document.getElementById('studio-toggle-tensegrity')?.classList.add('active');
-      document.getElementById('studio-toggle-geodesic')?.classList.remove('active');
-      const title = document.getElementById('studio-active-title');
       if (title) title.textContent = 'Tensegrity Equilibrium';
     } else {
-      if (this.studioTensegrityViewer) {
-        this.studioTensegrityViewer.destroy();
-        this.studioTensegrityViewer = null;
-      }
       this.studioGeodesicViewer = new GeodesicViewer('studio-3d-canvas');
-      document.getElementById('studio-toggle-geodesic')?.classList.add('active');
-      document.getElementById('studio-toggle-tensegrity')?.classList.remove('active');
-      const title = document.getElementById('studio-active-title');
       if (title) title.textContent = 'Geodesic Icosahedron Shell';
     }
   }
 
+  public async displayGeneratedModelInAllViewers(glbUrl: string, name: string = 'Generated 3D Asset'): Promise<void> {
+    this.currentGlbUrl = glbUrl;
+
+    // 1. Update AI Studio Viewer
+    if (this.aiModelViewer) {
+      await this.aiModelViewer.loadGLBUrl(glbUrl, name);
+    }
+
+    // 2. Ensure Studio Viewer is in 'ai' mode and loads the model
+    if (this.studioActiveMode !== 'ai') {
+      this.switchStudioMode('ai');
+    } else if (this.studioAIViewer) {
+      await this.studioAIViewer.loadGLBUrl(glbUrl, name);
+    }
+
+    // 3. Ensure Hero Viewer is in 'ai' mode and loads the model
+    if (this.heroActiveMode !== 'ai') {
+      this.switchHeroMode('ai');
+    } else if (this.heroAIViewer) {
+      await this.heroAIViewer.loadGLBUrl(glbUrl, name);
+    }
+
+    this.showToast('✨ Real 3D Generated Object displayed automatically on visualizer!');
+  }
+
   private initAIViewerEvents(): void {
-    // 1. Archetype Quick Switcher Tabs in AI 3D Stage
     const modelTabs = document.getElementById('ai-viewer-model-tabs');
     const titleEl = document.getElementById('ai-active-model-title');
 
@@ -261,7 +315,7 @@ class AtelierApp {
       });
     });
 
-    // 2. Wireframe, Auto-rotate, Lighting
+    // Wireframe, Auto-rotate, Lighting
     document.getElementById('btn-ai-wireframe')?.addEventListener('click', (e) => {
       if (this.aiModelViewer) {
         const isWire = this.aiModelViewer.toggleWireframe();
@@ -318,7 +372,7 @@ class AtelierApp {
       this.leadModal.open(cfg, est);
     });
 
-    // 3. File upload / Dropzone for .glb / .obj directly to canvas
+    // File upload / Dropzone for .glb / .obj directly to canvas
     const fileInput = document.getElementById('hf-file-input') as HTMLInputElement;
     const dropzone = document.getElementById('hf-model-dropzone');
     const browseBtn = document.getElementById('btn-browse-model-file');
@@ -366,47 +420,53 @@ class AtelierApp {
 
   private bindGlobalEvents(): void {
     // Hero toggles
+    document.getElementById('hero-toggle-ai')?.addEventListener('click', () => this.switchHeroMode('ai'));
     document.getElementById('hero-toggle-tensegrity')?.addEventListener('click', () => this.switchHeroMode('tensegrity'));
     document.getElementById('hero-toggle-geodesic')?.addEventListener('click', () => this.switchHeroMode('geodesic'));
 
     document.getElementById('hero-btn-autorotate')?.addEventListener('click', (e) => {
-      if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
+      if (this.heroActiveMode === 'ai' && this.heroAIViewer) {
+        const state = this.heroAIViewer.toggleAutoRotate();
+        (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
+      } else if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
         const state = this.heroTensegrityViewer.toggleAutoRotate();
-        (e.currentTarget as HTMLElement).textContent = `Auto-Spin: ${state ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
       } else if (this.heroGeodesicViewer) {
         const state = this.heroGeodesicViewer.toggleAutoRotate();
-        (e.currentTarget as HTMLElement).textContent = `Auto-Spin: ${state ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).textContent = `Spin: ${state ? 'ON' : 'OFF'}`;
       }
     });
 
-    document.getElementById('hero-btn-vectors')?.addEventListener('click', (e) => {
-      if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
+    document.getElementById('hero-btn-wireframe')?.addEventListener('click', (e) => {
+      if (this.heroActiveMode === 'ai' && this.heroAIViewer) {
+        const isWire = this.heroAIViewer.toggleWireframe();
+        (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
+      } else if (this.heroActiveMode === 'tensegrity' && this.heroTensegrityViewer) {
         const state = this.heroTensegrityViewer.toggleVectors();
         (e.currentTarget as HTMLElement).classList.toggle('active', state);
       }
     });
 
     // Studio toggles
+    document.getElementById('studio-toggle-ai')?.addEventListener('click', () => this.switchStudioMode('ai'));
     document.getElementById('studio-toggle-tensegrity')?.addEventListener('click', () => this.switchStudioMode('tensegrity'));
     document.getElementById('studio-toggle-geodesic')?.addEventListener('click', () => this.switchStudioMode('geodesic'));
 
-    const explodeSlider = document.getElementById('studio-explode-slider') as HTMLInputElement;
-    if (explodeSlider) {
-      explodeSlider.addEventListener('input', () => {
-        const val = parseFloat(explodeSlider.value);
-        if (this.studioTensegrityViewer) this.studioTensegrityViewer.setExplode(val);
-      });
-    }
+    document.getElementById('studio-toggle-wireframe')?.addEventListener('click', (e) => {
+      if (this.studioActiveMode === 'ai' && this.studioAIViewer) {
+        const isWire = this.studioAIViewer.toggleWireframe();
+        (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
+      }
+    });
 
-    // Camera presets
-    document.getElementById('studio-cam-iso')?.addEventListener('click', () => {
-      if (this.studioTensegrityViewer) this.studioTensegrityViewer.setCameraPreset('isometric');
-    });
-    document.getElementById('studio-cam-top')?.addEventListener('click', () => {
-      if (this.studioTensegrityViewer) this.studioTensegrityViewer.setCameraPreset('top');
-    });
-    document.getElementById('studio-cam-front')?.addEventListener('click', () => {
-      if (this.studioTensegrityViewer) this.studioTensegrityViewer.setCameraPreset('side');
+    document.getElementById('studio-btn-autorotate')?.addEventListener('click', (e) => {
+      if (this.studioActiveMode === 'ai' && this.studioAIViewer) {
+        const isSpin = this.studioAIViewer.toggleAutoRotate();
+        (e.currentTarget as HTMLElement).textContent = `Spin: ${isSpin ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).classList.toggle('active', isSpin);
+      }
     });
 
     // Lead Modal Open Triggers
@@ -440,8 +500,6 @@ class AtelierApp {
         if (project && project.defaultConfig) {
           this.planner.updateConfig(project.defaultConfig);
           this.planner.render('configurator-container');
-
-          // Smooth scroll to studio
           document.getElementById('planner-section')?.scrollIntoView({ behavior: 'smooth' });
         }
       });
@@ -542,9 +600,6 @@ class AtelierApp {
       setTimeout(() => container?.removeChild(toast), 300);
     }, 3500);
   }
-
-
-  private attachedSketchDataUrl: string | null = null;
 
   private initCustomPromptAndImageGenerator(): void {
     const sketchInput = document.getElementById('ai-sketch-file-input') as HTMLInputElement;
@@ -683,29 +738,23 @@ class AtelierApp {
       });
     });
 
-    // 4. "Generate Real 3D Furniture" Action Flow (ZeroGPU Neural Reconstruction with local CAD fallback)
+    // 4. "Load Neural 3D Sample Model" Action
     const loadNeuralSampleBtn = document.getElementById('btn-load-neural-sample');
     loadNeuralSampleBtn?.addEventListener('click', async () => {
-      if (this.aiModelViewer) {
-        this.showToast('Loading ZeroGPU TRELLIS neural 3D model...');
-        try {
-          const meta = await this.aiModelViewer.loadGLBUrl('/models/sample_ai_trellis.glb', 'Neural Tensegrity Masterpiece');
-          const titleEl = document.getElementById('ai-active-model-title');
-          if (titleEl) {
-            titleEl.textContent = `Real 3D Neural Mesh: ZeroGPU Trellis Masterpiece (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
-          }
-          if (successBar && successMsg) {
-            successBar.style.display = 'flex';
-            successMsg.textContent = `Loaded real neural 3D mesh generated on ZeroGPU! ${meta.vertexCount.toLocaleString()} vertices & ${meta.triangleCount.toLocaleString()} polygons rendered in WebGL.`;
-          }
-          this.showToast('Loaded real AI 3D model (1.85MB binary .GLB)!');
-        } catch (err) {
-          console.error('Failed to load sample GLB:', err);
-          this.showToast('Error loading sample GLB.');
+      this.showToast('Loading ZeroGPU TRELLIS neural 3D model into visualizers...');
+      try {
+        await this.displayGeneratedModelInAllViewers('/models/sample_ai_trellis.glb', 'Neural Tensegrity Masterpiece');
+        if (successBar && successMsg) {
+          successBar.style.display = 'flex';
+          successMsg.textContent = `Loaded real neural 3D mesh generated on ZeroGPU! Displayed automatically in 3D visualizers.`;
         }
+      } catch (err) {
+        console.error('Failed to load sample GLB:', err);
+        this.showToast('Error loading sample GLB.');
       }
     });
 
+    // 5. "Generate Real 3D Furniture" Action Flow (ZeroGPU Neural Reconstruction)
     synthesizeBtn?.addEventListener('click', async () => {
       let promptText = promptInput?.value.trim() || '';
       if (!promptText && !this.attachedSketchDataUrl) {
@@ -764,12 +813,13 @@ class AtelierApp {
             console.warn('Live ZeroGPU API unreachable, using local CAD engine:', netErr);
           }
 
-          if (generatedGlbUrl && this.aiModelViewer) {
-            statusLabel.textContent = 'Loading textured .GLB mesh into Three.js WebGL viewport...';
+          if (generatedGlbUrl) {
+            statusLabel.textContent = 'Loading textured .GLB mesh into Three.js WebGL visualizers...';
             progressBar.style.width = '85%';
             statusPct.textContent = '85%';
 
-            metadata = await this.aiModelViewer.loadGLBUrl(generatedGlbUrl, promptText.slice(0, 35));
+            await this.displayGeneratedModelInAllViewers(generatedGlbUrl, promptText.slice(0, 35));
+            metadata = this.aiModelViewer?.getMetadata();
           } else if (this.aiModelViewer) {
             // Local CAD engine fallback
             metadata = await this.aiModelViewer.generateCustom3DObject(promptText, this.attachedSketchDataUrl);
@@ -789,7 +839,7 @@ class AtelierApp {
             const origin = metadata.isFromHuggingFace
               ? generatorSource
               : (metadata.isFromImageContour ? 'Image Silhouette Contour Extrusion' : 'Parametric CAD Engine');
-            successMsg.textContent = `Real 3D Mesh synthesized via ${origin}! Constructed ${metadata.vertexCount.toLocaleString()} vertices & ${metadata.triangleCount.toLocaleString()} polygons. Download the real .GLB file or request commission.`;
+            successMsg.textContent = `Real 3D Mesh synthesized via ${origin}! Constructed ${metadata.vertexCount.toLocaleString()} vertices & ${metadata.triangleCount.toLocaleString()} polygons. Displayed automatically in 3D visualizers.`;
           }
 
           // Synchronize with Project Planner
@@ -813,8 +863,9 @@ class AtelierApp {
           });
           this.planner.render('configurator-container');
 
+          // Scroll visualizer into view automatically
           document.getElementById('ai-studio-3d-canvas')?.scrollIntoView({ behavior: 'smooth' });
-          this.showToast(`Real 3D Mesh generated (${metadata?.vertexCount?.toLocaleString()} vertices)!`);
+          this.showToast(`Real 3D Mesh generated and displayed automatically on visualizer!`);
         } catch (genErr) {
           console.error('Geometry synthesis error:', genErr);
           progressBox.style.display = 'none';
@@ -823,7 +874,7 @@ class AtelierApp {
       }
     });
 
-    // 5. "Commission this Generated Piece" button
+    // 6. "Commission this Generated Piece" button
     commissionGenBtn?.addEventListener('click', () => {
       const cfg = this.planner.getConfig();
       const est = this.planner.calculateEstimate();
@@ -836,6 +887,7 @@ class AtelierApp {
     });
   }
 }
+
 // Initialize on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   new AtelierApp();

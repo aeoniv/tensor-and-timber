@@ -4,6 +4,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { Real3DGeneratorService, Generated3DMetadata } from '../services/real3DGenerator';
 
+export interface AIModelViewerOptions {
+  autoLoadSample?: boolean;
+  hudPillId?: string;
+  titleId?: string;
+  defaultModelUrl?: string;
+  modelName?: string;
+}
+
 export class AIModelViewer {
   private container: HTMLElement;
   private scene: THREE.Scene;
@@ -11,6 +19,7 @@ export class AIModelViewer {
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
   private animFrameId: number = 0;
+  private options: AIModelViewerOptions;
 
   private currentModelGroup: THREE.Group;
   private gltfLoader: GLTFLoader;
@@ -29,10 +38,17 @@ export class AIModelViewer {
   private lightingPreset: 'studio' | 'daylight' | 'midnight' = 'studio';
   private currentMetadata: Generated3DMetadata | null = null;
 
-  constructor(containerId: string) {
+  constructor(containerId: string, options?: AIModelViewerOptions) {
     const el = document.getElementById(containerId);
     if (!el) throw new Error(`Container #${containerId} not found`);
     this.container = el;
+
+    this.options = {
+      autoLoadSample: true,
+      defaultModelUrl: '/models/sample_ai_trellis.glb',
+      modelName: 'Neural Tensegrity Masterpiece (TRELLIS 3D)',
+      ...options
+    };
 
     this.generatorService = new Real3DGeneratorService();
 
@@ -87,10 +103,12 @@ export class AIModelViewer {
     this.groundPlane.receiveShadow = true;
     this.scene.add(this.groundPlane);
 
-    // Load initial REAL neural 3D model (Sample Trellis GLB)
-    this.loadGLBUrl('/models/sample_ai_trellis.glb', 'Neural Tensegrity Chair (TRELLIS 3D)').catch(() => {
-      this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
-    });
+    // Load initial REAL neural 3D model automatically
+    if (this.options.autoLoadSample && this.options.defaultModelUrl) {
+      this.loadGLBUrl(this.options.defaultModelUrl, this.options.modelName || 'Neural Tensegrity Masterpiece').catch(() => {
+        this.generateCustom3DObject('American Black Walnut live-edge floating tensegrity dining table with PVD gold cables');
+      });
+    }
 
     this.setupResizeListener();
     this.render();
@@ -123,7 +141,8 @@ export class AIModelViewer {
     this.resetCameraForModel();
     this.updateStatsHud(metadata);
 
-    const titleEl = document.getElementById('ai-active-model-title');
+    const titleId = this.options.titleId || 'ai-active-model-title';
+    const titleEl = document.getElementById(titleId);
     if (titleEl && metadata) {
       titleEl.textContent = `Real 3D Geometry: ${metadata.name} (${metadata.dimensions.lengthCm} × ${metadata.dimensions.widthCm} × ${metadata.dimensions.heightCm} cm)`;
     }
@@ -321,7 +340,8 @@ export class AIModelViewer {
   }
 
   private updateStatsHud(metadata: Generated3DMetadata): void {
-    const pill = document.getElementById('ai-mesh-stats-pill');
+    const pillId = this.options.hudPillId || 'ai-mesh-stats-pill';
+    const pill = document.getElementById(pillId);
     if (pill) {
       const contourBadge = metadata.isFromImageContour ? ' <span style="color: #38bdf8;">[Vision Contour Extruded]</span>' : '';
       const neuralBadge = metadata.isFromHuggingFace ? ' <span style="color: #10b981;">[ZeroGPU TRELLIS 3D]</span>' : '';
