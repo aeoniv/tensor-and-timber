@@ -25,23 +25,19 @@ export function renderHero(): string {
             </p>
 
             <div class="hero-cta-group">
-              <a href="#planner-section" class="btn btn-primary-gold" id="hero-btn-planner">
-                <span>Configure Your Project in 3D</span>
+              <a href="#hf-spaces-section" class="btn btn-primary-gold" id="hero-btn-ai-gen">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
+                <span>Generate 3D with Prompt or Image</span>
               </a>
 
-              <a href="#projects-section" class="btn btn-glass">
-                <span>Explore Featured Works</span>
+              <a href="#planner-section" class="btn btn-glass" id="hero-btn-planner">
+                <span>Configure Scale &amp; Woods in 3D</span>
               </a>
 
-              <a href="#hf-spaces-section" class="btn btn-outline-gold">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-                <span>Hugging Face AI Visualizer</span>
+              <a href="#projects-section" class="btn btn-outline-gold">
+                <span>Featured Masterpieces</span>
               </a>
             </div>
 

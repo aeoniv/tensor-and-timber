@@ -21,7 +21,7 @@ export function renderNavbar(): string {
             <ul class="nav-links">
               <li><a href="#projects-section" class="nav-link">Innovative Projects</a></li>
               <li><a href="#planner-section" class="nav-link">3D Project Planner</a></li>
-              <li><a href="#hf-spaces-section" class="nav-link">AI Visualizer (HF)</a></li>
+              <li><a href="#hf-spaces-section" class="nav-link" style="color: var(--gold-light); font-weight: 700;">&#10024; AI 3D Generator</a></li>
               <li><a href="#engineering-section" class="nav-link">Physics &amp; Joinery</a></li>
             </ul>
           </nav>

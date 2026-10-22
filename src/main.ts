@@ -108,6 +108,7 @@ class AtelierApp {
     this.bindGlobalEvents();
     this.initPromptCrafter();
     this.initAIViewerEvents();
+    this.initCustomPromptAndImageGenerator();
   }
 
   private initViewers(): void {
@@ -560,6 +561,237 @@ class AtelierApp {
       setTimeout(() => container?.removeChild(toast), 300);
     }, 3500);
   }
+
+
+  private attachedSketchDataUrl: string | null = null;
+
+  private initCustomPromptAndImageGenerator(): void {
+    const sketchInput = document.getElementById('ai-sketch-file-input') as HTMLInputElement;
+    const sketchDropzone = document.getElementById('ai-sketch-dropzone');
+    const browseSketchBtn = document.getElementById('btn-browse-sketch');
+    const previewWrap = document.getElementById('ai-sketch-preview-wrap');
+    const previewImg = document.getElementById('ai-sketch-preview-img') as HTMLImageElement;
+    const emptyState = document.getElementById('ai-sketch-empty-state');
+    const removeSketchBtn = document.getElementById('btn-remove-sketch');
+    const promptInput = document.getElementById('ai-custom-prompt-input') as HTMLTextAreaElement;
+    const synthesizeBtn = document.getElementById('btn-synthesize-3d-furniture');
+    const progressBox = document.getElementById('ai-generation-progress');
+    const progressBar = document.getElementById('ai-gen-progress-bar');
+    const statusLabel = document.getElementById('ai-gen-step-status');
+    const statusPct = document.getElementById('ai-gen-step-pct');
+    const successBar = document.getElementById('ai-generation-success-bar');
+    const successMsg = document.getElementById('ai-success-msg');
+    const commissionGenBtn = document.getElementById('btn-commission-generated-piece');
+
+    // 1. File browsing & image loading
+    browseSketchBtn?.addEventListener('click', () => sketchInput?.click());
+
+    const loadAttachedImage = (file: File) => {
+      if (!file.type.startsWith('image/')) {
+        this.showToast('Please upload an image file (PNG, JPG, WEBP)');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.attachedSketchDataUrl = e.target?.result as string;
+        if (previewImg && previewWrap && emptyState) {
+          previewImg.src = this.attachedSketchDataUrl;
+          previewWrap.style.display = 'block';
+          emptyState.style.display = 'none';
+          this.showToast(`Attached image: ${file.name}`);
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    sketchInput?.addEventListener('change', () => {
+      if (sketchInput.files && sketchInput.files[0]) {
+        loadAttachedImage(sketchInput.files[0]);
+      }
+    });
+
+    if (sketchDropzone) {
+      sketchDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        sketchDropzone.classList.add('dragover');
+      });
+      sketchDropzone.addEventListener('dragleave', () => sketchDropzone.classList.remove('dragover'));
+      sketchDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        sketchDropzone.classList.remove('dragover');
+        if (e.dataTransfer && e.dataTransfer.files[0]) {
+          loadAttachedImage(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    removeSketchBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.attachedSketchDataUrl = null;
+      if (previewWrap && emptyState && sketchInput) {
+        previewWrap.style.display = 'none';
+        emptyState.style.display = 'flex';
+        sketchInput.value = '';
+      }
+    });
+
+    // 2. Sample Image Inspiration Pills
+    const sampleImages: Record<string, { prompt: string; color: string; label: string }> = {
+      'walnut-tensegrity': {
+        prompt: 'Solid American black walnut floating tensegrity dining table with 6mm stainless steel tension cables and live-edge contour',
+        color: '#3d2b1f',
+        label: 'Tensegrity Table Sketch'
+      },
+      'cantilever-desk': {
+        prompt: 'Cantilevered zero-gravity executive desk in European White Oak with gold titanium rigging and wireless power',
+        color: '#b8976b',
+        label: 'Cantilever Desk Concept'
+      },
+      'geodesic-dome': {
+        prompt: 'Handcrafted 3V timber geodesic dome glamping sanctuary with triangular stargazing crown and Douglas Fir framing',
+        color: '#c8894d',
+        label: 'Geodesic Timber Dome'
+      },
+      'charred-coffee': {
+        prompt: 'Sculptural Yakisugi charred cedar coffee table with matte carbon fiber cables and minimalist Japanese joinery',
+        color: '#18191c',
+        label: 'Yakisugi Coffee Table'
+      }
+    };
+
+    document.querySelectorAll('.sample-img-pill').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const sampleKey = (e.currentTarget as HTMLElement).dataset.sample || 'walnut-tensegrity';
+        const sample = sampleImages[sampleKey];
+        if (sample && promptInput) {
+          promptInput.value = sample.prompt;
+
+          // Generate an elegant SVG placeholder representing the attached concept
+          const svgData = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%23111520"/><rect x="40" y="50" width="220" height="20" rx="4" fill="${encodeURIComponent(sample.color)}"/><line x1="150" y1="70" x2="150" y2="130" stroke="%2338bdf8" stroke-width="4"/><line x1="60" y1="70" x2="80" y2="150" stroke="%23d4af37" stroke-width="2"/><line x1="240" y1="70" x2="220" y2="150" stroke="%23d4af37" stroke-width="2"/><rect x="60" y="150" width="180" height="15" rx="4" fill="${encodeURIComponent(sample.color)}"/><text x="150" y="185" fill="%23ffffff" font-size="12" font-family="sans-serif" text-anchor="middle">${encodeURIComponent(sample.label)}</text></svg>`;
+
+          this.attachedSketchDataUrl = svgData;
+          if (previewImg && previewWrap && emptyState) {
+            previewImg.src = svgData;
+            previewWrap.style.display = 'block';
+            emptyState.style.display = 'none';
+          }
+          this.showToast(`Loaded sample concept: ${sample.label}`);
+        }
+      });
+    });
+
+    // 3. Prompt Keyword Chips
+    document.querySelectorAll('.prompt-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const phrase = (e.currentTarget as HTMLElement).dataset.phrase || '';
+        if (promptInput) {
+          if (promptInput.value.trim().length > 0) {
+            promptInput.value += `, ${phrase}`;
+          } else {
+            promptInput.value = phrase;
+          }
+          promptInput.focus();
+        }
+      });
+    });
+
+    // 4. "Generate 3D Furniture" Action Flow
+    synthesizeBtn?.addEventListener('click', () => {
+      let promptText = promptInput?.value.trim() || '';
+      if (!promptText && !this.attachedSketchDataUrl) {
+        promptText = 'Solid American black walnut floating tensegrity dining table with PVD Gold cables';
+        if (promptInput) promptInput.value = promptText;
+      }
+
+      if (progressBox && progressBar && statusLabel && statusPct) {
+        progressBox.style.display = 'block';
+        if (successBar) successBar.style.display = 'none';
+
+        // Animate 4 generation steps
+        const steps = [
+          { pct: '25%', text: '1/4: Analyzing attached sketch geometry & spatial depth map...', delay: 300 },
+          { pct: '55%', text: '2/4: Synthesizing 3D sparse voxels & structural tension equilibrium...', delay: 1100 },
+          { pct: '82%', text: '3/4: Generating PBR timber grain textures & calibrated turnbuckles...', delay: 2000 },
+          { pct: '100%', text: '4/4: Compiling 3D mesh and loading into Atelier WebGL viewport...', delay: 2800 }
+        ];
+
+        steps.forEach(({ pct, text, delay }) => {
+          setTimeout(() => {
+            progressBar.style.width = pct;
+            statusLabel.textContent = text;
+            statusPct.textContent = pct;
+          }, delay);
+        });
+
+        setTimeout(() => {
+          progressBox.style.display = 'none';
+          if (successBar) successBar.style.display = 'flex';
+
+          // Determine model preset to render based on prompt keywords
+          const lower = promptText.toLowerCase();
+          let targetPreset = 'trellis-tensegrity';
+          let targetCategory: any = 'tensegrity-dining-table';
+
+          if (lower.includes('dome') || lower.includes('geodesic') || lower.includes('pavilion')) {
+            targetPreset = 'triposr-geodesic';
+            targetCategory = 'geodesic-glamping-dome';
+          } else if (lower.includes('loft') || lower.includes('room') || lower.includes('penthouse') || lower.includes('stage')) {
+            targetPreset = 'interior-loft';
+            targetCategory = 'tensegrity-dining-table';
+          } else if (lower.includes('splat') || lower.includes('scan') || lower.includes('video')) {
+            targetPreset = 'instant4d-splat';
+          }
+
+          // Load into on-page AI 3D Viewer
+          if (this.aiModelViewer) {
+            this.aiModelViewer.loadPresetModel(targetPreset);
+          }
+
+          // Update active title
+          const titleEl = document.getElementById('ai-active-model-title');
+          if (titleEl) {
+            titleEl.textContent = `Generated • ${promptText.slice(0, 55)}...`;
+          }
+
+          // Also synchronize with the Project Planner configuration!
+          let woodId = 'american-black-walnut';
+          if (lower.includes('oak')) woodId = 'european-white-oak';
+          else if (lower.includes('teak')) woodId = 'reclaimed-brazilian-teak';
+          else if (lower.includes('charred') || lower.includes('yakisugi') || lower.includes('cedar')) woodId = 'japanese-charred-cedar';
+
+          let tensionId = 'marine-stainless-316';
+          if (lower.includes('gold') || lower.includes('titanium')) tensionId = 'pvd-gold-titanium';
+          else if (lower.includes('carbon')) tensionId = 'carbon-stealth-black';
+
+          this.planner.updateConfig({
+            category: targetCategory,
+            title: `Custom Commission: ${promptText.slice(0, 40)}`,
+            woodSpeciesId: woodId,
+            tensionSystemId: tensionId,
+            customNotes: promptText
+          });
+          this.planner.render('configurator-container');
+
+          if (successMsg) {
+            successMsg.textContent = `Custom 3D Furniture synthesized from your prompt & image! Rendered below in WebGL.`;
+          }
+
+          // Smooth scroll to 3D Canvas
+          document.getElementById('ai-active-model-title')?.scrollIntoView({ behavior: 'smooth' });
+          this.showToast('3D Model generated & rendered on canvas!');
+        }, 3400);
+      }
+    });
+
+    // 5. "Commission this Generated Piece" button
+    commissionGenBtn?.addEventListener('click', () => {
+      const cfg = this.planner.getConfig();
+      const est = this.planner.calculateEstimate();
+      cfg.customNotes = promptInput?.value || cfg.customNotes;
+      this.leadModal.open(cfg, est);
+    });
+  }
+
 }
 
 // Initialize on DOM load

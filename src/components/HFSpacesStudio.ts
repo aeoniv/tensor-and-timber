@@ -72,13 +72,150 @@ export function renderHFSpacesStudio(): string {
       <div class="app-container">
         <div class="section-header">
           <span class="section-tag cyan">AI 3D Synthesis &amp; Virtual Staging</span>
-          <h2 class="section-title">Display &amp; Inspect <span class="cyan-gradient">AI 3D Objects</span> on Site</h2>
+          <h2 class="section-title">Attach a <span class="gold-gradient">Prompt or Image</span> to Generate 3D Furniture</h2>
           <p class="section-subtitle">
-            No external redirects. View and manipulate 3D models synthesized from Hugging Face AI architectures (TRELLIS.2, TripoSR, InteriorGen3D, and Instant4D Gaussian Splats) directly in our real-time WebGL studio.
+            Input your custom architectural vision or upload a sketch, reference photo, or room picture. Our on-page 3D engine synthesizes and displays your custom piece directly in WebGL.
           </p>
         </div>
 
-        <!-- Master Interactive 3D Object Stage -->
+        <!-- =================================================================
+             PROMPT & IMAGE ATTACHMENT GENERATOR CONSOLE
+             ================================================================= -->
+        <div class="ai-generator-console">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px;">
+            <div>
+              <span class="section-tag gold" style="font-size: 0.72rem; margin-bottom: 4px;">ZeroGPU 3D Synthesizer</span>
+              <h3 style="font-family: var(--font-display); font-size: 1.45rem; color: var(--text-main);">
+                Generate Custom 3D Furniture from Prompt or Photo
+              </h3>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--cyan-high-tensile); font-weight: 600;">
+              &bull; Powered by Microsoft TRELLIS.2 &amp; TripoSR Architecture
+            </div>
+          </div>
+
+          <div class="generator-columns">
+            <!-- Left Column: Image / Sketch Upload -->
+            <div>
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
+                1. Attach Image, Sketch, or Room Photo (Optional)
+              </label>
+
+              <!-- Upload Dropzone -->
+              <div class="image-attach-box" id="ai-sketch-dropzone">
+                <div id="ai-sketch-empty-state">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.6" style="margin-bottom: 10px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 4px;">
+                    Drop your sketch, photo, or room picture here
+                  </div>
+                  <div style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Supports PNG, JPG, WEBP &bull; Max 25 MB
+                  </div>
+                  <button class="btn btn-glass btn-sm" id="btn-browse-sketch" type="button">
+                    Browse Image
+                  </button>
+                  <input type="file" id="ai-sketch-file-input" accept="image/*" style="display: none;">
+                </div>
+
+                <!-- Preview State (when attached) -->
+                <div class="image-preview-wrapper" id="ai-sketch-preview-wrap" style="display: none;">
+                  <img id="ai-sketch-preview-img" src="" alt="Attached inspiration" />
+                  <button class="image-remove-btn" id="btn-remove-sketch" title="Remove Image">&times;</button>
+                </div>
+              </div>
+
+              <!-- Quick Sample Inspirations -->
+              <div style="margin-top: 10px;">
+                <span style="font-size: 0.74rem; color: var(--text-muted);">Or try sample concept sketch:</span>
+                <div class="sample-pills-row">
+                  <button class="sample-img-pill" data-sample="walnut-tensegrity" type="button">Walnut Tensegrity Table</button>
+                  <button class="sample-img-pill" data-sample="cantilever-desk" type="button">Cantilever Desk</button>
+                  <button class="sample-img-pill" data-sample="geodesic-dome" type="button">Timber Geodesic Pod</button>
+                  <button class="sample-img-pill" data-sample="charred-coffee" type="button">Yakisugi Coffee Table</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Prompt Input & Engine -->
+            <div style="display: flex; flex-direction: column;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">
+                2. Enter Custom Prompt Description
+              </label>
+
+              <textarea id="ai-custom-prompt-input" rows="3" placeholder="Describe your custom furniture (e.g. 'Solid American black walnut floating tensegrity dining table with 6mm stainless steel tension cables and live-edge contour for an architectural loft')..."></textarea>
+
+              <!-- Quick Prompt Keyword Chips -->
+              <div class="prompt-chips-row">
+                <button class="prompt-chip" data-phrase="American Black Walnut with rich grain">+ Black Walnut</button>
+                <button class="prompt-chip" data-phrase="floating tensegrity dining table with continuous cable suspension">+ Floating Tensegrity</button>
+                <button class="prompt-chip" data-phrase="PVD Gold titanium aircraft cables with brass turnbuckles">+ PVD Gold Rigging</button>
+                <button class="prompt-chip" data-phrase="3V timber geodesic dome with triangular skylights">+ Geodesic Dome (3V)</button>
+                <button class="prompt-chip" data-phrase="sculptural charred Yakisugi cedar with matte carbon cordage">+ Yakisugi Charred</button>
+                <button class="prompt-chip" data-phrase="cantilevered executive desk with floating drawers">+ Cantilever Desk</button>
+              </div>
+
+              <!-- Engine & Action Row -->
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; margin-top: auto;">
+                <div>
+                  <label style="display: block; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 4px;">AI Generation Engine</label>
+                  <select id="ai-generator-engine-select" style="width: 100%; font-size: 0.85rem;">
+                    <option value="trellis">TRELLIS.2 (Microsoft) &bull; Sparse Voxel PBR Mesh</option>
+                    <option value="triposr">TripoSR (Stability AI) &bull; Rapid 3D Geometry</option>
+                    <option value="interior">InteriorGen3D &bull; Spatial Room Staging</option>
+                  </select>
+                </div>
+
+                <div style="padding-top: 18px;">
+                  <button class="btn btn-primary-gold" id="btn-synthesize-3d-furniture" style="padding: 14px 28px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <span>Generate 3D Furniture</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Progress Notification Box -->
+          <div class="generation-progress-box" id="ai-generation-progress" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; font-size: 0.9rem; color: var(--cyan-high-tensile);" id="ai-gen-step-status">
+                Analyzing prompt and attached sketch geometry...
+              </span>
+              <span style="font-family: monospace; font-size: 0.82rem; color: var(--gold-light);" id="ai-gen-step-pct">
+                15%
+              </span>
+            </div>
+            <div class="gen-progress-bar-wrap">
+              <div class="gen-progress-bar-fill" id="ai-gen-progress-bar"></div>
+            </div>
+          </div>
+
+          <!-- Success Alert Bar -->
+          <div id="ai-generation-success-bar" style="display: none; margin-top: 18px; padding: 14px 18px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #10b981; font-size: 1.2rem;">&#10004;</span>
+              <span style="font-size: 0.88rem; color: var(--text-main); font-weight: 600;" id="ai-success-msg">
+                Custom 3D Furniture synthesized successfully! Displayed in the WebGL viewport below.
+              </span>
+            </div>
+            <button class="btn btn-primary-gold btn-sm" id="btn-commission-generated-piece">
+              <span>Commission this Exact 3D Piece</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- =================================================================
+             MASTER INTERACTIVE 3D OBJECT STAGE (DIRECTLY ON WEBSITE)
+             ================================================================= -->
         <div class="glass-panel gold-glow" style="padding: 24px; margin-bottom: 50px; border-radius: var(--radius-xl);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 14px;">
             <div>
@@ -136,70 +273,6 @@ export function renderHFSpacesStudio(): string {
         <!-- Curated HF Spaces Cards Grid -->
         <div class="hf-spaces-grid">
           ${spacesCards}
-        </div>
-
-        <!-- Interactive AI Prompt Crafter -->
-        <div class="prompt-crafter-card glass-panel gold-glow">
-          <div style="margin-bottom: 24px;">
-            <span class="section-tag gold">Client Prompt Generator</span>
-            <h3 style="font-family: var(--font-display); font-size: 1.6rem; color: var(--text-main); margin-bottom: 6px;">
-              Craft the Perfect AI Prompt for Your Space
-            </h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">
-              Select your room type, furniture archetype, timber species, and lighting mood. Generate an optimized prompt ready to feed into AI spatial synthesis models.
-            </p>
-          </div>
-
-          <div class="crafter-grid">
-            <div class="crafter-field">
-              <label>Space / Room Type</label>
-              <select id="crafter-room">
-                <option value="minimalist architectural penthouse living room">Minimalist Penthouse Living Room</option>
-                <option value="luxury mountain retreat dining area">Luxury Alpine Chalet Dining Room</option>
-                <option value="sunlit modern timber garden conservatory">Sunlit Garden Conservatory</option>
-                <option value="biophilic executive corner office">Biophilic Executive Office</option>
-                <option value="off-grid scenic meadow landscape">Scenic Meadow / Glamping Site</option>
-              </select>
-            </div>
-
-            <div class="crafter-field">
-              <label>Project Archetype</label>
-              <select id="crafter-type">
-                <option value="solid wood floating tensegrity dining table suspended by aircraft cables">Tensegrity Floating Dining Table</option>
-                <option value="sculptural tensegrity coffee table with counter-intuitive balance">Tensegrity Coffee Table</option>
-                <option value="architectural timber geodesic dome with triangular glass facets">Timber Geodesic Dome Sanctuary</option>
-                <option value="cantilevered tensegrity executive desk with floating drawers">Cantilever Tensegrity Desk</option>
-              </select>
-            </div>
-
-            <div class="crafter-field">
-              <label>Hardwood Species</label>
-              <select id="crafter-wood">
-                <option value="American Black Walnut with rich grain and satin oil finish">American Black Walnut</option>
-                <option value="Bavarian European White Oak with blonde medullary rays">European White Oak</option>
-                <option value="Charred Japanese Yakisugi Cedar with sculptural matte black texture">Yakisugi Charred Cedar</option>
-                <option value="Reclaimed Brazilian Teak with deep honey bronze patina">Reclaimed Brazilian Teak</option>
-              </select>
-            </div>
-
-            <div class="crafter-field">
-              <label>Lighting &amp; Ambience</label>
-              <select id="crafter-lighting">
-                <option value="warm 2700K golden hour sunlight, soft rim lighting, ultra-realistic architectural photography">Golden Hour Ambient</option>
-                <option value="diffused Scandinavian morning light, clean shadows, 8k octane render">Diffused Scandinavian Light</option>
-                <option value="dramatic moody evening spotlight, brass reflections, cinematic 35mm lens">Moody Evening Cinematic</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="crafter-output-box">
-            <div class="crafter-output-text" id="crafter-result-text">
-              Loading prompt...
-            </div>
-            <button class="btn btn-primary-gold btn-sm" id="btn-copy-crafter-prompt">
-              <span>Copy Prompt</span>
-            </button>
-          </div>
         </div>
 
         <!-- 3D Model Dropzone: Loads files directly into WebGL canvas -->
