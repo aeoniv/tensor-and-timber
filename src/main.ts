@@ -564,16 +564,6 @@ class AtelierApp {
     const successBar = document.getElementById('ai-generation-success-bar');
     const successMsg = document.getElementById('ai-success-msg');
     const commissionGenBtn = document.getElementById('btn-commission-generated-piece');
-    const engineSelect = document.getElementById('ai-generator-engine-select') as HTMLSelectElement;
-    const hfTokenRow = document.getElementById('hf-token-row');
-    const hfTokenInput = document.getElementById('ai-hf-token-input') as HTMLInputElement;
-
-    // Toggle HF Token Row when engine changes
-    engineSelect?.addEventListener('change', () => {
-      if (hfTokenRow) {
-        hfTokenRow.style.display = engineSelect.value === 'hf-trellis' ? 'block' : 'none';
-      }
-    });
 
     // 1. File browsing & image loading
     browseSketchBtn?.addEventListener('click', () => sketchInput?.click());
@@ -693,7 +683,7 @@ class AtelierApp {
       });
     });
 
-    // 4. "Generate Real 3D Furniture" Action Flow (NO FAKE TIMERS)
+    // 4. "Generate Real 3D Furniture" Action Flow (100% Client-Side Instant Synthesis)
     synthesizeBtn?.addEventListener('click', async () => {
       let promptText = promptInput?.value.trim() || '';
       if (!promptText && !this.attachedSketchDataUrl) {
@@ -701,56 +691,15 @@ class AtelierApp {
         if (promptInput) promptInput.value = promptText;
       }
 
-      const selectedEngine = engineSelect?.value || 'parametric-cad';
-      const userHfToken = hfTokenInput?.value.trim() || undefined;
-
       if (progressBox && progressBar && statusLabel && statusPct) {
         progressBox.style.display = 'block';
         if (successBar) successBar.style.display = 'none';
 
-        if (selectedEngine === 'hf-trellis' && this.attachedSketchDataUrl) {
-          try {
-            progressBar.style.width = '25%';
-            statusLabel.textContent = 'Connecting to Hugging Face ZeroGPU cluster (trellis-community/TRELLIS)...';
-            statusPct.textContent = '25%';
-
-            const res = await fetch(this.attachedSketchDataUrl);
-            const blob = await res.blob();
-
-            const { Real3DGeneratorService } = await import('./services/real3DGenerator');
-            const svc = new Real3DGeneratorService();
-
-            const { glbUrl } = await svc.generateFromHuggingFaceSpace(blob, userHfToken, (msg, pct) => {
-              statusLabel.textContent = msg;
-              statusPct.textContent = `${pct}%`;
-              progressBar.style.width = `${pct}%`;
-            });
-
-            if (this.aiModelViewer) {
-              const meta = await this.aiModelViewer.loadGLBUrl(glbUrl, `TRELLIS 3D • ${promptText.slice(0, 40)}`);
-              progressBox.style.display = 'none';
-              if (successBar) successBar.style.display = 'flex';
-              if (successMsg) {
-                successMsg.textContent = `Real 3D GLB synthesized from Hugging Face TRELLIS! (${meta.vertexCount.toLocaleString()} vertices, ${meta.triangleCount.toLocaleString()} polygons). Ready to export or commission.`;
-              }
-            }
-
-            document.getElementById('ai-studio-3d-canvas')?.scrollIntoView({ behavior: 'smooth' });
-            this.showToast('Real 3D GLB generated from Hugging Face Space!');
-            return;
-          } catch (hfErr: any) {
-            console.warn('Hugging Face ZeroGPU fallback to Real CAD Synthesizer:', hfErr);
-            statusLabel.textContent = 'ZeroGPU queue busy; synthesizing via Atelier Spatial Computer Vision & CAD Synthesizer...';
-            progressBar.style.width = '60%';
-          }
-        }
-
-        // REAL Client-Side Spatial Geometry Synthesizer (NO FAKE DELAY)
         statusLabel.textContent = this.attachedSketchDataUrl
-          ? 'Extracting contour vectors from image & computing 3D extruded geometry...'
-          : 'Parsing architectural parameters & constructing 3D BufferGeometry in physical tension equilibrium...';
-        progressBar.style.width = '75%';
-        statusPct.textContent = '75%';
+          ? 'Extracting contour vectors from sketch & extruding 3D timber geometry...'
+          : 'Parsing architectural parameters & constructing 3D BufferGeometry in tension equilibrium...';
+        progressBar.style.width = '70%';
+        statusPct.textContent = '70%';
 
         try {
           let metadata: any = null;
@@ -817,7 +766,6 @@ class AtelierApp {
     });
   }
 }
-
 // Initialize on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   new AtelierApp();

@@ -31,15 +31,11 @@ export function renderHFSpacesStudio(): string {
               </p>
             </div>
 
-            <!-- Engine Selector -->
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-              <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">
-                Synthesis Pipeline:
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="hud-pill" style="font-size: 0.76rem; border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #38bdf8; margin-right: 6px;"></span>
+                Client-Side Engine Active &bull; Instant Generation
               </span>
-              <select id="ai-generator-engine-select" style="background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border-medium); color: var(--text-main); font-size: 0.82rem; padding: 7px 12px; border-radius: var(--radius-md); outline: none; cursor: pointer;">
-                <option value="parametric-cad" selected>Client-Side Spatial 3D Synthesizer (Instant &bull; No Quotas)</option>
-                <option value="hf-trellis">Hugging Face ZeroGPU Cloud (trellis-community/TRELLIS)</option>
-              </select>
             </div>
           </div>
 
@@ -132,21 +128,6 @@ export function renderHFSpacesStudio(): string {
             </div>
           </div>
 
-          <!-- Optional Hugging Face Token Row (Expandable) -->
-          <div id="hf-token-row" style="display: none; margin-bottom: 18px; padding: 12px 16px; background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: var(--radius-md);">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-              <div style="flex: 1; min-width: 240px;">
-                <label for="ai-hf-token-input" style="font-size: 0.78rem; font-weight: 600; color: #38bdf8; display: block; margin-bottom: 4px;">
-                  Hugging Face Access Token (Optional &bull; Bypasses ZeroGPU Quota Limits):
-                </label>
-                <input type="password" id="ai-hf-token-input" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxxx" style="width: 100%; background: rgba(11, 15, 25, 0.9); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 6px 10px; color: var(--text-main); font-size: 0.8rem; outline: none;">
-              </div>
-              <span style="font-size: 0.74rem; color: var(--text-muted); max-width: 320px;">
-                Get a free read token at <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: underline;">huggingface.co/settings/tokens</a>.
-              </span>
-            </div>
-          </div>
-
           <!-- Bottom Action Row: Synthesize Button & Status -->
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -158,7 +139,7 @@ export function renderHFSpacesStudio(): string {
               </button>
 
               <span style="font-size: 0.82rem; color: var(--text-muted);">
-                Generates real BufferGeometry &bull; Direct .GLB export
+                Instant client-side 3D geometry &bull; Direct .GLB export
               </span>
             </div>
 
@@ -274,7 +255,7 @@ export function renderHFSpacesStudio(): string {
             Drop Any 3D Asset (.glb, .gltf, .obj) Directly onto the Stage
           </h4>
           <p style="color: var(--text-secondary); font-size: 0.88rem; max-width: 540px; margin: 0 auto 18px;">
-            Inspect any 3D asset generated from TRELLIS, Blender, or Rhino directly in our Atelier WebGL viewport with real vertex count, polygon metrics, and lighting simulations.
+            Inspect any 3D asset from Blender, Rhino, or CAD directly in our Atelier WebGL viewport with real vertex count, polygon metrics, and lighting simulations.
           </p>
           <button class="btn btn-glass btn-sm" id="btn-browse-model-file">
             Browse 3D File (.glb / .obj)
