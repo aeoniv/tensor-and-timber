@@ -6,6 +6,7 @@ import { renderHFSpacesStudio } from './components/HFSpacesStudio';
 import { renderFooter } from './components/Footer';
 import { TensegrityViewer } from './components/TensegrityViewer';
 import { GeodesicViewer } from './components/GeodesicViewer';
+import { AIModelViewer } from './components/AIModelViewer';
 import { ProjectPlanner } from './components/ProjectPlanner';
 import { LeadCaptureModal } from './components/LeadCaptureModal';
 import { AdminLeadsDrawer } from './components/AdminLeadsDrawer';
@@ -19,6 +20,8 @@ class AtelierApp {
   private studioTensegrityViewer: TensegrityViewer | null = null;
   private studioGeodesicViewer: GeodesicViewer | null = null;
   private studioActiveMode: 'tensegrity' | 'geodesic' = 'tensegrity';
+
+  private aiModelViewer: AIModelViewer | null = null;
 
   private planner: ProjectPlanner;
   private leadModal: LeadCaptureModal;
@@ -104,6 +107,7 @@ class AtelierApp {
     this.planner.render('configurator-container');
     this.bindGlobalEvents();
     this.initPromptCrafter();
+    this.initAIViewerEvents();
   }
 
   private initViewers(): void {
@@ -119,6 +123,13 @@ class AtelierApp {
       this.studioTensegrityViewer = new TensegrityViewer('studio-3d-canvas');
     } catch (e) {
       console.warn('Studio viewer init error:', e);
+    }
+
+    // 3. AI Studio 3D Model Viewer (Displays 3D objects directly on the page!)
+    try {
+      this.aiModelViewer = new AIModelViewer('ai-studio-3d-canvas');
+    } catch (e) {
+      console.warn('AI 3D model viewer init error:', e);
     }
 
     // Sync planner config changes to 3D viewers
@@ -200,6 +211,174 @@ class AtelierApp {
       document.getElementById('studio-toggle-tensegrity')?.classList.remove('active');
       const title = document.getElementById('studio-active-title');
       if (title) title.textContent = 'Geodesic Icosahedron Shell';
+    }
+  }
+
+  private initAIViewerEvents(): void {
+    // 1. Model Preset Switcher Tabs in AI 3D Stage
+    const modelTabs = document.getElementById('ai-viewer-model-tabs');
+    const titleEl = document.getElementById('ai-active-model-title');
+
+    const updateModelPreset = (preset: string, title?: string) => {
+      if (this.aiModelViewer) {
+        this.aiModelViewer.loadPresetModel(preset);
+      }
+      modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', (btn as HTMLElement).dataset.preset === preset);
+      });
+      if (titleEl) {
+        if (title) {
+          titleEl.textContent = title;
+        } else {
+          switch (preset) {
+            case 'trellis-tensegrity':
+              titleEl.textContent = 'TRELLIS.2 • Floating Tensegrity Coffee Table';
+              break;
+            case 'triposr-geodesic':
+              titleEl.textContent = 'TripoSR • Instant 3D Timber Geodesic Pavilion';
+              break;
+            case 'interior-loft':
+              titleEl.textContent = 'InteriorGen3D • Staged Architectural Loft';
+              break;
+            case 'instant4d-splat':
+              titleEl.textContent = 'Instant4D / Splatv • Gaussian Point Cloud Scan';
+              break;
+          }
+        }
+      }
+    };
+
+    modelTabs?.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const preset = (e.currentTarget as HTMLElement).dataset.preset || 'trellis-tensegrity';
+        updateModelPreset(preset);
+      });
+    });
+
+    // 2. "Display 3D Object on Site" buttons on space cards
+    document.querySelectorAll('.btn-display-3d-model').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const preset = target.dataset.preset || 'trellis-tensegrity';
+        const title = target.dataset.title;
+        updateModelPreset(preset, title);
+
+        // Smooth scroll directly to the 3D canvas on the website
+        document.getElementById('ai-active-model-title')?.scrollIntoView({ behavior: 'smooth' });
+        this.showToast(`Displaying 3D object for ${title || preset} directly on page!`);
+      });
+    });
+
+    // 3. In-Page Embedded Space Generator Modal
+    const hfModalOverlay = document.getElementById('hf-embedded-modal-overlay');
+    const hfIframe = document.getElementById('hf-embedded-iframe') as HTMLIFrameElement;
+    const hfModalTitle = document.getElementById('hf-embedded-modal-title');
+
+    document.querySelectorAll('.btn-embed-space-modal').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const embedUrl = target.dataset.embedUrl || '';
+        const title = target.dataset.title || 'Hugging Face Space';
+
+        if (hfIframe && hfModalOverlay) {
+          hfIframe.src = embedUrl;
+          if (hfModalTitle) hfModalTitle.textContent = `${title} • In-Page Generator`;
+          hfModalOverlay.classList.add('active');
+        }
+      });
+    });
+
+    const closeHfModal = () => {
+      if (hfModalOverlay && hfIframe) {
+        hfIframe.src = '';
+        hfModalOverlay.classList.remove('active');
+      }
+    };
+
+    document.getElementById('btn-close-hf-embedded-modal')?.addEventListener('click', closeHfModal);
+    document.getElementById('btn-done-hf-embedded')?.addEventListener('click', closeHfModal);
+
+    // 4. AI 3D Canvas Controls (Wireframe, Auto-spin, Lighting)
+    document.getElementById('btn-ai-wireframe')?.addEventListener('click', (e) => {
+      if (this.aiModelViewer) {
+        const isWire = this.aiModelViewer.toggleWireframe();
+        (e.currentTarget as HTMLElement).textContent = `Wireframe: ${isWire ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).classList.toggle('active', isWire);
+      }
+    });
+
+    document.getElementById('btn-ai-autorotate')?.addEventListener('click', (e) => {
+      if (this.aiModelViewer) {
+        const isSpin = this.aiModelViewer.toggleAutoRotate();
+        (e.currentTarget as HTMLElement).textContent = `Spin: ${isSpin ? 'ON' : 'OFF'}`;
+        (e.currentTarget as HTMLElement).classList.toggle('active', isSpin);
+      }
+    });
+
+    // Lighting Presets
+    const lightBtns = ['btn-ai-light-studio', 'btn-ai-light-daylight', 'btn-ai-light-midnight'];
+    lightBtns.forEach(id => {
+      document.getElementById(id)?.addEventListener('click', (e) => {
+        lightBtns.forEach(b => document.getElementById(b)?.classList.remove('active'));
+        (e.currentTarget as HTMLElement).classList.add('active');
+        if (this.aiModelViewer) {
+          if (id.includes('studio')) this.aiModelViewer.setLightingPreset('studio');
+          else if (id.includes('daylight')) this.aiModelViewer.setLightingPreset('daylight');
+          else if (id.includes('midnight')) this.aiModelViewer.setLightingPreset('midnight');
+        }
+      });
+    });
+
+    // Commission this 3D design CTA
+    document.getElementById('btn-ai-order-design')?.addEventListener('click', () => {
+      const cfg = this.planner.getConfig();
+      const est = this.planner.calculateEstimate();
+      this.leadModal.open(cfg, est);
+    });
+
+    // 5. File upload / Dropzone for .glb / .obj
+    const fileInput = document.getElementById('hf-file-input') as HTMLInputElement;
+    const dropzone = document.getElementById('hf-model-dropzone');
+    const browseBtn = document.getElementById('btn-browse-model-file');
+
+    const handleFile = (file: File) => {
+      if (this.aiModelViewer) {
+        this.showToast(`Loading 3D asset ${file.name}...`);
+        this.aiModelViewer.loadFromFile(
+          file,
+          () => {
+            this.showToast(`Successfully loaded ${file.name} directly into 3D viewer!`);
+            if (titleEl) titleEl.textContent = `Custom Upload • ${file.name}`;
+            document.getElementById('ai-active-model-title')?.scrollIntoView({ behavior: 'smooth' });
+          },
+          (err) => {
+            console.error('File load error:', err);
+            this.showToast(`Failed to parse 3D file: ${file.name}`);
+          }
+        );
+      }
+    };
+
+    browseBtn?.addEventListener('click', () => fileInput?.click());
+    fileInput?.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files[0]) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer && e.dataTransfer.files[0]) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
     }
   }
 
@@ -316,35 +495,6 @@ class AtelierApp {
         });
       });
     });
-
-    // File Dropzone handling
-    const dropzone = document.getElementById('hf-model-dropzone');
-    const fileInput = document.getElementById('hf-file-input') as HTMLInputElement;
-    const browseBtn = document.getElementById('btn-browse-model-file');
-
-    if (browseBtn && fileInput) {
-      browseBtn.addEventListener('click', () => fileInput.click());
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files && fileInput.files[0]) {
-          this.showToast(`Loaded ${fileInput.files[0].name} into Atelier 3D viewport!`);
-        }
-      });
-    }
-
-    if (dropzone) {
-      dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-      });
-      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-      dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        if (e.dataTransfer && e.dataTransfer.files[0]) {
-          this.showToast(`Loaded ${e.dataTransfer.files[0].name} into Atelier 3D viewport!`);
-        }
-      });
-    }
 
     // HF Copy sample prompts
     document.querySelectorAll('.btn-copy-hf-prompt').forEach(btn => {

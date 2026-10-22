@@ -17,7 +17,7 @@ Unlike traditional carpentry portfolios, this application combines:
 2. **Innovative Structural Focus**:
    - **Floating Tensegrity Furniture**: Dining tables, executive desks, and cantilever chairs utilizing Buckminster Fuller & Kenneth Snelson principles (continuous tension / discontinuous compression).
    - **Handcrafted Timber Geodesic Domes**: 2V, 3V, and 4V hemispherical architectural domes for luxury eco-resort glamping pods, garden studios, and wellness sanctuaries.
-3. **Open-Source AI Spatial Synthesis (Hugging Face Spaces)**: A client-facing AI studio connecting to state-of-the-art Hugging Face Spaces (such as Microsoft TRELLIS.2, TripoSR, and InteriorGen3D) so clients can convert 2D sketches or phone photos into 3D models and test custom woodwork in their actual rooms.
+3. **Open-Source AI Spatial Synthesis (Hugging Face Spaces)**: A client-facing AI studio that displays 3D objects directly on the website with zero external redirects. Clients can inspect 3D models synthesized from Hugging Face AI architectures (TRELLIS.2, TripoSR, InteriorGen3D, and Instant4D Gaussian Splats), toggle wireframe topology, test lighting presets, or launch embedded in-page generators.
 4. **Holograma Architectural Lineage**: Inherits the decoupled pipeline pattern from `aeoniv/holograma`—GPU spatial inference (image-to-3D, 4D Gaussian Splatting) decoupled from static, ultra-fast WebGL rendering and client-side lead capture.
 
 ---
