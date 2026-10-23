@@ -8,10 +8,10 @@ export function renderHero(): string {
           <div class="hero-badge-row">
             <span class="section-tag gold">
               <span class="flag-dot-green"></span>
-              Ateliê Brasil de Marcenaria
+              Ateliê Brasil &bull; Marcenaria Autoral
             </span>
             <span class="section-tag-subtle">
-              Engenharia Tensa &bull; Madeiras Nobres
+              Engenharia Tensa &bull; Madeiras Nobres FSC®
             </span>
           </div>
 
@@ -21,7 +21,7 @@ export function renderHero(): string {
           </h1>
 
           <p class="hero-subtitle">
-            Projetamos e executamos mesas de jantar suspensas, poltronas flutuantes e aparadores esculturais sob encomenda. Equilíbrio absoluto entre madeiras nobres brasileiras — Cumaru, Freijó, Jacarandá e Pequiá — e cabos de aço aeroespacial naval.
+            Mesas de jantar suspensas, poltronas flutuantes e aparadores esculturais produzidos sob encomenda. Equilíbrio estético e físico absoluto entre madeiras nobres brasileiras — Cumaru, Freijó, Jacarandá e Pequiá — e tirantes de aço aeroespacial naval.
           </p>
 
           <div class="hero-cta-group">
@@ -35,7 +35,7 @@ export function renderHero(): string {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
               </svg>
-              <span>Personalizar em 3D</span>
+              <span>Personalizar no Ateliê 3D</span>
             </a>
           </div>
 
@@ -46,15 +46,15 @@ export function renderHero(): string {
               <span class="stat-label">Madeiras Nacionais</span>
             </div>
             <div class="stat-item">
-              <span class="stat-val cyan">1.800 kg</span>
+              <span class="stat-val cyan font-serif">1.800 kg</span>
               <span class="stat-label">Carga de Ruptura</span>
             </div>
             <div class="stat-item">
               <span class="stat-val font-serif">6–8 Sem</span>
-              <span class="stat-label">Produção Artesanal</span>
+              <span class="stat-label">Produção Sob Medida</span>
             </div>
             <div class="stat-item">
-              <span class="stat-val font-serif" style="color: var(--gold-light);">Vitalícia</span>
+              <span class="stat-val font-serif gold-text">Vitalícia</span>
               <span class="stat-label">Garantia Estrutural</span>
             </div>
           </div>

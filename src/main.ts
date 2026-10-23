@@ -5,6 +5,7 @@ import { renderHero } from './components/Hero';
 import { renderRealFurnitureSection } from './components/RealFurnitureSection';
 import { renderAtelierStudio } from './components/AtelierStudio';
 import { renderInnovativeProjects } from './components/InnovativeProjects';
+import { renderPhilosophySection } from './components/PhilosophySection';
 import { renderConsultationSection } from './components/ConsultationSection';
 import { renderFooter } from './components/Footer';
 import { AIModelViewer } from './components/AIModelViewer';
@@ -46,6 +47,7 @@ class AtelierApp {
         ${renderRealFurnitureSection()}
         ${renderAtelierStudio()}
         ${renderInnovativeProjects()}
+        ${renderPhilosophySection()}
         ${renderConsultationSection()}
       </main>
       ${renderFooter()}

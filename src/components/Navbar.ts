@@ -22,7 +22,8 @@ export function renderNavbar(): string {
         <nav class="nav-links" id="main-nav">
           <a href="#real-furniture-section" class="nav-link">Mobiliário Real</a>
           <a href="#atelier-section" class="nav-link">Ateliê 3D</a>
-          <a href="#projects-section" class="nav-link">Inovação</a>
+          <a href="#projects-section" class="nav-link">Inovações</a>
+          <a href="#philosophy-section" class="nav-link">Filosofia</a>
           <a href="#consultation-section" class="nav-link">Contato</a>
         </nav>
 
@@ -33,8 +34,9 @@ export function renderNavbar(): string {
             target="_blank" 
             rel="noopener noreferrer" 
             class="btn btn-whatsapp-nav"
+            aria-label="Atendimento via WhatsApp"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
             </svg>
             <span>WhatsApp</span>
