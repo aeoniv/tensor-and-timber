@@ -557,44 +557,120 @@ export class Real3DGeneratorService {
       parent.add(slabMesh);
     }
 
-    // Timber Base Skids
-    const skidGeom = new THREE.BoxGeometry(L * 0.75, 0.07, W * 0.65);
-    const skidMesh = new THREE.Mesh(skidGeom, woodMat);
-    skidMesh.position.set(0, 0.035, 0);
-    skidMesh.castShadow = true;
-    parent.add(skidMesh);
+    // =========================================================================
+    // AUTHENTIC TENSEGRITY EQUILIBRIUM STRUCTURE
+    // Two completely non-touching rigid bodies suspended by tension physics:
+    // 1. Rigid Ground Base with upward cantilever mast reaching to apex TipBase.
+    // 2. Rigid Floating Tabletop with downward cantilever mast reaching to TipTable.
+    // 3. Central Vertical Cable: TipBase (higher) connects down to TipTable (lower),
+    //    carrying 100% of tabletop weight in pure tension!
+    // 4. Perimeter Pre-tensioned Cables: Lock planar stability & cancel tilt moments.
+    // =========================================================================
 
-    // Floating Tensegrity Compression Struts
-    const strutRadius = 0.04;
-    const strutGeom = new THREE.CylinderGeometry(strutRadius, strutRadius, H * 0.82, 16);
+    // 1. Ground Base Frame (Dual Sled Skids & Structural Cross Member)
+    const skidW = 0.12;
+    const skidH = 0.06;
+    const skidL = W * 0.78;
+    const baseSkidGeom = new THREE.BoxGeometry(skidW, skidH, skidL);
 
-    const s1 = new THREE.Mesh(strutGeom, woodMat);
-    s1.position.set(-halfL * 0.35, H * 0.45, 0);
-    s1.rotation.z = 0.42;
-    s1.castShadow = true;
-    parent.add(s1);
+    const leftSkid = new THREE.Mesh(baseSkidGeom, woodMat);
+    leftSkid.position.set(-halfL * 0.72, skidH / 2, 0);
+    leftSkid.castShadow = true;
+    parent.add(leftSkid);
 
-    const s2 = new THREE.Mesh(strutGeom, woodMat);
-    s2.position.set(halfL * 0.35, H * 0.45, 0);
-    s2.rotation.z = -0.42;
-    s2.castShadow = true;
-    parent.add(s2);
+    const rightSkid = new THREE.Mesh(baseSkidGeom, woodMat);
+    rightSkid.position.set(halfL * 0.72, skidH / 2, 0);
+    rightSkid.castShadow = true;
+    parent.add(rightSkid);
 
-    // Tension Cables & Turnbuckles
-    this.createCableMesh(parent, new THREE.Vector3(-halfL * 0.2, H * 0.75, 0), new THREE.Vector3(-halfL * 0.1, H - 0.02, 0), 0.005, cableMat, tbMat);
-    this.createCableMesh(parent, new THREE.Vector3(halfL * 0.2, H * 0.75, 0), new THREE.Vector3(halfL * 0.1, H - 0.02, 0), 0.005, cableMat, tbMat);
+    const crossGeom = new THREE.BoxGeometry(halfL * 1.44, skidH, 0.14);
+    const crossBeam = new THREE.Mesh(crossGeom, woodMat);
+    crossBeam.position.set(0, skidH / 2, 0);
+    crossBeam.castShadow = true;
+    parent.add(crossBeam);
 
-    const corners = [
-      [-halfL * 0.85, -halfW * 0.8],
-      [-halfL * 0.85, halfW * 0.8],
-      [halfL * 0.85, -halfW * 0.8],
-      [halfL * 0.85, halfW * 0.8]
+    // 2. Upward Cantilever Compression Mast (Anchored to Floor Base)
+    // Rises from base left and cantilevers up and into the center
+    const mastRadius = 0.045;
+    const lowerArmAnchor = new THREE.Vector3(-halfL * 0.28, skidH, 0);
+    const lowerArmElbow = new THREE.Vector3(-halfL * 0.06, H * 0.58, 0);
+    const tipBase = new THREE.Vector3(0, H * 0.63, 0);
+
+    // Slanted riser strut
+    const riserDir = new THREE.Vector3().subVectors(lowerArmElbow, lowerArmAnchor);
+    const riserLen = riserDir.length();
+    const riserGeom = new THREE.CylinderGeometry(mastRadius, mastRadius * 1.15, riserLen, 16);
+    const riserMesh = new THREE.Mesh(riserGeom, woodMat);
+    riserMesh.position.copy(lowerArmAnchor).addScaledVector(riserDir, 0.5);
+    riserMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), riserDir.clone().normalize());
+    riserMesh.castShadow = true;
+    parent.add(riserMesh);
+
+    // Horizontal cantilever arm to center apex
+    const cArmDir = new THREE.Vector3().subVectors(tipBase, lowerArmElbow);
+    const cArmLen = cArmDir.length();
+    const cArmGeom = new THREE.CylinderGeometry(mastRadius * 0.9, mastRadius, cArmLen, 16);
+    const cArmMesh = new THREE.Mesh(cArmGeom, woodMat);
+    cArmMesh.position.copy(lowerArmElbow).addScaledVector(cArmDir, 0.5);
+    cArmMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), cArmDir.clone().normalize());
+    cArmMesh.castShadow = true;
+    parent.add(cArmMesh);
+
+    // Mast apex titanium collar & eyelet
+    const collarGeom = new THREE.CylinderGeometry(mastRadius * 1.25, mastRadius * 1.25, 0.06, 16);
+    const apexCollar = new THREE.Mesh(collarGeom, tbMat);
+    apexCollar.position.copy(tipBase);
+    parent.add(apexCollar);
+
+    // 3. Downward Cantilever Compression Mast (Anchored Under Floating Tabletop)
+    // Mounted underneath tabletop right, reaches down and under towards center
+    const upperArmAnchor = new THREE.Vector3(halfL * 0.28, H - thickness, 0);
+    const upperArmElbow = new THREE.Vector3(halfL * 0.06, H * 0.48, 0);
+    const tipTable = new THREE.Vector3(0, H * 0.44, 0);
+
+    // Descending strut
+    const descDir = new THREE.Vector3().subVectors(upperArmElbow, upperArmAnchor);
+    const descLen = descDir.length();
+    const descGeom = new THREE.CylinderGeometry(mastRadius * 1.15, mastRadius, descLen, 16);
+    const descMesh = new THREE.Mesh(descGeom, woodMat);
+    descMesh.position.copy(upperArmAnchor).addScaledVector(descDir, 0.5);
+    descMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), descDir.clone().normalize());
+    descMesh.castShadow = true;
+    parent.add(descMesh);
+
+    // Horizontal cantilever arm under center
+    const uArmDir = new THREE.Vector3().subVectors(tipTable, upperArmElbow);
+    const uArmLen = uArmDir.length();
+    const uArmGeom = new THREE.CylinderGeometry(mastRadius * 0.9, mastRadius, uArmLen, 16);
+    const uArmMesh = new THREE.Mesh(uArmGeom, woodMat);
+    uArmMesh.position.copy(upperArmElbow).addScaledVector(uArmDir, 0.5);
+    uArmMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), uArmDir.clone().normalize());
+    uArmMesh.castShadow = true;
+    parent.add(uArmMesh);
+
+    // Tabletop mast tip titanium collar
+    const tableCollar = new THREE.Mesh(collarGeom, tbMat);
+    tableCollar.position.copy(tipTable);
+    parent.add(tableCollar);
+
+    // 4. CENTRAL HIGH-TENSION SUSPENSION CABLE (PURE GRAVITATIONAL TENSION)
+    // tipBase is at y = H * 0.63 (~47cm), tipTable is at y = H * 0.44 (~33cm).
+    // The base holds the top of this cable; the floating table hangs from the bottom!
+    this.createCableMesh(parent, tipBase, tipTable, 0.007, cableMat, tbMat);
+
+    // 5. PERIMETER STABILIZING TENSION CABLES (WITH TURNBUCKLES)
+    // 4 corner cables anchored to base skids, keeping the tabletop level & resisting all rotation
+    const perimeterAnchors = [
+      [-halfL * 0.72, -halfW * 0.74],
+      [-halfL * 0.72,  halfW * 0.74],
+      [ halfL * 0.72, -halfW * 0.74],
+      [ halfL * 0.72,  halfW * 0.74]
     ];
 
-    corners.forEach(([cx, cz]) => {
-      const topP = new THREE.Vector3(cx, H - 0.02, cz);
-      const baseP = new THREE.Vector3(cx * 0.78, 0.07, cz * 0.78);
-      this.createCableMesh(parent, topP, baseP, 0.0035, cableMat, tbMat);
+    perimeterAnchors.forEach(([bx, bz]) => {
+      const baseAnchor = new THREE.Vector3(bx, skidH, bz);
+      const topAnchor = new THREE.Vector3(bx * 1.14, H - thickness, bz * 1.12);
+      this.createCableMesh(parent, topAnchor, baseAnchor, 0.0035, cableMat, tbMat);
     });
   }
 
