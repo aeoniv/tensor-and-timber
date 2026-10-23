@@ -1,121 +1,126 @@
 export function renderConsultationSection(): string {
   return `
-    <section class="section" id="consultation-section">
+    <section class="section consultation-section" id="consultation-section">
       <div class="container">
         
         <div class="section-header text-center">
           <span class="section-tag gold">
-            <span class="flag-dot-green"></span>
-            Atendimento Personalizado &bull; João Pessoa, PB
+            Atendimento &bull; Orçamento Sem Compromisso
           </span>
           <h2 class="section-title">
-            Inicie sua Encomenda <span class="gold-gradient">Sob Medida</span>
+            Fale Conosco e Solicite seu <span class="gold-gradient">Orçamento</span>
           </h2>
           <p class="section-subtitle">
-            Atendemos arquitetos, designers de interiores e clientes finais com entregas White-Glove em todo o Brasil.
-            Fale diretamente com o mestre marceneiro ou envie as especificações do seu espaço.
+            Envie sua ideia, as dimensões do ambiente ou seu projeto arquitetônico. Atendemos com rapidez e clareza.
           </p>
         </div>
 
         <div class="consultation-layout-grid">
           
-          <!-- Left: Direct WhatsApp Card & Guarantees -->
-          <div class="consultation-direct-card glass-panel">
-            <div class="direct-card-tag">CANAL DIRETO &bull; RESPOSTA RÁPIDA</div>
-            <h3 class="direct-card-title">Prefere conversar diretamente no WhatsApp?</h3>
-            <p class="direct-card-desc">
-              Envie fotos do seu ambiente, plantas em PDF ou tire dúvidas técnicas sobre madeiras nobres, resistência e prazos com nosso atelier.
-            </p>
+          <!-- Left Column: Simple Honest Points & Legal Data -->
+          <div class="consultation-info-col">
+            
+            <div class="consultation-card glass-panel">
+              <div class="consultation-feature">
+                <div class="cf-icon">💬</div>
+                <div class="cf-text">
+                  <strong>Atendimento Direto pelo WhatsApp</strong>
+                  <p>Fale diretamente com quem fabrica. Tire dúvidas técnicas e receba estimativas iniciais de valores e prazos.</p>
+                </div>
+              </div>
 
-            <a 
-              href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20para%20mobiliário%20sob%20medida%20da%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="btn btn-whatsapp-full"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
-              </svg>
-              <span>Abrir Conversa no WhatsApp: (83) 9822-9900</span>
-            </a>
+              <div class="consultation-feature">
+                <div class="cf-icon">🪵</div>
+                <div class="cf-text">
+                  <strong>Material Conforme Sua Escolha</strong>
+                  <p>Trabalhamos com madeiras maciças (Cumaru, Freijó, Peroba, Pinus), MDF ou compensados, adequando ao projeto e ao seu orçamento.</p>
+                </div>
+              </div>
 
-            <div class="guarantees-list">
-              <div class="guarantee-item">
-                <span class="guarantee-icon">📍</span>
-                <div>
-                  <strong>Ateliê em João Pessoa / PB</strong>
-                  <p>Av. Bahia, 703, CXPST 042 — Bairro dos Estados, CEP 58.030-130.</p>
+              <div class="consultation-feature">
+                <div class="cf-icon">🚚</div>
+                <div class="cf-text">
+                  <strong>Entrega e Montagem Especializada</strong>
+                  <p>Montagem cuidadosa no local em João Pessoa e região, com possibilidade de envio para outros estados.</p>
                 </div>
               </div>
-              <div class="guarantee-item">
-                <span class="guarantee-icon">🏛️</span>
-                <div>
-                  <strong>Empresa Cadastrada &bull; CNPJ 59.492.848/0001-28</strong>
-                  <p>83 Empreendimentos Ltda (83 Ambientes Planejados) &bull; Situação Ativa na RFB.</p>
-                </div>
-              </div>
-              <div class="guarantee-item">
-                <span class="guarantee-icon">✉️</span>
-                <div>
-                  <strong>Canal Direto por E-mail</strong>
-                  <p>gerenciadamarcenaria@gmail.com &bull; Retorno formal de propostas.</p>
-                </div>
-              </div>
-              <div class="guarantee-item">
-                <span class="guarantee-icon">🚚</span>
-                <div>
-                  <strong>Entrega White-Glove em Todo o Brasil</strong>
-                  <p>Transporte especializado e equipe própria de montagem e calibração.</p>
+
+              <div class="consultation-feature">
+                <div class="cf-icon">📋</div>
+                <div class="cf-text">
+                  <strong>Dados Cadastrais Oficiais</strong>
+                  <p>
+                    <strong>83 EMPREENDIMENTOS LTDA</strong> (83 Ambientes Planejados)<br>
+                    CNPJ: 59.492.848/0001-28 &bull; CNAE 33.29-5-01 (Montagem de móveis)<br>
+                    Av. Bahia, 703, CXPST 042 — Bairro dos Estados, João Pessoa - PB
+                  </p>
                 </div>
               </div>
             </div>
+
+            <!-- Direct Contact Box -->
+            <div class="direct-phone-box glass-panel">
+              <span class="direct-label">ATENDIMENTO RÁPIDO</span>
+              <a href="https://wa.me/558398229900" target="_blank" rel="noopener noreferrer" class="direct-link">
+                (83) 9822-9900
+              </a>
+              <span class="direct-sub">Segunda a Sexta, das 8h às 18h &bull; Sábado, das 8h às 12h</span>
+            </div>
+
           </div>
 
-          <!-- Right: Clean Consultation Form -->
-          <div class="consultation-form-card glass-panel">
-            <h3 class="form-card-title">Solicitar Proposta Formal</h3>
-            <p class="form-card-subtitle">Retornamos com proposta detalhada e estimativa em até 24 horas úteis.</p>
+          <!-- Right Column: Clean Form -->
+          <div class="consultation-form-col glass-panel">
+            <h3 class="form-box-title">Solicitar Proposta de Móvel Sob Medida</h3>
+            <p class="form-box-sub">Preencha os campos abaixo. Retornamos o contato em até 24 horas úteis.</p>
 
-            <form id="onpage-commission-form" class="clean-form">
-              <div class="form-field">
-                <label for="comm-name">Seu Nome Completo</label>
-                <input type="text" id="comm-name" placeholder="Ex: Dra. Mariana Vasconcelos" required />
+            <form id="onpage-commission-form" class="bespoke-commission-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="comm-name">Seu Nome Completo *</label>
+                  <input type="text" id="comm-name" placeholder="Ex: Maria Fernandes" required />
+                </div>
+                <div class="form-group">
+                  <label for="comm-phone">WhatsApp / Telefone *</label>
+                  <input type="tel" id="comm-phone" placeholder="(83) 98888-0000" required />
+                </div>
               </div>
 
-              <div class="form-row-2">
-                <div class="form-field">
-                  <label for="comm-phone">WhatsApp / Telefone</label>
-                  <input type="tel" id="comm-phone" placeholder="(83) 9822-9900" required />
-                </div>
-                <div class="form-field">
-                  <label for="comm-city">Cidade / Estado</label>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="comm-city">Cidade / Estado *</label>
                   <input type="text" id="comm-city" placeholder="Ex: João Pessoa - PB" required />
                 </div>
+                <div class="form-group">
+                  <label for="comm-archetype">Tipo de Projeto *</label>
+                  <select id="comm-archetype" required>
+                    <option value="Mesa de Jantar Flutuante">Mesa de Jantar Flutuante</option>
+                    <option value="Poltrona Tensa Lounge">Poltrona Tensa Lounge</option>
+                    <option value="Aparador Suspenso Cerrado">Aparador Suspenso</option>
+                    <option value="Mesa de Centro Tupi">Mesa de Centro</option>
+                    <option value="Móveis Planejados Residenciais">Móveis Planejados Residenciais</option>
+                    <option value="Cúpula Geodésica 6M">Cúpula Geodésica em Madeira</option>
+                    <option value="Outro Projeto Sob Medida">Outro Projeto Sob Medida</option>
+                  </select>
+                </div>
               </div>
 
-              <div class="form-field">
-                <label for="comm-archetype">Peça de Interesse</label>
-                <select id="comm-archetype">
-                  <option value="Mesa de Jantar Flutuante Ipanema">Mesa de Jantar Flutuante Ipanema (Cumaru Maciço)</option>
-                  <option value="Poltrona Tensa Niemeyer">Poltrona Tensa Niemeyer (Freijó &amp; Couro)</option>
-                  <option value="Aparador Escultural Cerrado">Aparador Escultural Cerrado (Jacarandá da Bahia)</option>
-                  <option value="Mesa de Centro Tupi">Mesa de Centro Tupi (Pequiá &amp; Vidro 19mm)</option>
-                  <option value="Cúpula Geodésica Biosfera">Cúpula Geodésica Biosfera 3V</option>
-                  <option value="Projeto Especial Sob Medida">Projeto Especial com Arquiteto</option>
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label for="comm-notes">Dimensões do Espaço ou Observações</label>
-                <textarea id="comm-notes" rows="3" placeholder="Ex: Living integrado com 45m², desejamos uma mesa suspensa para 10 lugares em tom mel dourado..."></textarea>
+              <div class="form-group">
+                <label for="comm-notes">Descreva seu Projeto ou Medidas Desejadas</label>
+                <textarea id="comm-notes" rows="4" placeholder="Ex: Mesa para 8 lugares, tampo de 2,40m, preferência por madeira clara ou MDF."></textarea>
               </div>
 
               <button type="submit" class="btn btn-primary-gold btn-block btn-lg" id="btn-submit-commission">
-                <span>Enviar Solicitação de Orçamento &rarr;</span>
+                <span>Enviar Solicitação de Orçamento</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
               </button>
 
-              <div id="commission-success-state" class="form-success-message" style="display: none;">
-                ✓ Solicitação recebida com sucesso! Nossa equipe técnica da 83 Ambientes Planejados entrará em contato via WhatsApp em breve.
+              <div id="commission-success-state" class="commission-success-state" style="display: none;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <h4>Solicitação Recebida com Sucesso!</h4>
+                <p>Nossa equipe entrará em contato pelo seu WhatsApp.</p>
               </div>
             </form>
           </div>

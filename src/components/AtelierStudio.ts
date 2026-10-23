@@ -1,145 +1,133 @@
 export function renderAtelierStudio(): string {
   return `
-    <section class="section" id="atelier-section">
+    <section class="section atelier-studio-section" id="atelier-section">
       <div class="container">
         
-        <!-- Section Header -->
+        <!-- Header -->
         <div class="section-header text-center">
-          <div class="hero-badge-row" style="justify-content: center; margin-bottom: 12px;">
-            <span class="section-tag gold">
-              <span class="flag-dot-green"></span>
-              Ateliê 3D Digital &bull; Marcenaria Paramétrica
-            </span>
-          </div>
+          <span class="section-tag gold">
+            Estúdio 3D Interativo
+          </span>
           <h2 class="section-title">
-            Configure ou <span class="gold-gradient">Gere seu Objeto 3D Sob Medida</span>
+            Configure seu Móvel e <span class="gold-gradient">Visualize em 3D</span>
           </h2>
           <p class="section-subtitle">
-            Crie peças autorais em tempo real. Escolha um arquétipo ou descreva seu conceito para síntese tridimensional com física de tensegridade e exportação direta em .GLB.
+            Escolha o modelo, defina o material de sua preferência e visualize a estrutura tridimensional antes de solicitar seu orçamento.
           </p>
         </div>
 
-        <!-- Unified Side-by-Side Atelier Workspace -->
-        <div class="atelier-unified-layout">
+        <!-- 2-Column Responsive Workspace -->
+        <div class="atelier-workspace-grid">
           
-          <!-- Left Column: Generator & Customization Controls -->
-          <div class="atelier-controls-column glass-panel">
+          <!-- Left Column: Simple Configurator -->
+          <div class="atelier-config-panel glass-panel">
             
-            <!-- Step 1: Quick Archetype Selector -->
+            <!-- Step 1: Base Archetype Selection -->
             <div class="config-step-block">
               <div class="panel-section-title">
                 <span class="step-num">01</span>
-                <span>Selecione o Arquétipo Estrutural</span>
+                <span>Tipo de Peça</span>
               </div>
-              <div class="archetype-selector-tabs" id="archetype-selector">
-                <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante Ipanema" data-price="R$ 38.500 – R$ 48.000">
-                  <span>Mesa Flutuante</span>
+              <div class="archetype-tabs-row" id="archetype-selector">
+                <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante" data-price="R$ 38.500 – R$ 48.000">
+                  <span class="tab-label">Mesa de Jantar</span>
                 </button>
-                <button class="archetype-tab" data-archetype="lounge-chair" data-name="Poltrona Tensa Niemeyer" data-price="R$ 18.900 – R$ 24.500">
-                  <span>Poltrona Tensa</span>
+                <button class="archetype-tab" data-archetype="chair" data-name="Poltrona Tensa Lounge" data-price="R$ 18.900 – R$ 24.500">
+                  <span class="tab-label">Poltrona Lounge</span>
                 </button>
-                <button class="archetype-tab" data-archetype="shelving-unit" data-name="Aparador Escultural Cerrado" data-price="R$ 26.000 – R$ 34.000">
-                  <span>Aparador Suspenso</span>
+                <button class="archetype-tab" data-archetype="shelving-unit" data-name="Aparador Suspenso Cerrado" data-price="R$ 26.000 – R$ 34.000">
+                  <span class="tab-label">Aparador Suspenso</span>
                 </button>
-                <button class="archetype-tab" data-archetype="geodesic-dome" data-name="Cúpula Geodésica Biosfera 3V" data-price="R$ 68.000 – R$ 92.000">
-                  <span>Cúpula Biosfera 3V</span>
-                </button>
-                <button class="archetype-tab" data-archetype="cantilever-desk" data-name="Mesa Executiva Cantilever Aetherium" data-price="R$ 42.000 – R$ 56.000">
-                  <span>Mesa Cantilever</span>
+                <button class="archetype-tab" data-archetype="coffee-table" data-name="Mesa de Centro Tupi" data-price="R$ 15.800 – R$ 21.000">
+                  <span class="tab-label">Mesa de Centro</span>
                 </button>
               </div>
             </div>
 
-            <!-- Step 2: Custom Prompt & Vision Specifications -->
+            <!-- Step 2: Custom Request Prompt / Image Sketch -->
             <div class="config-step-block">
               <div class="panel-section-title">
                 <span class="step-num">02</span>
-                <span>Especificação Criativa ou Conceito</span>
+                <span>Descreva sua Ideia ou Selecione um Exemplo</span>
               </div>
               
-              <div class="prompt-input-wrapper">
+              <div class="ai-prompt-input-group">
                 <textarea 
                   id="atelier-custom-prompt-input" 
-                  class="atelier-textarea"
                   rows="3" 
-                  placeholder="Descreva seu projeto sob medida (ex: Mesa de jantar para 10 lugares em Cumaru com borda orgânica e tirantes de ouro titânio PVD...)"
+                  class="prompt-textarea"
+                  placeholder="Descreva seu projeto sob medida (ex: Mesa de jantar para 8 pessoas com tampo em madeira e cabos de aço inox)..."
                 ></textarea>
-
-                <!-- Prompt Inspiration Chips -->
+                
+                <!-- Prompt Suggestion Chips -->
                 <div class="prompt-chips-row">
-                  <span class="chips-label">Inspirações:</span>
-                  <button type="button" class="prompt-chip" data-phrase="Mesa de jantar flutuante para 10 lugares em Cumaru com borda orgânica natural">+ 10 Lugares</button>
-                  <button type="button" class="prompt-chip" data-phrase="Tampo em Cumaru com canal de resina azul cristalino e cabos dourados">+ Rio de Vidro</button>
-                  <button type="button" class="prompt-chip" data-phrase="Poltrona lounge modernista em Freijó curvado com tirantes tensores">+ Poltrona Tensa</button>
-                  <button type="button" class="prompt-chip" data-phrase="Aparador escultural suspenso em Jacarandá de demolição">+ Aparador Suspenso</button>
-                  <button type="button" class="prompt-chip" data-phrase="Cúpula geodésica 3V em madeira tratada de 6 metros">+ Cúpula 3V</button>
-                </div>
-              </div>
-
-              <!-- Attach Sketch or Drawing (Computer Vision Contour) -->
-              <div class="sketch-upload-block">
-                <div class="sketch-upload-header">
-                  <span class="sketch-title">Anexar Croqui ou Referência (Opcional)</span>
-                  <span class="sketch-badge">Visão Computacional</span>
+                  <button type="button" class="prompt-chip" data-phrase="Mesa de jantar para 8 pessoas com cabos de aço">Mesa de Jantar (8 Lugares)</button>
+                  <button type="button" class="prompt-chip" data-phrase="Aparador suspenso com portas ripadas">Aparador Suspenso</button>
+                  <button type="button" class="prompt-chip" data-phrase="Mesa de centro com apoio tensil e tampo circular">Mesa de Centro</button>
+                  <button type="button" class="prompt-chip" data-phrase="Bancada de trabalho sob medida">Bancada Sob Medida</button>
                 </div>
 
-                <div id="atelier-sketch-dropzone" class="sketch-dropzone">
-                  <input type="file" id="atelier-sketch-file-input" accept="image/png,image/jpeg,image/webp" style="display: none;">
-                  
-                  <div id="atelier-sketch-empty-state" class="sketch-empty-state">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- Sketch / Photo Uploader -->
+                <div class="sketch-uploader-row">
+                  <label for="atelier-sketch-upload" class="sketch-upload-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                     </svg>
-                    <span>Arraste um croqui/planta ou <strong>selecione do dispositivo</strong></span>
-                  </div>
-
-                  <div id="atelier-sketch-preview-wrap" class="sketch-preview-wrap" style="display: none;">
-                    <img id="atelier-sketch-preview-img" src="" alt="Croqui anexado" class="sketch-preview-img" />
-                    <button type="button" id="btn-remove-atelier-sketch" class="btn-remove-sketch" aria-label="Remover imagem">&times;</button>
+                    <span>Anexar Esboço, Foto ou Planta (Opcional)</span>
+                  </label>
+                  <input type="file" id="atelier-sketch-upload" accept="image/*" style="display: none;" />
+                  <div id="sketch-preview-badge" class="sketch-preview-badge" style="display: none;">
+                    <span id="sketch-preview-filename">imagem.png</span>
+                    <button type="button" id="btn-remove-sketch">&times;</button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Step 3: Brazilian Hardwoods Swatches -->
+            <!-- Step 3: Material / Wood Selection (Client's Choice) -->
             <div class="config-step-block">
               <div class="panel-section-title">
                 <span class="step-num">03</span>
-                <span>Madeira Nobre Brasileira Certificada FSC®</span>
+                <span>Opções de Madeira ou Material de Referência</span>
               </div>
-              <div class="wood-selector-grid" id="wood-selector">
-                <button class="wood-option-btn active" data-wood="cumaru" data-wood-name="Cumaru Amazônico">
+              <p class="step-note-simple">A madeira e o acabamento são definidos pelo cliente. Veja algumas opções de referência:</p>
+              
+              <div class="wood-options-grid" id="wood-species-selector">
+                <button class="wood-option-btn active" data-wood="cumaru" data-wood-name="Cumaru">
                   <span class="wood-swatch" style="background: #8b5a2b;"></span>
                   <div class="wood-option-info">
                     <span class="wood-title">Cumaru</span>
-                    <span class="wood-sub">Tom Mel Dourado &bull; Alta Densidade</span>
+                    <span class="wood-sub">Tom Castanho &bull; Alta Densidade</span>
                   </div>
                 </button>
 
-                <button class="wood-option-btn" data-wood="freijo" data-wood-name="Freijó Maciço">
+                <button class="wood-option-btn" data-wood="freijo" data-wood-name="Freijó">
                   <span class="wood-swatch" style="background: #b8976b;"></span>
                   <div class="wood-option-info">
                     <span class="wood-title">Freijó</span>
-                    <span class="wood-sub">Tom Palha &bull; Modernismo Brasileiro</span>
+                    <span class="wood-sub">Tom Claro &bull; Veios Suaves</span>
                   </div>
                 </button>
 
-                <button class="wood-option-btn" data-wood="jacaranda" data-wood-name="Jacarandá da Bahia">
+                <button class="wood-option-btn" data-wood="jacaranda" data-wood-name="Jacarandá">
                   <span class="wood-swatch" style="background: #3d2b1f;"></span>
                   <div class="wood-option-info">
                     <span class="wood-title">Jacarandá</span>
-                    <span class="wood-sub">Tom Escuro Nobre &bull; Demolição</span>
+                    <span class="wood-sub">Tom Escuro &bull; Desenho Marcante</span>
                   </div>
                 </button>
 
-                <button class="wood-option-btn" data-wood="pequia" data-wood-name="Pequiá Natural">
+                <button class="wood-option-btn" data-wood="pequia" data-wood-name="Pequiá">
                   <span class="wood-swatch" style="background: #dfbe8f;"></span>
                   <div class="wood-option-info">
                     <span class="wood-title">Pequiá</span>
-                    <span class="wood-sub">Borda Orgânica &bull; Textura Viva</span>
+                    <span class="wood-sub">Tom Amarelado &bull; Textura Viva</span>
                   </div>
                 </button>
               </div>
+              <p class="wood-disclaimer-note">
+                * Também trabalhamos com MDF, compensado naval e outras madeiras de acordo com a sua preferência e orçamento.
+              </p>
             </div>
 
             <!-- Step 4: Tension System Finishes -->
@@ -151,15 +139,15 @@ export function renderAtelierStudio(): string {
               <div class="tension-selector-row" id="tension-selector">
                 <button class="tension-pill active" data-tension="inox">
                   <span class="tension-swatch" style="background: #d8dee9;"></span>
-                  <span>Inox Naval 316</span>
+                  <span>Aço Inox</span>
                 </button>
                 <button class="tension-pill" data-tension="ouro">
                   <span class="tension-swatch" style="background: #f1c40f;"></span>
-                  <span>Ouro Titânio PVD</span>
+                  <span>Acabamento Dourado</span>
                 </button>
                 <button class="tension-pill" data-tension="preto">
                   <span class="tension-swatch" style="background: #22252a;"></span>
-                  <span>Preto Stealth</span>
+                  <span>Preto Fosco</span>
                 </button>
               </div>
             </div>
@@ -170,11 +158,11 @@ export function renderAtelierStudio(): string {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
-                <span id="btn-generate-3d-text">✨ Gerar Objeto 3D Sob Medida</span>
+                <span id="btn-generate-3d-text">Gerar Modelo 3D Sob Medida</span>
               </button>
               <div class="generator-guarantee-note">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Cálculo de equilíbrio e renderização Three.js instantânea</span>
+                <span>Visualização interativa imediata no navegador</span>
               </div>
             </div>
 
@@ -190,7 +178,7 @@ export function renderAtelierStudio(): string {
                   <span class="pulse-dot"></span>
                   <span class="stage-status-text" id="atelier-status-label">Visualização 3D Ativa</span>
                 </div>
-                <div class="stage-model-pill" id="atelier-model-pill">Mesa Flutuante em Cumaru</div>
+                <div class="stage-model-pill" id="atelier-model-pill">Mesa de Jantar em Cumaru</div>
               </div>
 
               <!-- WebGL Canvas Container -->
@@ -218,9 +206,9 @@ export function renderAtelierStudio(): string {
             <div class="deal-closing-card glass-panel" id="deal-closing-card">
               <div class="deal-card-header">
                 <div class="deal-info-group">
-                  <span class="deal-card-tag">ESTIMATIVA DE INVESTIMENTO &bull; PRODUÇÃO REAL</span>
-                  <h3 class="deal-card-title" id="deal-project-name">Mesa de Jantar Flutuante Ipanema</h3>
-                  <div class="deal-wood-summary" id="deal-wood-summary">Cumaru Amazônico Maciço &bull; Inox Naval 316</div>
+                  <span class="deal-card-tag">RESUMO DO PROJETO &bull; ESTIMATIVA</span>
+                  <h3 class="deal-card-title" id="deal-project-name">Mesa de Jantar Flutuante</h3>
+                  <div class="deal-wood-summary" id="deal-wood-summary">Cumaru &bull; Aço Inox</div>
                 </div>
                 <div class="deal-price-bracket" id="deal-price-bracket">
                   R$ 38.500 – R$ 48.000
@@ -230,26 +218,26 @@ export function renderAtelierStudio(): string {
               <div class="deal-inclusions-grid">
                 <div class="inclusion-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Madeira 100% FSC® com seleção de veios</span>
+                  <span>Material e acabamento à escolha do cliente</span>
                 </div>
                 <div class="inclusion-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Cálculo estrutural de deflexão zero</span>
+                  <span>Dimensões adaptadas ao seu ambiente</span>
                 </div>
                 <div class="inclusion-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Entrega White-Glove e montagem no local</span>
+                  <span>Acompanhamento visual em modelo 3D</span>
                 </div>
                 <div class="inclusion-item">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Garantia estrutural vitalícia</span>
+                  <span>Entrega e montagem no local</span>
                 </div>
               </div>
 
               <div class="deal-action-buttons">
                 <a 
                   id="deal-btn-whatsapp" 
-                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20encomendar%20a%20Mesa%20de%20Jantar%20Flutuante%20Ipanema%20em%20Cumaru%20Maciço." 
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20orçamento%20para%20uma%20Mesa%20de%20Jantar%20Flutuante%20sob%20medida." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp-lg"
@@ -257,10 +245,10 @@ export function renderAtelierStudio(): string {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
                   </svg>
-                  <span>Encomendar Esta Configuração via WhatsApp</span>
+                  <span>Conversar sobre este Projeto no WhatsApp</span>
                 </a>
                 <button class="btn btn-glass" id="btn-reserve-atelier-slot">
-                  <span>Solicitar Proposta Formal</span>
+                  <span>Solicitar Orçamento Detalhado</span>
                 </button>
               </div>
 

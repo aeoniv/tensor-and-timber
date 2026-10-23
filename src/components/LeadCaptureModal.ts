@@ -121,7 +121,7 @@ export class LeadCaptureModal {
               </label>
               <select id="lead-budget-bracket" style="width: 100%;">
                 <option value="R$ 15.000 – R$ 30.000">R$ 15.000 – R$ 30.000 (Mesas de Centro ou Poltronas)</option>
-                <option value="R$ 30.000 – R$ 60.000" selected>R$ 30.000 – R$ 60.000 (Mesa de Jantar Escultural)</option>
+                <option value="R$ 30.000 – R$ 60.000" selected>R$ 30.000 – R$ 60.000 (Mesa de Jantar Sob Medida)</option>
                 <option value="R$ 60.000 – R$ 120.000">R$ 60.000 – R$ 120.000 (Domo Geodésico ou Grande Porte)</option>
                 <option value="Acima de R$ 120.000">Acima de R$ 120.000 (Projetos Especiais Monumentais)</option>
               </select>

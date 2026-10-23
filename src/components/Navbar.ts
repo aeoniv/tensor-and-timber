@@ -20,17 +20,17 @@ export function renderNavbar(): string {
 
         <!-- Clean Navigation Links -->
         <nav class="nav-links" id="main-nav">
-          <a href="#real-furniture-section" class="nav-link">Mobiliário Real</a>
-          <a href="#atelier-section" class="nav-link">Ateliê 3D</a>
-          <a href="#projects-section" class="nav-link">Inovações</a>
-          <a href="#philosophy-section" class="nav-link">Filosofia</a>
+          <a href="#real-furniture-section" class="nav-link">Modelos</a>
+          <a href="#atelier-section" class="nav-link">Estúdio 3D</a>
+          <a href="#projects-section" class="nav-link">Estruturas</a>
+          <a href="#philosophy-section" class="nav-link">Como Trabalhamos</a>
           <a href="#consultation-section" class="nav-link">Contato</a>
         </nav>
 
         <!-- High-Conversion Actions -->
         <div class="nav-actions">
           <a 
-            href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20de%20mobiliário%20sob%20medida%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." 
+            href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20um%20projeto%20de%20marcenaria%20sob%20medida%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." 
             target="_blank" 
             rel="noopener noreferrer" 
             class="btn btn-whatsapp-nav"

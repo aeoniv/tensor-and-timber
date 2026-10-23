@@ -1,5 +1,5 @@
 import { WOOD_SPECIES, TENSION_SYSTEMS, JOINERY_TYPES, DOME_FREQUENCIES } from '../data/constants';
-import { ProjectConfiguration, EstimateResult, BillOfMaterialsItem } from '../types';
+import { ProjectConfiguration, EstimateResult, BillOfMaterialsItem, JoineryType } from '../types';
 
 export class ProjectPlanner {
   private config: ProjectConfiguration;
@@ -47,7 +47,7 @@ export class ProjectPlanner {
     const isDome = this.config.category.includes('geodesic');
     const wood = WOOD_SPECIES.find(w => w.id === this.config.woodSpeciesId) || WOOD_SPECIES[0];
     const tension = TENSION_SYSTEMS.find(t => t.id === this.config.tensionSystemId) || TENSION_SYSTEMS[0];
-    const joinery = JOINERY_TYPES.find(j => j.id === this.config.joineryId) || JOINERY_TYPES[0];
+    const joinery = JOINERY_TYPES.find((j: JoineryType) => j.id === this.config.joineryId) || JOINERY_TYPES[0];
 
     const bom: BillOfMaterialsItem[] = [];
 
@@ -191,7 +191,7 @@ export class ProjectPlanner {
     }
     if (this.config.addons.whiteGloveInstallation) {
       addonsCost += 950;
-      bom.push({ category: 'Atelier Addon', description: 'White-Glove Delivery, Laser Balancing & On-Site Setup', quantity: 1, unit: 'service', unitPrice: 950, total: 950 });
+      bom.push({ category: 'Atelier Addon', description: 'Entrega e Montagem Especializada no Local', quantity: 1, unit: 'service', unitPrice: 950, total: 950 });
     }
 
     const materialsCost = Math.round(bom.reduce((acc, item) => item.category !== 'Atelier Addon' ? acc + item.total : acc, 0));
@@ -443,7 +443,7 @@ export class ProjectPlanner {
               <div class="addon-info">
                 <input type="checkbox" id="addon-whiteglove" ${this.config.addons.whiteGloveInstallation ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--gold-primary);">
                 <div>
-                  <div class="addon-title">White-Glove Delivery &amp; Laser Alignment</div>
+                  <div class="addon-title">Entrega e Montagem Especializada</div>
                   <div style="font-size: 0.75rem; color: var(--text-muted);">Master artisan travels on-site for laser tension calibration</div>
                 </div>
               </div>

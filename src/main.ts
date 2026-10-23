@@ -64,8 +64,8 @@ class AtelierApp {
     try {
       this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
         hudPillId: 'hero-model-pill',
-        modelName: 'Mesa de Jantar Flutuante Ipanema',
-        initialPrompt: 'Mesa de jantar flutuante em madeira Cumaru maciça com cabos de aço naval'
+        modelName: 'Mesa de Jantar Flutuante',
+        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox'
       });
     } catch (e) {
       console.warn('Hero 3D viewer init error:', e);
@@ -75,8 +75,8 @@ class AtelierApp {
     try {
       this.atelierAIViewer = new AIModelViewer('atelier-3d-canvas', {
         hudPillId: 'atelier-model-pill',
-        modelName: 'Mesa de Jantar Flutuante Ipanema',
-        initialPrompt: 'Mesa de jantar flutuante em madeira Cumaru maciça com cabos de aço naval'
+        modelName: 'Mesa de Jantar Flutuante',
+        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox'
       });
     } catch (e) {
       console.warn('Atelier 3D viewer init error:', e);
@@ -359,7 +359,7 @@ class AtelierApp {
       this.showToast('Erro ao gerar modelo 3D. Tente novamente.');
     } finally {
       if (btn) btn.disabled = false;
-      if (btnText) btnText.innerHTML = `✨ Gerar Objeto 3D Sob Medida`;
+      if (btnText) btnText.innerHTML = `Gerar Modelo 3D Sob Medida`;
       if (statusLabel) statusLabel.textContent = 'Visualização 3D Ativa';
     }
   }
@@ -372,16 +372,16 @@ class AtelierApp {
     if (dealPrice) dealPrice.textContent = this.currentEstimatedBracket;
 
     const woodNames: Record<string, string> = {
-      cumaru: 'Cumaru Amazônico Maciço FSC®',
-      freijo: 'Freijó Maciço Curvado',
-      jacaranda: 'Jacarandá da Bahia de Demolição',
-      pequia: 'Pequiá Maciço Natural'
+      cumaru: 'Cumaru',
+      freijo: 'Freijó',
+      jacaranda: 'Jacarandá',
+      pequia: 'Pequiá'
     };
 
     const tensionNames: Record<string, string> = {
-      inox: 'Aço Inox Naval 316',
-      ouro: 'Ouro Titânio PVD',
-      preto: 'Preto Stealth'
+      inox: 'Aço Inox',
+      ouro: 'Acabamento Dourado',
+      preto: 'Preto Fosco'
     };
 
     const woodDesc = woodNames[this.currentWood] || 'Madeira Nobre';
@@ -392,10 +392,10 @@ class AtelierApp {
       summaryEl.textContent = `${woodDesc} • ${tensionDesc}`;
     }
 
-    // Update WhatsApp link with exact configuration!
+    // Update WhatsApp link with exact configuration
     const waBtn = document.getElementById('deal-btn-whatsapp') as HTMLAnchorElement;
     if (waBtn) {
-      const msg = `Olá! Configurei a ${this.currentModelName} em ${woodDesc} com tirantes em ${tensionDesc} (${this.currentEstimatedBracket}) no Ateliê 3D da Tensor & Timber e gostaria de encomendar sob medida.`;
+      const msg = `Olá! Configurei a ${this.currentModelName} com acabamento em ${woodDesc} e tirantes em ${tensionDesc} (${this.currentEstimatedBracket}) no site da 83 Ambientes Planejados e gostaria de solicitar um orçamento sob medida.`;
       waBtn.href = `https://wa.me/558398229900?text=${encodeURIComponent(msg)}`;
     }
   }
@@ -444,9 +444,9 @@ class AtelierApp {
           category: 'tensegrity-dining-table',
           title: archetype,
           dimensions: { length: 280, width: 110, height: 76, diameter: 6.0, domeHeight: 3.6 },
-          woodSpeciesId: 'Cumaru Amazônico FSC®',
+          woodSpeciesId: 'Madeira à escolha do cliente',
           tensionSystemId: 'Aço Inox Naval 316',
-          joineryId: 'Encaixes Tradicionais & Titânio',
+          joineryId: 'Encaixes de Marcenaria Sob Medida',
           domeFrequency: 'v3',
           glazingCoverage: 'stargazing',
           finishType: 'organic-matte-oil',
@@ -505,9 +505,9 @@ class AtelierApp {
       category: 'tensegrity-dining-table',
       title: pieceName,
       dimensions: { length: 280, width: 110, height: 76, diameter: 6.0, domeHeight: 3.6 },
-      woodSpeciesId: 'Cumaru Amazônico Maciço FSC®',
+      woodSpeciesId: 'Madeira à escolha do cliente',
       tensionSystemId: 'Aço Inox Naval 316 (6mm)',
-      joineryId: 'Encaixes Ocultos com Cavilhas de Titânio',
+      joineryId: 'Fixações Estruturais Ocultas',
       domeFrequency: 'v3',
       glazingCoverage: 'stargazing',
       finishType: 'organic-matte-oil',

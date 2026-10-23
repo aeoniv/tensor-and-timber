@@ -3,33 +3,32 @@ export function renderFooter(): string {
     <footer class="site-footer">
       <div class="container footer-content">
         
-        <!-- Brand & Certification Column -->
+        <!-- Brand & Details Column -->
         <div class="footer-col brand-col">
           <div class="footer-logo">
             <span class="footer-brand-name">TENSOR &amp; TIMBER</span>
-            <span class="footer-brand-sub">83 Ambientes Planejados &bull; Marcenaria Autoral</span>
+            <span class="footer-brand-sub">83 Ambientes Planejados &bull; Marcenaria Sob Medida</span>
           </div>
           <p class="footer-desc">
-            Mobiliário escultural em tensegridade e arquitetura de madeira de alta precisão. Peças sob encomenda com madeiras nobres certificadas FSC® e engenharia aeroespacial.
+            Móveis planejados, marcenaria sob medida e estruturas de tensegridade em João Pessoa, PB. Projetos personalizados com materiais escolhidos pelo cliente.
           </p>
           <div class="footer-badges">
-            <span class="footer-pill">🇧🇷 João Pessoa - PB</span>
+            <span class="footer-pill">João Pessoa - PB</span>
             <span class="footer-pill">CNPJ: 59.492.848/0001-28</span>
             <span class="footer-pill">Situação: ATIVA</span>
-            <span class="footer-pill">FSC® 100% Certificado</span>
           </div>
         </div>
 
         <!-- Navigation Links -->
         <div class="footer-col">
-          <div class="footer-heading">Mobiliário Autoral</div>
+          <div class="footer-heading">Modelos &amp; Projetos</div>
           <ul class="footer-nav">
-            <li><a href="#real-furniture-section">Mesa Flutuante Cumaru</a></li>
-            <li><a href="#real-furniture-section">Poltrona Tensa Niemeyer</a></li>
-            <li><a href="#real-furniture-section">Aparador Cerrado Jacarandá</a></li>
-            <li><a href="#real-furniture-section">Mesa de Centro Pequiá</a></li>
-            <li><a href="#atelier-section">Ateliê 3D Sob Medida</a></li>
-            <li><a href="#projects-section">Obras &amp; Cúpulas 3V</a></li>
+            <li><a href="#real-furniture-section">Mesa Flutuante</a></li>
+            <li><a href="#real-furniture-section">Poltrona Lounge</a></li>
+            <li><a href="#real-furniture-section">Aparador Suspenso</a></li>
+            <li><a href="#real-furniture-section">Mesa de Centro</a></li>
+            <li><a href="#atelier-section">Estúdio 3D Sob Medida</a></li>
+            <li><a href="#projects-section">Cúpulas Geodésicas</a></li>
           </ul>
         </div>
 
@@ -54,7 +53,7 @@ export function renderFooter(): string {
             <li><span class="footer-val">Bairro dos Estados &bull; João Pessoa - PB</span></li>
             <li><span class="footer-val">CEP: 58.030-130</span></li>
             <li>
-              <a href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." target="_blank" rel="noopener noreferrer" class="footer-val highlight-val">
+              <a href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20um%20projeto%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." target="_blank" rel="noopener noreferrer" class="footer-val highlight-val">
                 WhatsApp: (83) 9822-9900
               </a>
             </li>
@@ -63,7 +62,7 @@ export function renderFooter(): string {
                 gerenciadamarcenaria@gmail.com
               </a>
             </li>
-            <li><span class="footer-val">Atendimento &amp; Entrega em Todo o Brasil</span></li>
+            <li><span class="footer-val">Atendimento em João Pessoa e Região</span></li>
           </ul>
         </div>
 
@@ -72,15 +71,14 @@ export function renderFooter(): string {
       <div class="container footer-bottom">
         <p>&copy; 2025–2026 83 EMPREENDIMENTOS LTDA (83 Ambientes Planejados) &bull; TENSOR &amp; TIMBER. CNPJ: 59.492.848/0001-28. Todos os direitos reservados.</p>
         <div class="footer-meta-links">
-          <span>Origem Rastreável IBAMA/DOF</span>
-          <span>Sustentabilidade FSC®</span>
-          <button id="footer-btn-admin" class="btn-link-subtle" style="font-size: 0.72rem; opacity: 0.5;">Área Técnica</button>
+          <span>Material à escolha do cliente</span>
+          <span>Projetos Sob Medida</span>
         </div>
       </div>
 
-      <!-- Floating High-Converting WhatsApp Concierge Button -->
+      <!-- Floating WhatsApp Concierge Button -->
       <a 
-        href="https://wa.me/558398229900?text=Olá!%20Estou%20no%20site%20da%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber%20e%20gostaria%20de%20solicitar%20um%20orçamento%20de%20mobiliário%20sob%20medida." 
+        href="https://wa.me/558398229900?text=Olá!%20Estou%20no%20site%20da%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber%20e%20gostaria%20de%20solicitar%20um%20orçamento%20de%20móveis%20sob%20medida." 
         target="_blank" 
         rel="noopener noreferrer" 
         class="floating-whatsapp-btn"

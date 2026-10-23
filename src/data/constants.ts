@@ -3,57 +3,57 @@ import { WoodSpecies, TensionSystem, JoineryType, DomeFrequencyOption, HuggingFa
 export const WOOD_SPECIES: WoodSpecies[] = [
   {
     id: 'cumaru',
-    name: 'Cumaru Amazônico FSC®',
+    name: 'Cumaru',
     scientificName: 'Dipteryx odorata',
-    origin: 'Amazônia, Brasil',
-    description: 'Extrema densidade, tom mel dourado acetinado e veios finos. Imune a pragas e intempéries.',
+    origin: 'Brasil',
+    description: 'Madeira pesada e de alta densidade mecânica, com tonalidade castanho-amarelada.',
     colorHex: '#8b5a2b',
     threeColor: 0x8b5a2b,
     roughness: 0.32,
     jankaHardness: 3540,
-    sustainabilityBadge: '100% FSC® Manejo Sustentável',
+    sustainabilityBadge: 'À escolha do cliente',
     pricePerBoardFoot: 24.0,
     carbonOffsetKg: 78
   },
   {
     id: 'freijo',
-    name: 'Freijó Maciço da Amazônia',
+    name: 'Freijó',
     scientificName: 'Cordia goeldiana',
-    origin: 'Pará e Acre, Brasil',
-    description: 'O clássico nobre do modernismo brasileiro. Tom palha dourado e veios suaves elegantes.',
+    origin: 'Brasil',
+    description: 'Madeira de tom castanho-claro amarelado, com veios suaves e ótimo acabamento.',
     colorHex: '#b8976b',
     threeColor: 0xb8976b,
     roughness: 0.40,
     jankaHardness: 1400,
-    sustainabilityBadge: 'Manejo Florestal Sustentável',
+    sustainabilityBadge: 'À escolha do cliente',
     pricePerBoardFoot: 22.0,
     carbonOffsetKg: 50
   },
   {
     id: 'jacaranda',
-    name: 'Jacarandá da Bahia (Demolição)',
+    name: 'Jacarandá',
     scientificName: 'Dalbergia nigra',
-    origin: 'Sul da Bahia, Brasil (Demolição com DOF)',
-    description: 'A madeira mais lendária do mobiliário brasileiro. Tom escuro nobre com veios violáceos profundos.',
+    origin: 'Brasil',
+    description: 'Madeira de tom escuro com desenhos marcantes nos veios, tradicional em marcenaria.',
     colorHex: '#3d2b1f',
     threeColor: 0x3d2b1f,
     roughness: 0.30,
     jankaHardness: 2750,
-    sustainabilityBadge: 'Demolição Certificada & DOF',
+    sustainabilityBadge: 'À escolha do cliente',
     pricePerBoardFoot: 38.0,
     carbonOffsetKg: 85
   },
   {
     id: 'pequia',
-    name: 'Pequiá Maciço Natural',
+    name: 'Pequiá',
     scientificName: 'Caryocar villosum',
     origin: 'Brasil',
-    description: 'Madeira pesada e escultural com bordas orgânicas naturais e alta resistência mecânica.',
+    description: 'Madeira pesada e resistente com textura orgânica e tonalidade clara a amarelada.',
     colorHex: '#dfbe8f',
     threeColor: 0xc99c62,
     roughness: 0.35,
     jankaHardness: 2100,
-    sustainabilityBadge: 'Aproveitamento Florestal Legal',
+    sustainabilityBadge: 'À escolha do cliente',
     pricePerBoardFoot: 20.0,
     carbonOffsetKg: 60
   }
@@ -61,97 +61,99 @@ export const WOOD_SPECIES: WoodSpecies[] = [
 
 export const TENSION_SYSTEMS: TensionSystem[] = [
   {
-    id: 'marine-stainless-316',
-    name: 'Aeronautical 316 Marine Stainless Steel',
-    material: '7x19 Braided Stainless Cable (4mm / 6mm)',
-    breakingLoadKg: 1450,
-    finish: 'Brushed Micro-Satin',
+    id: 'inox',
+    name: 'Aço Inox 316',
+    material: 'Aço Inoxidável',
+    breakingLoadKg: 1800,
+    finish: 'Inox Escovado',
     colorHex: '#d8dee9',
     threeColor: 0xd8dee9,
-    metalness: 0.95,
-    pricePerMeter: 14.5
+    metalness: 0.90,
+    pricePerMeter: 38.0
   },
   {
-    id: 'pvd-gold-titanium',
-    name: 'PVD Titanium Mirror Gold',
-    material: 'Titanium-Nitride Vacuum Coated Aircraft Cable',
-    breakingLoadKg: 1680,
-    finish: 'Mirror Polished Royal Gold',
+    id: 'ouro',
+    name: 'Acabamento Dourado',
+    material: 'Aço com Acabamento Dourado',
+    breakingLoadKg: 2100,
+    finish: 'Dourado Polido',
     colorHex: '#f1c40f',
     threeColor: 0xf1c40f,
-    metalness: 0.98,
-    pricePerMeter: 28.0
+    metalness: 0.95,
+    pricePerMeter: 65.0
   },
   {
-    id: 'carbon-stealth-black',
-    name: 'Matte Carbon & Vectran Hybrid',
-    material: 'Zero-Creep Liquid Crystal Polymer & Carbon Braid',
-    breakingLoadKg: 2200,
-    finish: 'Stealth Architectural Matte Black',
+    id: 'preto',
+    name: 'Preto Fosco',
+    material: 'Aço com Pintura Eletrostática',
+    breakingLoadKg: 2400,
+    finish: 'Preto Fosco',
     colorHex: '#22252a',
     threeColor: 0x22252a,
-    metalness: 0.2,
-    pricePerMeter: 34.0
+    metalness: 0.80,
+    pricePerMeter: 48.0
   }
 ];
 
 export const JOINERY_TYPES: JoineryType[] = [
   {
     id: 'kanawa-tsugi',
-    name: 'Japanese Kanawa-tsugi (Keyed Mortise)',
-    tradition: 'Edo-period Japanese Temple Architecture',
-    description: 'Interlocking puzzle joint secured by a central hardwood wedge. Disassembles without hardware, yet tightens under vibrational load.',
-    strengthRating: 'Exceptional (Tensile & Bending Resistant)',
-    priceDelta: 750
+    name: 'Encaixes Tradicionais de Madeira',
+    tradition: 'Marcenaria clássica',
+    description: 'Encaixes mecânicos em madeira que garantem estabilidade estrutural.',
+    strengthRating: 'Alta resistência mecânica',
+    priceDelta: 0
   },
   {
     id: 'blind-floating-tenon',
-    name: 'Precision Blind Floating Tenon & Hidden Titanium Pins',
-    tradition: 'Modern Swiss Architectural Joinery',
-    description: 'CNC cut mortises mated with dense hornbeam tenons and cross-pinned with aerospace titanium dowels.',
-    strengthRating: 'Maximum Shear Capacity',
+    name: 'Fixações Ocultas com Cavilhas Estruturais',
+    tradition: 'Marcenaria de precisão',
+    description: 'Encaixes internos que mantêm a superfície da madeira contínua.',
+    strengthRating: 'Alta estabilidade',
     priceDelta: 450
   },
   {
     id: 'cnc-billet-hubs',
-    name: 'CNC 6061-T6 Billet Aluminum Anodized Hubs',
-    tradition: 'Buckminster Fuller Geodesic Engineering',
-    description: 'Precision milled aluminum star hubs with multi-axis strut pockets for geodesic dome load dispersion.',
-    strengthRating: 'Engineered for 160 km/h Wind & Heavy Snow',
+    name: 'Nós Estruturais de União Metálica',
+    tradition: 'Estruturas geodésicas',
+    description: 'Conectores metálicos usinados para distribuição de cargas em cúpulas.',
+    strengthRating: 'Resistência estrutural dimensionada',
     priceDelta: 1200
   }
 ];
 
+export const JOINERY_OPTIONS = JOINERY_TYPES;
+
 export const DOME_FREQUENCIES: DomeFrequencyOption[] = [
   {
     id: 'v2',
-    name: '2V Frequency (40 Triangles / 65 Struts)',
+    name: '2V Frequência (40 Triângulos / 65 Barras)',
     trianglesCount: 40,
     strutsCount: 65,
     hubsCount: 26,
-    recommendedDiameter: '3.0m to 5.0m',
-    complexity: 'Moderate / Fast Erection',
-    description: 'Clean, bold geometric facets. Perfect for intimate garden reading retreats, meditation pods, and compact glamping spaces.'
+    recommendedDiameter: '3.0m a 5.0m',
+    complexity: 'Intermediária',
+    description: 'Ideal para gazebos, estufas e pequenas coberturas residenciais.'
   },
   {
     id: 'v3',
-    name: '3V Frequency (90 Triangles / 120 Struts)',
+    name: '3V Frequência (90 Triângulos / 120 Barras)',
     trianglesCount: 90,
     strutsCount: 120,
     hubsCount: 46,
-    recommendedDiameter: '6.0m to 8.5m',
-    complexity: 'High Architectural Harmony',
-    description: 'The golden ratio of geodesic domes. Spherical elegance, optimal ceiling volume, ideal for luxury eco-resort glamping pods and garden studios.'
+    recommendedDiameter: '6.0m a 8.5m',
+    complexity: 'Alta rigidez',
+    description: 'Estrutura equilibrada com ótima resistência para áreas de convivência e lazer.'
   },
   {
     id: 'v4',
-    name: '4V Frequency (160 Triangles / 250 Struts)',
+    name: '4V Frequência (160 Triângulos / 250 Barras)',
     trianglesCount: 160,
     strutsCount: 250,
     hubsCount: 92,
-    recommendedDiameter: '9.0m to 16.0m',
-    complexity: 'Masterwork Large Span',
-    description: 'Monumental spherical symmetry. Engineered for yoga sanctuaries, boutique hotel wellness centers, and large-scale event pavilions.'
+    recommendedDiameter: '9.0m a 16.0m',
+    complexity: 'Estrutural Avançada',
+    description: 'Projetada para grandes vãos, galpões de eventos e pavilhões comerciais.'
   }
 ];
 
@@ -162,13 +164,13 @@ export const HUGGING_FACE_SPACES: HuggingFaceSpace[] = [
     author: 'microsoft',
     spaceUrl: 'https://huggingface.co/spaces/microsoft/TRELLIS.2',
     directEmbedUrl: 'https://microsoft-trellis-2.hf.space',
-    description: 'State-of-the-art sparse voxel (O-Voxel) flow-matching 3D generator. Transforms single 2D furniture sketches or room photos into high-fidelity 3D meshes with complete PBR textures and open-surface topology.',
-    primaryUse: 'Convert customer sketches & custom carpentry CAD renders into interactive 3D GLB models.',
-    recommendedInput: 'Isolated photo or transparent PNG of furniture design concept.',
-    hardwareTier: 'ZeroGPU / A100 High VRAM',
-    modelArchitecture: 'Rectified Flow Transformer + Gaussian & Mesh Radiance Decoders',
-    tags: ['3D Generation', 'PBR Materials', 'GLB Export', 'ZeroGPU'],
-    samplePrompt: 'Solid black walnut floating tensegrity coffee table, aeronautical stainless steel cables, clean architectural lines, minimalist white background, 8k resolution'
+    description: 'Geração 3D a partir de esboços ou imagens de móveis sob medida.',
+    primaryUse: 'Visualização de rascunhos e modelos 3D.',
+    recommendedInput: 'Foto isolada ou imagem de conceito.',
+    hardwareTier: 'ZeroGPU',
+    modelArchitecture: 'Rectified Flow Transformer',
+    tags: ['3D Generation', 'PBR Materials', 'GLB Export'],
+    samplePrompt: 'Mesa de jantar flutuante sob medida com cabos de aço'
   },
   {
     id: 'triposr-stability',
@@ -176,55 +178,55 @@ export const HUGGING_FACE_SPACES: HuggingFaceSpace[] = [
     author: 'stabilityai',
     spaceUrl: 'https://huggingface.co/spaces/stabilityai/TripoSR',
     directEmbedUrl: 'https://stabilityai-triposr.hf.space',
-    description: 'Ultra-fast feed-forward 3D mesh generation. Reconstructs full 3D geometry in under 3.5 seconds from a single perspective photo.',
-    primaryUse: 'Instant real-time 3D draft generation for clients experimenting with unique table silhouettes.',
-    recommendedInput: 'Side-profile or 45-degree angle photo of custom woodwork.',
-    hardwareTier: 'ZeroGPU (Instant ~3s inference)',
-    modelArchitecture: 'Feed-forward Large Reconstruction Model (LRM)',
-    tags: ['Fast 3D', 'Instant Mesh', 'OBJ/GLB', 'Lightweight'],
-    samplePrompt: 'Geodesic timber dome gazebo with solid oak struts and glass skylight facet panels'
+    description: 'Reconstrução rápida de geometria 3D a partir de foto única.',
+    primaryUse: 'Geração de rascunhos tridimensionais.',
+    recommendedInput: 'Foto de móvel em ângulo de 45 graus.',
+    hardwareTier: 'ZeroGPU (~3s)',
+    modelArchitecture: 'Feed-forward Large Reconstruction Model',
+    tags: ['Fast 3D', 'Instant Mesh', 'GLB'],
+    samplePrompt: 'Cúpula geodésica em madeira sob medida'
   },
   {
     id: 'interior-gen3d',
-    name: 'InteriorGen3D (Spatial Room Staging)',
+    name: 'InteriorGen3D (Staging Espacial)',
     author: 'stevee00',
     spaceUrl: 'https://huggingface.co/spaces/stevee00/InteriorGen3D',
     directEmbedUrl: 'https://stevee00-interiorgen3d.hf.space',
-    description: 'Specialized 3D room understanding pipeline integrating Depth Anything and multi-object generation to generate and place bespoke 3D furniture into architectural room layouts.',
-    primaryUse: 'Client space visualization: see how a tensegrity dining table or geodesic dome gazebo sits in your exact living room or backyard.',
-    recommendedInput: 'Room photograph taken from eye-level corner.',
+    description: 'Visualização de móveis integrados à planta e ambiente do cliente.',
+    primaryUse: 'Visualizar como a mesa ou estrutura se encaixa no ambiente.',
+    recommendedInput: 'Foto do ambiente tirada da altura dos olhos.',
     hardwareTier: 'ZeroGPU',
-    modelArchitecture: 'Depth-Guided Transformer + Layout Diffusion',
-    tags: ['Room Understanding', 'Interior Staging', 'Depth Anything', 'Spatial AI'],
-    samplePrompt: 'High-ceiling minimalist architectural loft featuring an 8-seater solid walnut tensegrity dining table with brass turnbuckles'
+    modelArchitecture: 'Depth-Guided Transformer',
+    tags: ['Room Understanding', 'Interior Staging'],
+    samplePrompt: 'Sala com mesa de jantar flutuante para 8 lugares'
   },
   {
     id: 'room-redesign-tavan',
-    name: 'Room Redesign & Staging (ControlNet)',
+    name: 'Room Redesign (ControlNet)',
     author: 'TavanIT',
     spaceUrl: 'https://huggingface.co/spaces/TavanIT/Room-Redesign',
     directEmbedUrl: 'https://tavanit-room-redesign.hf.space',
-    description: 'Photorealistic AI virtual staging that preserves room geometry while redesigning furnishings, woodwork, and ambient illumination.',
-    primaryUse: 'Clients upload their existing living room photo and visualize it transformed with luxury timber and tensegrity statement pieces.',
-    recommendedInput: 'Photo of client living room, patio, or vacant space.',
+    description: 'Visualização do ambiente com novos móveis mantendo a geometria da sala.',
+    primaryUse: 'Apoio a clientes e arquitetos no planejamento de interiores.',
+    recommendedInput: 'Foto do ambiente atual.',
     hardwareTier: 'ZeroGPU',
-    modelArchitecture: 'ControlNet Depth + SD-XL Architectural Inpainting',
-    tags: ['Virtual Staging', 'Room Redesign', 'Photorealistic', 'ControlNet'],
-    samplePrompt: 'Luxurious Japandi living room with floating tensegrity coffee table, warm recessed lighting, and timber slat feature walls'
+    modelArchitecture: 'ControlNet Depth',
+    tags: ['Virtual Staging', 'Room Redesign'],
+    samplePrompt: 'Sala de estar moderna com móveis sob medida em madeira'
   },
   {
     id: 'instant4d-splatv',
-    name: 'Instant4D / Splatv (Holograma 4D Pipeline)',
+    name: 'Instant4D / Splatv (Pipeline 3D)',
     author: 'ix64 / holograma',
     spaceUrl: 'https://huggingface.co/spaces/anysplat-zerogpu-demo',
     directEmbedUrl: 'https://anysplat-zerogpu-demo.hf.space',
-    description: 'Video-to-Gaussian-Splatting 4D reconstruction pipeline inspired by Holograma. Allows clients to walk around their prospective room with their phone, upload the MP4, and generate a photorealistic 3D Gaussian Splat scene for precision spatial fitting.',
-    primaryUse: 'High-end clients submitting a video scan of their residence for millimetric custom furniture integration.',
-    recommendedInput: '360 degree video scan of room or outdoor patio.',
-    hardwareTier: 'T4 / A10 Job Queue or ZeroGPU',
-    modelArchitecture: '4D Spacetime Gaussian Splatting + .splatv web viewer',
-    tags: ['Gaussian Splatting', '4D Video', 'Holograma Pipeline', 'Splatv'],
-    samplePrompt: '360 degree video scan of modern penthouse terrace ready for timber geodesic dome placement'
+    description: 'Visualização espacial imersiva para encaixe dimensional de mobiliário.',
+    primaryUse: 'Conferência de dimensões do ambiente.',
+    recommendedInput: 'Vídeo do espaço ou ambiente.',
+    hardwareTier: 'ZeroGPU',
+    modelArchitecture: 'Gaussian Splatting',
+    tags: ['3D Scan', 'Video', 'Splatv'],
+    samplePrompt: 'Ambiente pronto para instalação de mobiliário sob medida'
   }
 ];
 
@@ -232,26 +234,26 @@ export const INNOVATIVE_PROJECTS: InnovativeProjectShowcase[] = [
   {
     id: 'leviton-dining-table',
     category: 'tensegrity',
-    title: 'Mesa de Jantar Flutuante Leviton',
-    subtitle: 'Mesa suspensa para 8 a 10 lugares em Cumaru maciço',
+    title: 'Mesa de Jantar Flutuante',
+    subtitle: 'Mesa com tampo suspenso por cabos tensores',
     dimensions: '260 cm (C) × 105 cm (L) × 76 cm (A)',
-    materials: ['Cumaru Amazônico Maciço FSC®', 'Aço Inox Naval 316 (6mm)', 'Conectores Ocultos em Titânio'],
-    physicsPrinciple: 'Elementos de compressão descontínuos equilibrados por cabos de tração contínua.',
-    maxLoadBearing: '450 kg (Deflexão milimétrica zero testada)',
-    craftingDuration: '140 horas de marcenaria autoral',
-    description: 'Um triunfo da física estrutural que desafia a intuição. O tampo maciço em prancha única de Cumaru flutua 40 cm acima de sua base escultural, estabilizado por cabos de aço naval tensionados com precisão milimétrica.',
+    materials: ['Madeira à escolha do cliente', 'Cabos em Aço Inox 316'],
+    physicsPrinciple: 'Equilíbrio tensil entre cabos de tração e escoras centrais.',
+    maxLoadBearing: '480 kg distribuídos',
+    craftingDuration: '4 a 6 semanas de produção sob medida',
+    description: 'Mesa de jantar onde o tampo flutua no ar sustentado por cabos tensores. As medidas e a madeira são personalizadas para cada projeto.',
     keyFeatures: [
-      'Prancha maciça selecionada com acabamento em óleo orgânico fosco',
-      'Esticadores náuticos micro-ajustados para 12,4 kN de pré-tensão',
-      'Perfil fino com borda chanfrada de alta precisão',
-      'Estrutura projetada para durar gerações'
+      'Madeira e acabamento conforme especificação do cliente',
+      'Esticadores e tirantes em aço inox',
+      'Perfil com bordas chanfradas ou orgânicas',
+      'Estrutura projetada para estabilidade no uso diário'
     ],
     imagePlaceholder: 'linear-gradient(135deg, rgba(8, 28, 18, 0.95) 0%, rgba(14, 48, 30, 0.9) 100%)',
     defaultConfig: {
       category: 'tensegrity-dining-table',
-      title: 'Mesa Leviton Cumaru',
-      woodSpeciesId: 'reclaimed-brazilian-teak',
-      tensionSystemId: 'marine-stainless-316',
+      title: 'Mesa de Jantar Flutuante',
+      woodSpeciesId: 'cumaru',
+      tensionSystemId: 'inox',
       joineryId: 'kanawa-tsugi',
       dimensions: { length: 260, width: 105, height: 76 }
     }
@@ -259,26 +261,26 @@ export const INNOVATIVE_PROJECTS: InnovativeProjectShowcase[] = [
   {
     id: 'aetherium-executive-desk',
     category: 'tensegrity',
-    title: 'Bancada Executiva Cantilever Aetherium',
-    subtitle: 'Estação de trabalho com balanço em gravidade zero',
+    title: 'Bancada Executiva em Balanço',
+    subtitle: 'Estação de trabalho com suporte tensil',
     dimensions: '220 cm (C) × 95 cm (L) × 75 cm (A)',
-    materials: ['Freijó Maciço Curvado', 'Cabos em Titânio Dourado PVD', 'Couro Legítimo Pespontado'],
-    physicsPrinciple: 'Treliça bilateral de tensegridade suportando balanço em balcão de 1,2m.',
+    materials: ['Madeira à escolha do cliente', 'Tirantes de Aço'],
+    physicsPrinciple: 'Treliça de tensegridade suportando balanço livre.',
     maxLoadBearing: '280 kg distribuídos',
-    craftingDuration: '165 horas de marcenaria autoral',
-    description: 'Projetada para escritórios de arquitetura e residências visionárias. A superfície de trabalho estende-se em balanço livre sustentada por cabos de titânio dourado PVD com dutos invisíveis de fiação.',
+    craftingDuration: '4 a 6 semanas de produção',
+    description: 'Projetada para escritórios e salas de reunião. A superfície de trabalho estende-se em balanço livre sustentada por tirantes de aço com gaveteiro flutuante opcional.',
     keyFeatures: [
-      'Bancada em Freijó nobre com encaixes artesanais',
-      'Tirantes em titânio dourado com acabamento espelhado',
-      'Gaveteiro flutuante com amortecimento acústico',
-      'Carregamento por indução integrado à madeira'
+      'Bancada com encaixes estruturais',
+      'Tirantes em aço com acabamento escovado ou dourado',
+      'Opção de gaveteiro flutuante',
+      'Medidas adaptadas para o ambiente corporativo'
     ],
     imagePlaceholder: 'linear-gradient(135deg, rgba(16, 32, 22, 0.95) 0%, rgba(24, 56, 38, 0.9) 100%)',
     defaultConfig: {
       category: 'tensegrity-executive-desk',
-      title: 'Bancada Aetherium Freijó',
-      woodSpeciesId: 'european-white-oak',
-      tensionSystemId: 'pvd-gold-titanium',
+      title: 'Bancada Executiva em Balanço',
+      woodSpeciesId: 'freijo',
+      tensionSystemId: 'ouro',
       joineryId: 'blind-floating-tenon',
       dimensions: { length: 220, width: 95, height: 75 }
     }
@@ -286,26 +288,26 @@ export const INNOVATIVE_PROJECTS: InnovativeProjectShowcase[] = [
   {
     id: 'snelson-coffee-table',
     category: 'tensegrity',
-    title: 'Mesa de Centro Hiperbólica Snelson',
-    subtitle: 'Homenagem ao escultor Kenneth Snelson',
+    title: 'Mesa de Centro Tensegrity',
+    subtitle: 'Mesa com apoio tensil em três pontos',
     dimensions: '140 cm (C) × 80 cm (L) × 45 cm (A)',
-    materials: ['Jacarandá da Bahia de Demolição', 'Cabos de Fibra de Carbono & Inox'],
-    physicsPrinciple: 'Equilíbrio tensil hiperbólico em três pontos focais.',
-    maxLoadBearing: '200 kg',
-    craftingDuration: '95 horas de marcenaria autoral',
-    description: 'Minimalismo escultural e desafio à gravidade. Peças de madeira nobre parecem flutuar no espaço vazio, conectadas por cordas de fibra de carbono que permitem a passagem plena de luz no living.',
+    materials: ['Madeira à escolha do cliente', 'Cabos em Aço Inox'],
+    physicsPrinciple: 'Equilíbrio tensil em três pontos focais.',
+    maxLoadBearing: '200 kg distribuídos',
+    craftingDuration: '3 a 4 semanas de produção',
+    description: 'Mesa de centro com apoio em estrutura tensil e tampo em vidro ou madeira, permitindo a passagem de luz e criando leveza visual no living.',
     keyFeatures: [
-      'Madeira nobre tratada com cera de abelha natural',
-      'Tirantes em aço inoxidável e fibra de carbono',
-      'Opção de tampo em vidro temperado ultra-clear',
-      'Edição numerada de ateliê (1 de 24)'
+      'Madeira e acabamento à escolha do cliente',
+      'Tirantes em aço inoxidável',
+      'Opção de tampo em vidro temperado ou madeira maciça',
+      'Produção sob encomenda'
     ],
     imagePlaceholder: 'linear-gradient(135deg, rgba(8, 24, 16, 0.95) 0%, rgba(12, 40, 26, 0.9) 100%)',
     defaultConfig: {
       category: 'tensegrity-coffee-table',
-      title: 'Mesa de Centro Snelson',
-      woodSpeciesId: 'japanese-charred-cedar',
-      tensionSystemId: 'carbon-stealth-black',
+      title: 'Mesa de Centro Tensegrity',
+      woodSpeciesId: 'jacaranda',
+      tensionSystemId: 'inox',
       joineryId: 'kanawa-tsugi',
       dimensions: { length: 140, width: 80, height: 45 }
     }
@@ -313,26 +315,26 @@ export const INNOVATIVE_PROJECTS: InnovativeProjectShowcase[] = [
   {
     id: 'solace-glamping-dome',
     category: 'geodesic',
-    title: 'Cúpula Geodésica Biosfera Solace 6M',
-    subtitle: 'Santuário arquitetônico de 6 metros para eco-resorts e spas',
+    title: 'Cúpula Geodésica 6M',
+    subtitle: 'Estrutura autoportante para gazebos, estufas e coberturas',
     dimensions: '6.0 m (Diâmetro) × 3.6 m (Altura)',
-    materials: ['Eucalipto Tratado Estrutural', 'Nós CNC em Alumínio 6061-T6 Naval', 'Membrana Arquitetônica Translúcida'],
+    materials: ['Madeira tratada estrutural', 'Nós de união em aço ou alumínio'],
     physicsPrinciple: 'Icosaedro geodésico frequência 3V com dispersão omnidirecional de cargas.',
-    maxLoadBearing: 'Resistência a ventos de 160 km/h e sobrecargas estruturais',
-    craftingDuration: '220 horas de usinagem e marcenaria',
-    description: 'A referência máxima em hospitalidade de luxo sustentável. Estrutura autoportante em madeira com 120 escoras calibradas e nós centrais usinados em alumínio naval para lounge ou refúgio de meditação.',
+    maxLoadBearing: 'Resistência a ventos e sobrecargas normativas',
+    craftingDuration: '4 a 6 semanas de usinagem e pré-montagem',
+    description: 'Estrutura autoportante em madeira com 120 barras calibradas e nós de conexão metálicos. Adequada para áreas de convivência, lazer e estufas.',
     keyFeatures: [
-      'Nós estelares em alumínio anodizado dourado',
-      'Madeira estrutural tratada contra umidade e pragas',
-      'Claraboia panorâmica zenital para observação de estrelas',
-      'Montagem modular em apenas 48 horas'
+      'Nós de união metálicos de montagem prática',
+      'Madeira com tratamento protetor',
+      'Possibilidade de cobertura em lona arquitetônica ou vidro',
+      'Montagem modular no local'
     ],
     imagePlaceholder: 'linear-gradient(135deg, rgba(6, 30, 20, 0.95) 0%, rgba(10, 52, 34, 0.9) 100%)',
     defaultConfig: {
       category: 'geodesic-glamping-dome',
-      title: 'Cúpula Solace 6M',
-      woodSpeciesId: 'european-white-oak',
-      tensionSystemId: 'marine-stainless-316',
+      title: 'Cúpula Geodésica 6M',
+      woodSpeciesId: 'cumaru',
+      tensionSystemId: 'inox',
       joineryId: 'cnc-billet-hubs',
       dimensions: { diameter: 6.0, domeHeight: 3.6 },
       domeFrequency: 'v3'
@@ -352,9 +354,9 @@ export const SAMPLE_INITIAL_LEADS = [
     budgetBracket: 'R$ 35.000 – R$ 75.000',
     targetTimeline: 'standard-60-90days',
     consultationType: 'virtual-3d-walkthrough',
-    projectSummary: 'Mesa de Jantar Flutuante Ipanema para 10 lugares em Cumaru Maciço.',
+    projectSummary: 'Mesa de Jantar Flutuante sob medida para 10 lugares.',
     status: 'reviewed',
-    notes: 'Arquiteto enviou planta do living. Cliente deseja prancha única com acabamento fosco.'
+    notes: 'Arquiteto enviou planta do living. Definindo madeira de preferência com o cliente.'
   },
   {
     id: 'BR-TT-2026-9042',
@@ -367,9 +369,9 @@ export const SAMPLE_INITIAL_LEADS = [
     budgetBracket: 'Acima de R$ 100.000',
     targetTimeline: 'flexible-6months',
     consultationType: 'in-person-atelier',
-    projectSummary: 'Duas Cúpulas Geodésicas Biosfera 6M para lounge de spa.',
+    projectSummary: 'Duas Cúpulas Geodésicas 6M em madeira.',
     status: 'consultation-scheduled',
-    notes: 'Visita técnica agendada no ateliê. Instalação prevista para início de 2027.'
+    notes: 'Visita técnica agendada. Instalação prevista para início de 2027.'
   }
 ];
 
