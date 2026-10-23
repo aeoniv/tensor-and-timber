@@ -58,7 +58,7 @@ export function renderPhilosophySection(): string {
             </div>
             <h3 class="pillar-title">Execução Artesanal &amp; Única</h3>
             <p class="pillar-desc">
-              Cada peça é esculpida à mão por mestres marceneiros em nossos ateliês em São Paulo e Paraty. Acabamento orgânico com óleos vegetais atóxicos que preservam o toque e aroma natural da madeira.
+              Cada peça é esculpida à mão por mestres marceneiros em nosso ateliê em João Pessoa (PB). Acabamento orgânico com óleos vegetais atóxicos que preservam o toque e aroma natural da madeira.
             </p>
             <div class="pillar-tags">
               <span>Óleo Vegetal Natural</span>
@@ -75,7 +75,7 @@ export function renderPhilosophySection(): string {
             "A tensegridade nos ensina que a estabilidade não vem da rigidez maciça, mas da harmonia perfeita entre forças opostas de tração e compressão."
           </blockquote>
           <div class="quote-author">
-            <strong>Ateliê Tensor &amp; Timber</strong> &bull; São Paulo &amp; Paraty, Brasil
+            <strong>83 Ambientes Planejados &bull; TENSOR &amp; TIMBER</strong> &bull; João Pessoa, PB &bull; Brasil
           </div>
         </div>
 

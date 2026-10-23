@@ -85,7 +85,7 @@ export function renderInnovativeProjects(): string {
               </div>
               <div class="project-card-actions">
                 <a 
-                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20consultar%20a%20viabilidade%20da%20Cúpula%20Geodésica%20Biosfera%203V." 
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20consultar%20a%20viabilidade%20da%20Cúpula%20Geodésica%20Biosfera%203V." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp-sm"
@@ -153,7 +153,7 @@ export function renderInnovativeProjects(): string {
               </div>
               <div class="project-card-actions">
                 <a 
-                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20consultar%20a%20Mesa%20Executiva%20Cantilever%20Aetherium." 
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20consultar%20a%20Mesa%20Executiva%20Cantilever%20Aetherium." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp-sm"
@@ -227,7 +227,7 @@ export function renderInnovativeProjects(): string {
               </div>
               <div class="project-card-actions">
                 <a 
-                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20desenvolver%20uma%20Escultura%20Monumental%20em%20Tensegridade%20sob%20medida." 
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20desenvolver%20uma%20Escultura%20Monumental%20em%20Tensegridade%20sob%20medida." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp-sm"

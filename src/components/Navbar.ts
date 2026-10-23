@@ -14,7 +14,7 @@ export function renderNavbar(): string {
           </div>
           <div class="brand-text">
             <span class="brand-name">TENSOR &amp; TIMBER</span>
-            <span class="brand-tagline">Marcenaria Autoral &bull; Brasil</span>
+            <span class="brand-tagline">83 Ambientes Planejados &bull; João Pessoa, PB</span>
           </div>
         </a>
 
@@ -30,16 +30,16 @@ export function renderNavbar(): string {
         <!-- High-Conversion Actions -->
         <div class="nav-actions">
           <a 
-            href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20de%20mobiliário%20sob%20medida%20da%20Tensor%20%26%20Timber." 
+            href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20de%20mobiliário%20sob%20medida%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." 
             target="_blank" 
             rel="noopener noreferrer" 
             class="btn btn-whatsapp-nav"
-            aria-label="Atendimento via WhatsApp"
+            aria-label="Atendimento via WhatsApp (83) 9822-9900"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
             </svg>
-            <span>WhatsApp</span>
+            <span>WhatsApp (83) 9822-9900</span>
           </a>
 
           <a href="#consultation-section" class="btn btn-primary-gold btn-sm">

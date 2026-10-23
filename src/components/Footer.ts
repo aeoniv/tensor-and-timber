@@ -3,56 +3,74 @@ export function renderFooter(): string {
     <footer class="site-footer">
       <div class="container footer-content">
         
+        <!-- Brand & Certification Column -->
         <div class="footer-col brand-col">
           <div class="footer-logo">
             <span class="footer-brand-name">TENSOR &amp; TIMBER</span>
-            <span class="footer-brand-sub">Marcenaria Autoral &bull; Tensegridade Brasil</span>
+            <span class="footer-brand-sub">83 Ambientes Planejados &bull; Marcenaria Autoral</span>
           </div>
           <p class="footer-desc">
-            Mobiliário de luxo e arquitetura tensil esculpidos em madeiras nobres brasileiras com certificação FSC® e engenharia aeroespacial de deflexão zero.
+            Mobiliário escultural em tensegridade e arquitetura de madeira de alta precisão. Peças sob encomenda com madeiras nobres certificadas FSC® e engenharia aeroespacial.
           </p>
           <div class="footer-badges">
-            <span class="footer-pill">🇧🇷 Feito no Brasil</span>
+            <span class="footer-pill">🇧🇷 João Pessoa - PB</span>
+            <span class="footer-pill">CNPJ: 59.492.848/0001-28</span>
+            <span class="footer-pill">Situação: ATIVA</span>
             <span class="footer-pill">FSC® 100% Certificado</span>
-            <span class="footer-pill">Garantia Vitalícia</span>
           </div>
         </div>
 
+        <!-- Navigation Links -->
         <div class="footer-col">
-          <div class="footer-heading">Mobiliário Real</div>
+          <div class="footer-heading">Mobiliário Autoral</div>
           <ul class="footer-nav">
             <li><a href="#real-furniture-section">Mesa Flutuante Cumaru</a></li>
             <li><a href="#real-furniture-section">Poltrona Tensa Niemeyer</a></li>
             <li><a href="#real-furniture-section">Aparador Cerrado Jacarandá</a></li>
             <li><a href="#real-furniture-section">Mesa de Centro Pequiá</a></li>
             <li><a href="#atelier-section">Ateliê 3D Sob Medida</a></li>
+            <li><a href="#projects-section">Obras &amp; Cúpulas 3V</a></li>
           </ul>
         </div>
 
+        <!-- Dados Cadastrais e Fiscais -->
         <div class="footer-col">
-          <div class="footer-heading">Inovação &amp; Arquitetura</div>
+          <div class="footer-heading">Informações Legais</div>
           <ul class="footer-nav">
-            <li><a href="#projects-section">Cúpula Biosfera 3V</a></li>
-            <li><a href="#projects-section">Mesa Cantilever Aetherium</a></li>
-            <li><a href="#projects-section">Monumento Cinético</a></li>
-            <li><a href="#philosophy-section">Manifesto de Marcenaria</a></li>
+            <li><span class="footer-val"><strong>Razão Social:</strong> 83 EMPREENDIMENTOS LTDA</span></li>
+            <li><span class="footer-val"><strong>Nome Fantasia:</strong> 83 AMBIENTES PLANEJADOS</span></li>
+            <li><span class="footer-val"><strong>CNPJ:</strong> 59.492.848/0001-28 (Matriz)</span></li>
+            <li><span class="footer-val"><strong>Abertura:</strong> 16/02/2025</span></li>
+            <li><span class="footer-val"><strong>CNAE Principal:</strong> 33.29-5-01 (Montagem de móveis)</span></li>
+            <li><span class="footer-val"><strong>Natureza Jurídica:</strong> Sociedade Empresária Limitada</span></li>
           </ul>
         </div>
 
+        <!-- Ateliê Central & Contato -->
         <div class="footer-col">
-          <div class="footer-heading">Ateliês &amp; Visitas</div>
+          <div class="footer-heading">Ateliê &amp; Contato</div>
           <ul class="footer-nav">
-            <li><span class="footer-val">São Paulo &bull; Vila Madalena / Pinheiros</span></li>
-            <li><span class="footer-val">Paraty &bull; Ateliê Experimental de Marcenaria</span></li>
-            <li><span class="footer-val">Atendimento Nacional &amp; Exportação</span></li>
-            <li><a href="mailto:contato@tensorandtimber.com.br" class="footer-val highlight-val">contato@tensorandtimber.com.br</a></li>
+            <li><span class="footer-val">Av. Bahia, 703, CXPST 042</span></li>
+            <li><span class="footer-val">Bairro dos Estados &bull; João Pessoa - PB</span></li>
+            <li><span class="footer-val">CEP: 58.030-130</span></li>
+            <li>
+              <a href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20conversar%20sobre%20uma%20encomenda%20com%20a%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber." target="_blank" rel="noopener noreferrer" class="footer-val highlight-val">
+                WhatsApp: (83) 9822-9900
+              </a>
+            </li>
+            <li>
+              <a href="mailto:gerenciadamarcenaria@gmail.com" class="footer-val">
+                gerenciadamarcenaria@gmail.com
+              </a>
+            </li>
+            <li><span class="footer-val">Atendimento &amp; Entrega em Todo o Brasil</span></li>
           </ul>
         </div>
 
       </div>
 
       <div class="container footer-bottom">
-        <p>&copy; 2026 TENSOR &amp; TIMBER Marcenaria Autoral Ltda. Todos os direitos reservados. CNPJ: 45.892.110/0001-34.</p>
+        <p>&copy; 2025–2026 83 EMPREENDIMENTOS LTDA (83 Ambientes Planejados) &bull; TENSOR &amp; TIMBER. CNPJ: 59.492.848/0001-28. Todos os direitos reservados.</p>
         <div class="footer-meta-links">
           <span>Origem Rastreável IBAMA/DOF</span>
           <span>Sustentabilidade FSC®</span>
@@ -62,11 +80,11 @@ export function renderFooter(): string {
 
       <!-- Floating High-Converting WhatsApp Concierge Button -->
       <a 
-        href="https://wa.me/5511999998888?text=Olá!%20Estou%20no%20site%20da%20Tensor%20%26%20Timber%20e%20gostaria%20de%20solicitar%20um%20orçamento%20de%20mobiliário%20sob%20medida." 
+        href="https://wa.me/558398229900?text=Olá!%20Estou%20no%20site%20da%2083%20Ambientes%20Planejados%20/%20Tensor%20%26%20Timber%20e%20gostaria%20de%20solicitar%20um%20orçamento%20de%20mobiliário%20sob%20medida." 
         target="_blank" 
         rel="noopener noreferrer" 
         class="floating-whatsapp-btn"
-        aria-label="Falar no WhatsApp"
+        aria-label="Falar no WhatsApp com o Marceneiro"
       >
         <span class="wa-tooltip">Falar com o Marceneiro</span>
         <svg width="26" height="26" viewBox="0 0 24 24" fill="white">

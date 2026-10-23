@@ -249,7 +249,7 @@ export function renderAtelierStudio(): string {
               <div class="deal-action-buttons">
                 <a 
                   id="deal-btn-whatsapp" 
-                  href="https://wa.me/5511999998888?text=Olá!%20Gostaria%20de%20encomendar%20a%20Mesa%20de%20Jantar%20Flutuante%20Ipanema%20em%20Cumaru%20Maciço." 
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20encomendar%20a%20Mesa%20de%20Jantar%20Flutuante%20Ipanema%20em%20Cumaru%20Maciço." 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   class="btn btn-whatsapp-lg"

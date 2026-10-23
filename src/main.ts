@@ -396,7 +396,7 @@ class AtelierApp {
     const waBtn = document.getElementById('deal-btn-whatsapp') as HTMLAnchorElement;
     if (waBtn) {
       const msg = `Olá! Configurei a ${this.currentModelName} em ${woodDesc} com tirantes em ${tensionDesc} (${this.currentEstimatedBracket}) no Ateliê 3D da Tensor & Timber e gostaria de encomendar sob medida.`;
-      waBtn.href = `https://wa.me/5511999998888?text=${encodeURIComponent(msg)}`;
+      waBtn.href = `https://wa.me/558398229900?text=${encodeURIComponent(msg)}`;
     }
   }
 
@@ -433,7 +433,7 @@ class AtelierApp {
       const newLead: LeadSubmission = {
         id: `BR-TT-${Date.now().toString().slice(-6)}`,
         clientName: name,
-        clientEmail: 'lead@atelier.com.br',
+        clientEmail: 'gerenciadamarcenaria@gmail.com',
         clientPhone: phone,
         clientType: 'private-homeowner',
         projectLocation: city || 'Brasil',
@@ -491,7 +491,7 @@ class AtelierApp {
       form.reset();
 
       // Offer immediate WhatsApp link
-      const waUrl = `https://wa.me/5511999998888?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(name)}%20e%20acabei%20de%20enviar%20uma%20solicitação%20no%20site%20para%20${encodeURIComponent(archetype)}.`;
+      const waUrl = `https://wa.me/558398229900?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(name)}%20e%20acabei%20de%20enviar%20uma%20solicitação%20no%20site%20para%20${encodeURIComponent(archetype)}.`;
       setTimeout(() => {
         if (confirm('Deseja também abrir a conversa diretamente no WhatsApp com o marceneiro?')) {
           window.open(waUrl, '_blank');

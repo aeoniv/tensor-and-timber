@@ -132,7 +132,7 @@ export function renderRealFurnitureSection(): string {
 
         <div class="real-furniture-actions">
           <a 
-            href="https://wa.me/5511999998888?text=${encodeURIComponent(item.whatsappMsg)}" 
+            href="https://wa.me/558398229900?text=${encodeURIComponent(item.whatsappMsg)}" 
             target="_blank" 
             rel="noopener noreferrer" 
             class="btn btn-whatsapp"
@@ -190,7 +190,7 @@ export function renderRealFurnitureSection(): string {
           </div>
           <div class="custom-piece-cta">
             <a 
-              href="https://wa.me/5511999998888?text=Olá!%20Tenho%20um%20projeto%20com%20dimensões%20específicas%20e%20gostaria%20de%20desenvolver%20uma%20peça%20sob%20medida%20com%20a%20Tensor%20%26%20Timber." 
+              href="https://wa.me/558398229900?text=Olá!%20Tenho%20um%20projeto%20com%20dimensões%20específicas%20e%20gostaria%20de%20desenvolver%20uma%20peça%20sob%20medida%20com%20a%20Tensor%20%26%20Timber." 
               target="_blank" 
               rel="noopener noreferrer" 
               class="btn btn-primary-gold"

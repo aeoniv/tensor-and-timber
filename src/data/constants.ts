@@ -372,3 +372,46 @@ export const SAMPLE_INITIAL_LEADS = [
     notes: 'Visita técnica agendada no ateliê. Instalação prevista para início de 2027.'
   }
 ];
+
+// ============================================================================
+// DADOS LEGAIS DA EMPRESA (RECEITA FEDERAL DO BRASIL - CNPJ OFICIAL)
+// ============================================================================
+export const COMPANY_LEGAL_INFO = {
+  razaoSocial: '83 EMPREENDIMENTOS LTDA',
+  nomeFantasia: '83 AMBIENTES PLANEJADOS',
+  marcaAutoral: 'TENSOR & TIMBER',
+  cnpj: '59.492.848/0001-28',
+  cnpjNumeros: '59492848000128',
+  dataAbertura: '16/02/2025',
+  situacaoCadastral: 'ATIVA',
+  naturezaJuridica: '206-2 - Sociedade Empresária Limitada',
+  porte: 'ME',
+  cnaePrincipal: {
+    codigo: '33.29-5-01',
+    descricao: 'Serviços de montagem de móveis de qualquer material'
+  },
+  cnaesSecundarios: [
+    '62.04-0-00 - Consultoria em tecnologia da informação',
+    '62.09-1-00 - Suporte técnico, manutenção e outros serviços em tecnologia da informação',
+    '70.20-4-00 - Atividades de consultoria em gestão empresarial',
+    '85.50-3-02 - Atividades de apoio à educação',
+    '95.11-8-00 - Reparação e manutenção de computadores e equipamentos periféricos'
+  ],
+  endereco: {
+    logradouro: 'Av. Bahia',
+    numero: '703',
+    complemento: 'CXPST 042',
+    bairro: 'Estados',
+    cidade: 'João Pessoa',
+    uf: 'PB',
+    cep: '58030-130',
+    cepFormatado: '58.030-130',
+    formatado: 'Av. Bahia, 703, CXPST 042 — Bairro dos Estados, João Pessoa - PB, CEP 58.030-130'
+  },
+  contato: {
+    email: 'gerenciadamarcenaria@gmail.com',
+    telefone: '(83) 9822-9900',
+    whatsappRaw: '558398229900',
+    whatsappUrl: 'https://wa.me/558398229900'
+  }
+};
