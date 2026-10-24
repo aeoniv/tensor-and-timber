@@ -38,7 +38,7 @@ export class AIModelViewer {
   private isAutoRotating: boolean = true;
   private lightingPreset: 'studio' | 'daylight' | 'midnight' = 'studio';
   private currentMetadata: Generated3DMetadata | null = null;
-  public activeGLBUrl: string = '/models/sample_ai_trellis.glb';
+  public activeGLBUrl: string = '/models/trellis_generated_5ddeb2ee.glb';
 
   constructor(containerId: string, options?: AIModelViewerOptions) {
     const el = document.getElementById(containerId);
@@ -49,7 +49,7 @@ export class AIModelViewer {
       autoLoadSample: true,
       modelName: 'Mesa de Jantar Flutuante',
       initialPrompt: 'Mesa de Jantar Flutuante em Madeira Maciça com Cabos Tensores de Inox',
-      defaultModelUrl: '/models/sample_ai_trellis.glb',
+      defaultModelUrl: '/models/trellis_generated_5ddeb2ee.glb',
       ...options
     };
 
@@ -274,6 +274,12 @@ export class AIModelViewer {
           const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
           mats.forEach((m) => {
             if (m instanceof THREE.MeshStandardMaterial) {
+              // Preserve original neural textures if present
+              if (m.map) {
+                m.roughness = woodId === 'jacaranda' ? 0.28 : (woodId === 'cumaru' ? 0.35 : 0.42);
+                m.needsUpdate = true;
+                return;
+              }
               m.color.setHex(col);
               m.roughness = woodId === 'jacaranda' ? 0.28 : (woodId === 'cumaru' ? 0.35 : 0.42);
               m.needsUpdate = true;

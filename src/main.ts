@@ -66,7 +66,7 @@ class AtelierApp {
         hudPillId: 'hero-model-pill',
         modelName: 'Mesa de Jantar Flutuante Ipanema',
         initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox',
-        defaultModelUrl: '/models/sample_ai_trellis.glb'
+        defaultModelUrl: '/models/trellis_generated_5ddeb2ee.glb'
       });
     } catch (e) {
       console.warn('Hero 3D viewer init error:', e);
@@ -78,7 +78,7 @@ class AtelierApp {
         hudPillId: 'atelier-model-pill',
         modelName: 'Mesa de Jantar Flutuante Ipanema',
         initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox',
-        defaultModelUrl: '/models/sample_ai_trellis.glb'
+        defaultModelUrl: '/models/trellis_generated_5ddeb2ee.glb'
       });
     } catch (e) {
       console.warn('Atelier 3D viewer init error:', e);
@@ -286,6 +286,8 @@ class AtelierApp {
           emptyState.style.display = 'none';
         }
         this.showToast('Croqui carregado! Clique em Gerar Objeto 3D para processar.');
+        const btnText = document.getElementById('btn-generate-3d-text');
+        if (btnText) btnText.textContent = '✨ Gerar Objeto 3D a partir da Imagem (Hugging Face)';
       };
       reader.readAsDataURL(file);
     };
@@ -322,6 +324,8 @@ class AtelierApp {
         emptyState.style.display = 'flex';
       }
       this.showToast('Referência removida.');
+      const btnText = document.getElementById('btn-generate-3d-text');
+      if (btnText) btnText.textContent = '✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)';
     });
 
     // 6. PRIMARY ACTION: GENERATE CUSTOM 3D OBJECT BUTTON
@@ -348,11 +352,9 @@ class AtelierApp {
       let meta: any = null;
       if (this.atelierAIViewer) {
         meta = await this.atelierAIViewer.generateCustom3DObject(prompt, this.attachedSketchDataUrl);
-        this.atelierAIViewer.applyWoodTint(this.currentWood);
       }
       if (this.heroAIViewer && this.atelierAIViewer) {
         await this.heroAIViewer.loadGLBUrl(this.atelierAIViewer.activeGLBUrl, prompt);
-        this.heroAIViewer.applyWoodTint(this.currentWood);
       }
 
       if (meta) {
@@ -379,7 +381,7 @@ class AtelierApp {
       this.showToast('Modelo 3D neural calibrado e carregado no ateliê.');
     } finally {
       if (btn) btn.disabled = false;
-      if (btnText) btnText.innerHTML = `Gerar Modelo 3D Sob Medida`;
+      if (btnText) btnText.innerHTML = `✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)`;
       if (statusLabel) statusLabel.textContent = 'Visualização 3D Ativa';
     }
   }

@@ -1,17 +1,13 @@
 export function renderAtelierStudio(): string {
   return `
-    <section class="section atelier-section" id="atelier-section">
+    <section class="section section-atelier" id="atelier-section">
       <div class="container">
         
-        <div class="section-header text-center">
-          <span class="section-tag">
-            Estúdio 3D Interativo
-          </span>
-          <h2 class="section-title">
-            Configure seu Móvel e <span class="accent-text">Visualize em 3D</span>
-          </h2>
+        <div class="section-title-wrap">
+          <span class="badge">Estúdio 3D Interativo &bull; Hugging Face ZeroGPU</span>
+          <h2 class="section-title">Geração 3D por Texto ou Imagem</h2>
           <p class="section-subtitle">
-            Escolha o modelo, informe o acabamento de sua preferência e visualize a estrutura tridimensional antes de solicitar seu orçamento.
+            Informe a descrição do móvel ou faça upload de um croqui/foto de referência. O motor neural ZeroGPU processa a geometria e compila a malha 3D real (.GLB) diretamente no navegador.
           </p>
         </div>
 
@@ -24,7 +20,7 @@ export function renderAtelierStudio(): string {
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">1</span>
-                <span class="step-label">Tipo de Peça</span>
+                <span class="step-label">Tipo de Mobiliário</span>
               </div>
               <div class="archetype-tabs-row" id="archetype-selector">
                 <button class="archetype-tab active" data-archetype="dining-table" data-name="Mesa de Jantar Flutuante" data-price="R$ 38.500 – R$ 48.000">
@@ -42,31 +38,57 @@ export function renderAtelierStudio(): string {
               </div>
             </div>
 
-            <!-- Step 2: Custom Prompt -->
+            <!-- Step 2: Custom Prompt (Text Input) -->
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">2</span>
-                <span class="step-label">Descreva sua Ideia ou Escolha uma Sugestão</span>
+                <span class="step-label">Entrada por Texto (Prompt)</span>
               </div>
               <textarea 
                 id="atelier-custom-prompt-input" 
                 rows="2" 
                 class="prompt-input-area"
-                placeholder="Ex: Mesa de jantar para 8 pessoas com acabamento em madeira e cabos de aço..."
+                placeholder="Ex: Mesa de jantar retangular flutuante em madeira nobre com cabos de aço inox e base tensil..."
               ></textarea>
               <div class="prompt-chips-row">
-                <button type="button" class="prompt-chip" data-phrase="Mesa de jantar para 8 pessoas com cabos de aço">Mesa (8 Lugares)</button>
-                <button type="button" class="prompt-chip" data-phrase="Aparador suspenso com portas ripadas">Aparador Suspenso</button>
+                <button type="button" class="prompt-chip" data-phrase="Mesa de jantar para 8 pessoas com cabos de aço e madeira maciça">Mesa (8 Lugares)</button>
+                <button type="button" class="prompt-chip" data-phrase="Aparador suspenso com portas ripadas em freijó">Aparador Suspenso</button>
                 <button type="button" class="prompt-chip" data-phrase="Mesa de centro com apoio tensil e tampo circular">Mesa de Centro</button>
-                <button type="button" class="prompt-chip" data-phrase="Bancada de trabalho sob medida">Bancada Sob Medida</button>
+                <button type="button" class="prompt-chip" data-phrase="Banqueta minimalista com pés cônicos em peroba rosa">Banqueta Minimalista</button>
               </div>
             </div>
 
-            <!-- Step 3: Wood / Material -->
+            <!-- Step 3: Image / Sketch Upload (Image Input) -->
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">3</span>
-                <span class="step-label">Opção de Madeira ou Material</span>
+                <span class="step-label">Entrada por Imagem (Croqui ou Foto)</span>
+              </div>
+              <div class="sketch-dropzone" id="atelier-sketch-dropzone">
+                <input type="file" id="atelier-sketch-file-input" accept="image/png,image/jpeg,image/webp" style="display: none;" />
+                
+                <div class="sketch-empty-state" id="atelier-sketch-empty-state">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <p class="sketch-drop-title">Anexar Croqui ou Foto de Referência</p>
+                  <p class="sketch-drop-hint">Clique ou arraste um arquivo PNG, JPG ou WEBP para a IA reconstruir em 3D</p>
+                </div>
+
+                <div class="sketch-preview-wrap" id="atelier-sketch-preview-wrap" style="display: none;">
+                  <img id="atelier-sketch-preview-img" src="" alt="Croqui anexado" class="sketch-preview-img" />
+                  <button type="button" class="btn-remove-sketch" id="btn-remove-atelier-sketch" title="Remover imagem">&times;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Wood / Material -->
+            <div class="config-step">
+              <div class="step-header">
+                <span class="step-number">4</span>
+                <span class="step-label">Opção de Madeira ou Acabamento</span>
               </div>
               <p class="step-subtitle">A madeira e o acabamento são definidos pelo cliente. Veja opções de referência:</p>
               
@@ -103,36 +125,15 @@ export function renderAtelierStudio(): string {
                   </div>
                 </button>
               </div>
-              <p class="wood-notice-text">
-                * Também trabalhamos com MDF, compensado naval e outras espécies conforme o seu projeto e orçamento.
-              </p>
             </div>
 
-            <!-- Step 4: Tension Cables -->
-            <div class="config-step">
-              <div class="step-header">
-                <span class="step-number">4</span>
-                <span class="step-label">Acabamento dos Tirantes Tensores</span>
-              </div>
-              <div class="tension-pills-row" id="tension-selector">
-                <button class="tension-pill active" data-tension="inox">
-                  <span class="tension-swatch" style="background: #a0a6b2;"></span>
-                  <span>Aço Inox</span>
-                </button>
-                <button class="tension-pill" data-tension="ouro">
-                  <span class="tension-swatch" style="background: #d4a737;"></span>
-                  <span>Acabamento Dourado</span>
-                </button>
-                <button class="tension-pill" data-tension="preto">
-                  <span class="tension-swatch" style="background: #2a2826;"></span>
-                  <span>Preto Fosco</span>
-                </button>
-              </div>
-            </div>
-
+            <!-- PRIMARY ACTION: GENERATE 3D BUTTON -->
             <button class="btn btn-primary btn-block btn-lg" id="btn-generate-custom-3d" style="margin-top: 20px;">
-              <span id="btn-generate-3d-text">Atualizar Modelo 3D</span>
+              <span id="btn-generate-3d-text">✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)</span>
             </button>
+            <p style="font-size: 0.78rem; color: #78716c; text-align: center; margin-top: 8px;">
+              Motor Neural ZeroGPU ativo &bull; Reconstrução 3D real por texto ou imagem &bull; Download .GLB
+            </p>
 
           </div>
 
