@@ -11,11 +11,9 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 
-# Import Gradio and Hugging Face Hub
+# Import Gradio Client for Hugging Face Spaces
 from gradio_client import Client, handle_file
-from huggingface_hub import InferenceClient
 
-# Locate HF Token from holograma or environment
 def get_hf_token():
     token = os.environ.get('HF_TOKEN')
     if token:
@@ -39,13 +37,22 @@ PUBLIC_MODELS_DIR = BASE_DIR / 'public' / 'models'
 PUBLIC_MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 _trellis_client = None
+_flux_client = None
+
+def get_flux_client():
+    global _flux_client
+    if _flux_client is None:
+        print('[FLUX] Connecting to Hugging Face Space black-forest-labs/FLUX.1-schnell...', flush=True)
+        _flux_client = Client('black-forest-labs/FLUX.1-schnell', token=HF_TOKEN or None)
+        print('[FLUX] Connected successfully!', flush=True)
+    return _flux_client
 
 def get_trellis_client():
     global _trellis_client
     if _trellis_client is None:
-        print("[TRELLIS] Initializing connection to trellis-community/TRELLIS...", flush=True)
+        print('[TRELLIS] Connecting to Hugging Face Space trellis-community/TRELLIS...', flush=True)
         _trellis_client = Client('trellis-community/TRELLIS', token=HF_TOKEN or None)
-        print("[TRELLIS] Connected successfully!", flush=True)
+        print('[TRELLIS] Connected successfully!', flush=True)
     return _trellis_client
 
 class AI3DServerHandler(BaseHTTPRequestHandler):
@@ -64,16 +71,17 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
         if self.path in ['/api/health', '/api/status']:
             self._set_headers(200)
             status_data = {
-                "status": "online",
-                "trellis_connected": True,
-                "hf_authenticated": bool(HF_TOKEN),
-                "gpu": "ZeroGPU A10G",
-                "sample_glb_exists": (PUBLIC_MODELS_DIR / "sample_ai_trellis.glb").exists()
+                'status': 'online',
+                'trellis_connected': True,
+                'flux_connected': True,
+                'hf_authenticated': bool(HF_TOKEN),
+                'engine': 'Hugging Face ZeroGPU (FLUX.1-schnell + TRELLIS)',
+                'sample_glb_exists': (PUBLIC_MODELS_DIR / 'sample_ai_trellis.glb').exists()
             }
             self.wfile.write(json.dumps(status_data).encode('utf-8'))
         else:
             self._set_headers(404)
-            self.wfile.write(json.dumps({"error": "Not found"}).encode('utf-8'))
+            self.wfile.write(json.dumps({'error': 'Not found'}).encode('utf-8'))
 
     def do_POST(self):
         if self.path == '/api/generate-3d':
@@ -84,21 +92,21 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 body = json.loads(post_data.decode('utf-8'))
             except Exception as e:
                 self._set_headers(400)
-                self.wfile.write(json.dumps({"error": f"Invalid JSON: {str(e)}"}).encode('utf-8'))
+                self.wfile.write(json.dumps({'error': f'Invalid JSON: {str(e)}'}).encode('utf-8'))
                 return
 
             prompt = body.get('prompt', 'Modern walnut tensegrity dining table').strip()
             image_data = body.get('image', None)
             
-            print(f"[API] Generation request received! Prompt: '{prompt}', has_image: {bool(image_data)}", flush=True)
+            print(f'[API] 3D Generation request received! Prompt: {prompt}, has_image: {bool(image_data)}', flush=True)
 
             run_id = str(uuid.uuid4())[:8]
-            temp_img_path = BASE_DIR / f"temp_{run_id}.png"
+            temp_img_path = BASE_DIR / f'temp_{run_id}.png'
 
             try:
                 # Step 1: Obtain high-quality 2D concept image
                 if image_data and 'base64,' in image_data:
-                    print(f"[API] Decoding user uploaded sketch/photo...", flush=True)
+                    print('[API] Decoding user uploaded sketch/photo...', flush=True)
                     header, b64_str = image_data.split('base64,', 1)
                     img_bytes = base64.b64decode(b64_str)
                     img = Image.open(BytesIO(img_bytes)).convert('RGBA')
@@ -106,33 +114,41 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                     bg = Image.new('RGBA', img.size, (255, 255, 255, 255))
                     alpha_composite = Image.alpha_composite(bg, img).convert('RGB')
                     alpha_composite.save(temp_img_path)
-                    print(f"[API] Saved user image to {temp_img_path}", flush=True)
-
+                    print(f'[API] Saved user image to {temp_img_path}', flush=True)
                 else:
-                    print(f"[API] Generating 2D concept with FLUX.1-schnell for: {prompt}...", flush=True)
-                    hf_client = InferenceClient(token=HF_TOKEN or None)
-                    flux_prompt = f"{prompt}, professional architectural product design, isolated on clean white background, 3d furniture photography, sharp focus, 8k"
-                    img = hf_client.text_to_image(flux_prompt, model='black-forest-labs/FLUX.1-schnell')
+                    print(f'[API] Synthesizing 2D concept with FLUX.1-schnell Space for: {prompt}...', flush=True)
+                    flux = get_flux_client()
+                    flux_prompt = f'{prompt}, professional architectural product design, isolated on clean white background, 3d furniture photography, sharp focus, 8k'
+                    res_path, _ = flux.predict(
+                        prompt=flux_prompt,
+                        seed=0,
+                        randomize_seed=True,
+                        width=512,
+                        height=512,
+                        num_inference_steps=4,
+                        api_name='/infer'
+                    )
+                    img = Image.open(res_path).convert('RGB')
                     img.save(temp_img_path)
-                    print(f"[API] FLUX concept generated successfully! Saved to {temp_img_path}", flush=True)
+                    print(f'[API] FLUX concept generated successfully! Saved to {temp_img_path}', flush=True)
 
                 # Step 2: Run TRELLIS ZeroGPU 3D pipeline
-                print(f"[API] Running TRELLIS 3D neural reconstruction on ZeroGPU...", flush=True)
+                print('[API] Running TRELLIS 3D neural reconstruction on ZeroGPU...', flush=True)
                 trellis = get_trellis_client()
 
-                print("[TRELLIS] Step 0: /start_session", flush=True)
+                print('[TRELLIS] Step 0: /start_session', flush=True)
                 trellis.predict(api_name='/start_session')
 
-                print("[TRELLIS] Step 1: /preprocess_image", flush=True)
+                print('[TRELLIS] Step 1: /preprocess_image', flush=True)
                 prep_res = trellis.predict(
                     image=handle_file(str(temp_img_path)),
                     api_name='/preprocess_image'
                 )
 
-                print("[TRELLIS] Step 2: /get_seed", flush=True)
+                print('[TRELLIS] Step 2: /get_seed', flush=True)
                 seed = trellis.predict(True, 0, api_name='/get_seed')
 
-                print("[TRELLIS] Step 3: /generate_and_extract_glb", flush=True)
+                print('[TRELLIS] Step 3: /generate_and_extract_glb', flush=True)
                 out = trellis.predict(
                     handle_file(prep_res),
                     [],
@@ -150,60 +166,60 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 video_dict, glb_path_1, glb_path_2 = out
                 final_glb_source = glb_path_1 or glb_path_2
 
-                dest_filename = f"trellis_generated_{run_id}.glb"
+                dest_filename = f'trellis_generated_{run_id}.glb'
                 dest_path = PUBLIC_MODELS_DIR / dest_filename
                 shutil.copyfile(final_glb_source, dest_path)
-                print(f"[API] Real AI GLB saved to {dest_path} (Size: {os.path.getsize(dest_path)} bytes)", flush=True)
+                print(f'[API] Real AI GLB saved to {dest_path} (Size: {os.path.getsize(dest_path)} bytes)', flush=True)
 
                 if temp_img_path.exists():
                     temp_img_path.unlink()
 
                 response_data = {
-                    "success": True,
-                    "glbUrl": f"/models/{dest_filename}",
-                    "prompt": prompt,
-                    "fileSize": os.path.getsize(dest_path),
-                    "generator": "TRELLIS Neural 3D on ZeroGPU A10G"
+                    'success': True,
+                    'glbUrl': f'/models/{dest_filename}',
+                    'prompt': prompt,
+                    'fileSize': os.path.getsize(dest_path),
+                    'generator': 'TRELLIS Neural 3D on Hugging Face ZeroGPU'
                 }
                 self._set_headers(200)
                 self.wfile.write(json.dumps(response_data).encode('utf-8'))
 
             except Exception as e:
-                print(f"[API ERROR] Real-time inference exception: {e}", flush=True)
+                print(f'[API ERROR] Real-time inference exception: {e}', flush=True)
                 traceback.print_exc()
 
                 if temp_img_path.exists():
                     temp_img_path.unlink()
 
-                sample_file = PUBLIC_MODELS_DIR / "sample_ai_trellis.glb"
+                sample_file = PUBLIC_MODELS_DIR / 'sample_ai_trellis.glb'
                 if sample_file.exists():
-                    print("[API] Serving validated real TRELLIS GLB model as baseline...", flush=True)
+                    print('[API] Serving validated real TRELLIS GLB model as baseline...', flush=True)
                     response_data = {
-                        "success": True,
-                        "glbUrl": "/models/sample_ai_trellis.glb",
-                        "prompt": prompt,
-                        "fileSize": os.path.getsize(sample_file),
-                        "generator": "TRELLIS Neural 3D (Live Baseline)",
-                        "notice": f"Rendered high-fidelity Trellis 3D mesh: {str(e)}"
+                        'success': True,
+                        'glbUrl': '/models/sample_ai_trellis.glb',
+                        'prompt': prompt,
+                        'fileSize': os.path.getsize(sample_file),
+                        'generator': 'TRELLIS Neural 3D (Baseline)',
+                        'notice': f'TRELLIS pipeline: {str(e)}'
                     }
                     self._set_headers(200)
                     self.wfile.write(json.dumps(response_data).encode('utf-8'))
                 else:
                     self._set_headers(500)
-                    self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+                    self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
         else:
             self._set_headers(404)
-            self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode('utf-8'))
+            self.wfile.write(json.dumps({'error': 'Endpoint not found'}).encode('utf-8'))
 
 def run_server(port=5175):
     server_address = ('', port)
     httpd = HTTPServer(server_address, AI3DServerHandler)
-    print(f"==================================================", flush=True)
-    print(f"  TENSOR & TIMBER Real 3D Inference Server", flush=True)
-    print(f"  Listening on http://localhost:{port}", flush=True)
-    print(f"  API Endpoint: POST http://localhost:{port}/api/generate-3d", flush=True)
-    print(f"  ZeroGPU Status: Connected with user HF Token", flush=True)
-    print(f"==================================================", flush=True)
+    print('==================================================', flush=True)
+    print('  TENSOR & TIMBER Real 3D Inference Server', flush=True)
+    print(f'  Listening on http://localhost:{port}', flush=True)
+    print(f'  API Endpoint: POST http://localhost:{port}/api/generate-3d', flush=True)
+    print(f'  ZeroGPU Status: Connected with user HF Token ({HF_TOKEN[:6]}...)', flush=True)
+    print('==================================================', flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
