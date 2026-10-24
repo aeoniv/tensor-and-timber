@@ -1,80 +1,63 @@
 export function renderPhilosophySection(): string {
   return `
-    <section class="section philosophy-section" id="philosophy-section">
+    <section class="section" id="philosophy-section">
       <div class="container">
         
         <div class="section-header text-center">
-          <span class="section-tag gold">
-            Como Trabalhamos &bull; Do Projeto à Montagem
+          <span class="section-tag">
+            Como Trabalhamos
           </span>
           <h2 class="section-title">
-            Processo Simples, <span class="gold-gradient">Direto e Transparente</span>
+            Do Projeto à <span class="accent-text">Instalação</span>
           </h2>
           <p class="section-subtitle">
-            Do primeiro rascunho até a instalação no seu ambiente, com total clareza e liberdade de escolha dos materiais.
+            Processo transparente e direto, com liberdade total para definir os materiais do seu móvel.
           </p>
         </div>
 
-        <div class="philosophy-pillars-grid">
+        <div class="process-grid">
           
-          <!-- Pillar 1: Project & 3D -->
-          <div class="pillar-card glass-panel">
-            <div class="pillar-icon-box">
-              <span class="pillar-icon">📐</span>
-            </div>
-            <h3 class="pillar-title">1. Ideia e Projeto 3D</h3>
-            <p class="pillar-desc">
-              Você compartilha as medidas, referências ou a planta do espaço. Criamos a visualização 3D para você conferir as proporções e o visual antes de qualquer corte.
+          <div class="process-card">
+            <div class="process-step-num">01</div>
+            <h3 class="process-title">Briefing e Medidas</h3>
+            <p class="process-desc">
+              Você compartilha as medidas, referências ou a planta do ambiente. Alinhamos o que você precisa em termos de uso, tamanho e funcionalidade.
             </p>
-            <div class="pillar-tags">
-              <span>Sob Medida</span>
-              <span>Visualização 3D</span>
-              <span>Ajustes Prévios</span>
-            </div>
           </div>
 
-          <!-- Pillar 2: Client Chooses Materials -->
-          <div class="pillar-card glass-panel">
-            <div class="pillar-icon-box">
-              <span class="pillar-icon">🪵</span>
-            </div>
-            <h3 class="pillar-title">2. A Madeira é Sua Escolha</h3>
-            <p class="pillar-desc">
+          <div class="process-card">
+            <div class="process-step-num">02</div>
+            <h3 class="process-title">A Madeira é Sua Escolha</h3>
+            <p class="process-desc">
               Não impomos materiais específicos. O cliente escolhe entre madeiras maciças (Cumaru, Freijó, Peroba, Pinus), MDF ou compensados, adequando ao seu estilo e orçamento.
             </p>
-            <div class="pillar-tags">
-              <span>Maciça ou MDF</span>
-              <span>Escolha do Cliente</span>
-              <span>Acabamentos Diversos</span>
-            </div>
           </div>
 
-          <!-- Pillar 3: Craft & Assembly -->
-          <div class="pillar-card glass-panel">
-            <div class="pillar-icon-box">
-              <span class="pillar-icon">🛠️</span>
-            </div>
-            <h3 class="pillar-title">3. Fabricação e Montagem</h3>
-            <p class="pillar-desc">
-              Produzimos com ferragens e cabos tensores dimensionados para estabilidade e durabilidade. Realizamos a entrega e montagem cuidadosa no seu endereço.
+          <div class="process-card">
+            <div class="process-step-num">03</div>
+            <h3 class="process-title">Projeto 3D e Orçamento</h3>
+            <p class="process-desc">
+              Elaboramos a visualização 3D para você conferir proporções e estética antes de qualquer corte, com proposta clara de valores e prazos.
             </p>
-            <div class="pillar-tags">
-              <span>João Pessoa e Região</span>
-              <span>Envio Nacional</span>
-              <span>Montagem no Local</span>
-            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-step-num">04</div>
+            <h3 class="process-title">Fabricação e Montagem</h3>
+            <p class="process-desc">
+              Fabricação com ferragens adequadas para alta durabilidade. Entrega e montagem cuidadosa no seu endereço em João Pessoa e região.
+            </p>
           </div>
 
         </div>
 
-        <!-- Practical Commitment Note -->
-        <div class="philosophy-quote-card glass-panel">
-          <blockquote class="philosophy-quote">
-            "Trabalhamos com marcenaria sob medida e estruturas de tensegridade unindo técnica, durabilidade e respeito às escolhas de cada cliente."
-          </blockquote>
-          <div class="quote-author">
-            <strong>83 Ambientes Planejados &bull; 83 Empreendimentos Ltda</strong> &bull; João Pessoa - PB
-          </div>
+        <div class="reassurance-box">
+          <p class="reassurance-text">
+            "Marcenaria sob medida e estruturas de tensegridade unindo durabilidade, técnica e respeito às preferências de cada cliente."
+          </p>
+          <span class="reassurance-author">
+            83 Ambientes Planejados &bull; 83 Empreendimentos Ltda &bull; João Pessoa - PB
+          </span>
         </div>
 
       </div>

@@ -4,7 +4,7 @@ import { renderNavbar } from './components/Navbar';
 import { renderHero } from './components/Hero';
 import { renderRealFurnitureSection } from './components/RealFurnitureSection';
 import { renderAtelierStudio } from './components/AtelierStudio';
-import { renderInnovativeProjects } from './components/InnovativeProjects';
+
 import { renderPhilosophySection } from './components/PhilosophySection';
 import { renderConsultationSection } from './components/ConsultationSection';
 import { renderFooter } from './components/Footer';
@@ -46,7 +46,7 @@ class AtelierApp {
         ${renderHero()}
         ${renderRealFurnitureSection()}
         ${renderAtelierStudio()}
-        ${renderInnovativeProjects()}
+        
         ${renderPhilosophySection()}
         ${renderConsultationSection()}
       </main>
