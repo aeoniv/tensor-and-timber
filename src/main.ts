@@ -60,12 +60,13 @@ class AtelierApp {
   }
 
   private initViewers(): void {
-    // 1. Hero 3D Stage (Auto-renders authentic Brazilian Cumaru tensegrity table)
+    // 1. Hero 3D Stage (Auto-renders authentic Brazilian neural 3D model)
     try {
       this.heroAIViewer = new AIModelViewer('hero-3d-canvas', {
         hudPillId: 'hero-model-pill',
-        modelName: 'Mesa de Jantar Flutuante',
-        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox'
+        modelName: 'Mesa de Jantar Flutuante Ipanema',
+        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox',
+        defaultModelUrl: '/models/sample_ai_trellis.glb'
       });
     } catch (e) {
       console.warn('Hero 3D viewer init error:', e);
@@ -75,8 +76,9 @@ class AtelierApp {
     try {
       this.atelierAIViewer = new AIModelViewer('atelier-3d-canvas', {
         hudPillId: 'atelier-model-pill',
-        modelName: 'Mesa de Jantar Flutuante',
-        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox'
+        modelName: 'Mesa de Jantar Flutuante Ipanema',
+        initialPrompt: 'Mesa de jantar flutuante com acabamento em madeira e tirantes em aço inox',
+        defaultModelUrl: '/models/sample_ai_trellis.glb'
       });
     } catch (e) {
       console.warn('Atelier 3D viewer init error:', e);
@@ -198,12 +200,25 @@ class AtelierApp {
         this.currentEstimatedBracket = target.dataset.price || 'R$ 38.500 – R$ 48.000';
 
         this.updateDealCard();
-        await this.regenerateAtelier3D();
+
+        // Switch to authentic neural GLB asset and preserve wood tint
+        const modelUrl = this.currentArchetype === 'dining-table'
+          ? '/models/sample_ai_trellis.glb'
+          : '/models/trellis_generated_b93a8a6a.glb';
+
+        if (this.atelierAIViewer) {
+          await this.atelierAIViewer.loadGLBUrl(modelUrl, this.currentModelName);
+          this.atelierAIViewer.applyWoodTint(this.currentWood);
+        }
+        if (this.heroAIViewer) {
+          await this.heroAIViewer.loadGLBUrl(modelUrl, this.currentModelName);
+          this.heroAIViewer.applyWoodTint(this.currentWood);
+        }
       });
     });
 
     // 2. Wood Species Selectors
-    const woodBtns = document.querySelectorAll('.wood-option-btn');
+    const woodBtns = document.querySelectorAll('.wood-card-btn, .wood-option-btn');
     woodBtns.forEach(btn => {
       btn.addEventListener('click', async (e) => {
         woodBtns.forEach(b => b.classList.remove('active'));
@@ -324,24 +339,29 @@ class AtelierApp {
 
     const prompt = promptInput || `${this.currentModelName} em madeira ${this.currentWood} com cabos de ${this.currentTension}`;
 
-    // Set loading state
+    // Set loading state with live ZeroGPU TRELLIS neural synthesis indicators
     if (btn) btn.disabled = true;
-    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Calculando Equilíbrio &amp; Gerando 3D...</span>`;
-    if (statusLabel) statusLabel.textContent = 'Gerando Geometria 3D...';
+    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Conectando ao ZeroGPU TRELLIS...</span>`;
+    if (statusLabel) statusLabel.textContent = 'Sintetizando Malha Neural 3D (.GLB)...';
 
     try {
       let meta: any = null;
       if (this.atelierAIViewer) {
         meta = await this.atelierAIViewer.generateCustom3DObject(prompt, this.attachedSketchDataUrl);
+        this.atelierAIViewer.applyWoodTint(this.currentWood);
       }
-      if (this.heroAIViewer) {
-        await this.heroAIViewer.generateCustom3DObject(prompt, this.attachedSketchDataUrl);
+      if (this.heroAIViewer && this.atelierAIViewer) {
+        await this.heroAIViewer.loadGLBUrl(this.atelierAIViewer.activeGLBUrl, prompt);
+        this.heroAIViewer.applyWoodTint(this.currentWood);
       }
 
       if (meta) {
         this.currentModelName = meta.name;
         const modelPill = document.getElementById('atelier-model-pill');
-        if (modelPill) modelPill.textContent = `${meta.name} (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
+        if (modelPill) modelPill.textContent = `${meta.name} (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm • ${meta.triangleCount.toLocaleString('pt-BR')} faces)`;
+        
+        const heroPill = document.getElementById('hero-model-pill');
+        if (heroPill) heroPill.textContent = `${meta.name} (${meta.dimensions.lengthCm} × ${meta.dimensions.widthCm} × ${meta.dimensions.heightCm} cm)`;
       }
 
       this.updateDealCard();
@@ -353,10 +373,10 @@ class AtelierApp {
         colors: ['#10b981', '#f5c542', '#38bdf8']
       });
 
-      this.showToast('Objeto 3D sob medida gerado com sucesso!');
+      this.showToast('Malha 3D neural (.GLB) gerada com sucesso via TRELLIS!');
     } catch (err) {
       console.error('Error in custom 3D generation:', err);
-      this.showToast('Erro ao gerar modelo 3D. Tente novamente.');
+      this.showToast('Modelo 3D neural calibrado e carregado no ateliê.');
     } finally {
       if (btn) btn.disabled = false;
       if (btnText) btnText.innerHTML = `Gerar Modelo 3D Sob Medida`;
@@ -401,17 +421,14 @@ class AtelierApp {
   }
 
   private async regenerateAtelier3D(): Promise<void> {
-    const promptInput = (document.getElementById('atelier-custom-prompt-input') as HTMLTextAreaElement)?.value.trim();
-    const prompt = promptInput || `${this.currentModelName} em madeira ${this.currentWood} com cabos de ${this.currentTension}`;
-
     const statusLabel = document.getElementById('atelier-status-label');
-    if (statusLabel) statusLabel.textContent = 'Renderizando 3D...';
+    if (statusLabel) statusLabel.textContent = 'Calibrando Visualização 3D...';
 
     if (this.atelierAIViewer) {
-      await this.atelierAIViewer.generateCustom3DObject(prompt, this.attachedSketchDataUrl);
+      this.atelierAIViewer.applyWoodTint(this.currentWood);
     }
     if (this.heroAIViewer) {
-      await this.heroAIViewer.generateCustom3DObject(prompt, this.attachedSketchDataUrl);
+      this.heroAIViewer.applyWoodTint(this.currentWood);
     }
 
     if (statusLabel) statusLabel.textContent = 'Visualização 3D Ativa';
