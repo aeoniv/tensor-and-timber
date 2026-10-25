@@ -13,7 +13,7 @@ export function renderNavbar(): string {
           </div>
           <div class="brand-text">
             <span class="brand-name">83 Ambientes Planejados</span>
-            <span class="brand-sub">Tensor &amp; Timber &bull; João Pessoa - PB</span>
+            <span class="brand-sub">Tensor &amp; Timber &bull; João Pessoa - PB &bull; Brasil 🇧🇷</span>
           </div>
         </a>
 

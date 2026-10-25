@@ -7,7 +7,7 @@ export function renderHero(): string {
           <!-- Text Column -->
           <div class="hero-text-col">
             <div class="hero-badge">
-              Marcenaria &bull; João Pessoa, PB
+              Marcenaria Sob Medida &bull; João Pessoa, PB &bull; Brasil 🇧🇷
             </div>
 
             <h1 class="hero-title">
@@ -15,7 +15,7 @@ export function renderHero(): string {
             </h1>
 
             <p class="hero-subtitle">
-              Projetos residenciais e corporativos fabricados em João Pessoa. Desenvolvemos mesas, estantes, aparadores e peças com estrutura tensil. Você define as dimensões, o material e o acabamento.
+              Projetos residenciais e corporativos fabricados no Brasil em João Pessoa. Desenvolvemos mesas, estantes, aparadores e peças com estrutura tensil. Você define as dimensões, o material e o acabamento.
             </p>
 
             <div class="hero-ctas">

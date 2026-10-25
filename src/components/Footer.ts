@@ -9,16 +9,16 @@ export function renderFooter(): string {
             <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: #ffffff; margin-bottom: 8px;">
               83 Ambientes Planejados
             </h3>
-            <p style="font-size: 0.8rem; color: var(--accent-brass); font-weight: 600; text-transform: uppercase;">
-              Tensor &amp; Timber &bull; João Pessoa, PB
+            <p style="font-size: 0.8rem; color: var(--brasil-amarelo); font-weight: 600; text-transform: uppercase;">
+              Tensor &amp; Timber &bull; João Pessoa, PB &bull; Brasil 🇧🇷
             </p>
             <p class="footer-desc">
-              Móveis planejados, marcenaria sob medida e estruturas de tensegridade. Projetos personalizados com materiais definidos pelo cliente.
+              Móveis planejados, marcenaria sob medida e estruturas de tensegridade fabricadas no Brasil. Projetos personalizados com materiais definidos pelo cliente.
             </p>
             <div class="footer-pill-row">
               <span class="footer-pill">João Pessoa - PB</span>
               <span class="footer-pill">CNPJ: 59.492.848/0001-28</span>
-              <span class="footer-pill">Empresa Ativa</span>
+              <span class="footer-pill">Fabricação Nacional</span>
             </div>
           </div>
 
@@ -48,7 +48,7 @@ export function renderFooter(): string {
             <ul class="footer-links">
               <li><span>Av. Bahia, 703, CXPST 042</span></li>
               <li><span>Bairro dos Estados &bull; João Pessoa - PB</span></li>
-              <li><span>CEP: 58.030-130</span></li>
+              <li><span>CEP: 58.030-130 &bull; Brasil</span></li>
               <li>
                 <a href="https://wa.me/558398229900" target="_blank" rel="noopener noreferrer" style="color: var(--whatsapp-green); font-weight: 600;">
                   WhatsApp: (83) 9822-9900
@@ -65,7 +65,7 @@ export function renderFooter(): string {
         </div>
 
         <div class="footer-bottom">
-          <p>&copy; 2025–2026 83 EMPREENDIMENTOS LTDA (83 Ambientes Planejados) &bull; Tensor &amp; Timber. CNPJ: 59.492.848/0001-28. Todos os direitos reservados.</p>
+          <p>&copy; 2025–2026 83 EMPREENDIMENTOS LTDA (83 Ambientes Planejados) &bull; Tensor &amp; Timber. CNPJ: 59.492.848/0001-28. Fabricado com orgulho no Brasil 🇧🇷.</p>
           <div style="display: flex; gap: 16px;">
             <span>Material à escolha do cliente</span>
             <span>Móveis Sob Medida</span>

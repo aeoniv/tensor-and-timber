@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "ix64-studio"
+  },
+  "targets": {
+    "ix64-studio": {
+      "hosting": {
+        "tensor-and-timber": [
+          "tensor-and-timber"
+        ]
+      }
+    }
+  }
+}
