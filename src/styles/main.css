@@ -1439,3 +1439,28 @@ button, input, select, textarea {
   background: linear-gradient(90deg, #00843D 0%, #00843D 42%, #f5a623 42%, #f5a623 70%, #002776 70%, #002776 100%);
   margin-bottom: 48px;
 }
+
+
+/* Room Planner Studio Additions */
+#btn-analyze-empty-room {
+  background: linear-gradient(135deg, var(--brasil-azul) 0%, var(--brasil-azul-hover) 100%) !important;
+  color: #ffffff !important;
+  border: 1.5px solid var(--brasil-amarelo) !important;
+  box-shadow: 0 4px 16px rgba(0, 39, 118, 0.25) !important;
+}
+#btn-analyze-empty-room:hover:not(:disabled) {
+  border-color: #ffdf00 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 39, 118, 0.34) !important;
+}
+#room-finish-selector {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.room-type-tab.active {
+  background: var(--brasil-verde) !important;
+  border-color: var(--brasil-amarelo) !important;
+  color: #ffffff !important;
+}

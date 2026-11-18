@@ -19,6 +19,7 @@ export function renderNavbar(): string {
 
         <!-- Clean Navigation Links -->
         <nav class="nav-links" id="main-nav">
+          <a href="#room-planner-section" class="nav-link">Projeto por Foto</a>
           <a href="#real-furniture-section" class="nav-link">Modelos</a>
           <a href="#atelier-section" class="nav-link">Estúdio 3D</a>
           <a href="#philosophy-section" class="nav-link">Como Trabalhamos</a>

@@ -6,6 +6,10 @@ export default defineConfig({
     open: false,
     host: true,
     proxy: {
+      '/runtime-models': {
+        target: 'http://127.0.0.1:5175',
+        changeOrigin: true
+      },
       '/api': {
         target: 'http://127.0.0.1:5175',
         changeOrigin: true

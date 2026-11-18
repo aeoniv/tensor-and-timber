@@ -3,6 +3,8 @@ import confetti from 'canvas-confetti';
 import { renderNavbar } from './components/Navbar';
 import { renderHero } from './components/Hero';
 import { renderRealFurnitureSection } from './components/RealFurnitureSection';
+import { renderRoomPlannerStudio } from './components/RoomPlannerStudio';
+import { RoomPlannerController } from './components/RoomPlannerController';
 import { renderAtelierStudio } from './components/AtelierStudio';
 
 import { renderPhilosophySection } from './components/PhilosophySection';
@@ -16,6 +18,7 @@ import { LeadSubmission, ProjectConfiguration, EstimateResult } from './types';
 class AtelierApp {
   // 3D Viewers
   private heroAIViewer: AIModelViewer | null = null;
+  private roomPlannerController: RoomPlannerController | null = null;
   private atelierAIViewer: AIModelViewer | null = null;
 
   // Active Model State
@@ -44,6 +47,7 @@ class AtelierApp {
       ${renderNavbar()}
       <main>
         ${renderHero()}
+        ${renderRoomPlannerStudio()}
         ${renderRealFurnitureSection()}
         ${renderAtelierStudio()}
         
@@ -55,6 +59,7 @@ class AtelierApp {
 
     this.initViewers();
     this.bindEvents();
+    this.roomPlannerController = new RoomPlannerController((msg) => this.showToast(msg));
     this.initAtelierConfigurator();
     this.initCommissionForm();
   }

@@ -31,8 +31,8 @@ export function renderHero(): string {
                 <span>Falar no WhatsApp</span>
               </a>
 
-              <a href="#real-furniture-section" class="btn btn-outline btn-lg">
-                <span>Ver Modelos</span>
+              <a href="#room-planner-section" class="btn btn-outline btn-lg">
+                <span>Simular Cômodo por Foto</span>
               </a>
             </div>
 

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+runtime_models/
+temp_*.png
+__pycache__/
