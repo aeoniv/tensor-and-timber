@@ -1,7 +1,14 @@
 import confetti from 'canvas-confetti';
 import {
+  CabinetStyleOptions,
+  FrontStyleId,
+  HandleStyleId,
+  HardwareTierId,
   MDF_FEATURED_FINISHES,
   HARDWARE_KIT_OPTIONS,
+  MODULE_CATALOG_TEMPLATES,
+  ModuleArchetype,
+  ThicknessModeId,
   calculateCabinetryQuote,
   findMdfFinishById,
 } from '../data/pricingCatalog';
@@ -15,6 +22,7 @@ import { RoomSceneViewer } from './RoomSceneViewer';
 import {
   CounterTone,
   buildRoomProposalSummaryMessage,
+  exportCutlistToCSVDownload,
 } from '../services/parametricCabinetBuilder';
 
 const ROOM_CHIPS: Record<RoomType, Array<{ label: string; phrase: string }>> = {
@@ -96,8 +104,11 @@ export class RoomPlannerController {
   private frontFinishId: string = MDF_FEATURED_FINISHES[0]?.id || 'branco-artico';
   private carcassFinishId: string = 'branco-artico';
   private splitCarcass: boolean = true;
-  private hardwareId: 'padrao' | 'slow' = 'slow';
+  private hardwareId: HardwareTierId = 'slow';
   private counterTone: CounterTone = 'claro';
+  private frontStyle: FrontStyleId = 'lisa';
+  private handleStyle: HandleStyleId = 'perfil_18';
+  private thicknessMode: ThicknessModeId = '15mm';
   private photoDataUrl: string | null = null;
   private currentAnalysis: RoomAnalysisResult | null = null;
   private onToast: (msg: string) => void;
@@ -118,6 +129,14 @@ export class RoomPlannerController {
     return this.splitCarcass ? this.carcassFinishId : this.frontFinishId;
   }
 
+  private getStyleOptions(): CabinetStyleOptions {
+    return {
+      frontStyle: this.frontStyle,
+      handleStyle: this.handleStyle,
+      thicknessMode: this.thicknessMode,
+    };
+  }
+
   private bindEvents(): void {
     // 1. Seletor dos 7 Cômodos
     const roomTabs = document.querySelectorAll('.room-type-tab');
@@ -132,9 +151,9 @@ export class RoomPlannerController {
         if (refInput && el.dataset.defaultCm) {
           refInput.value = el.dataset.defaultCm;
         }
-        // Sugerir caixaria resistente umidade se cozinha/banheiro/lavanderia
+        // Sugerir caixaria resistente umidade para áreas molhadas/gourmet
         const carcassSelect = document.getElementById('room-carcass-select') as HTMLSelectElement;
-        if (carcassSelect && (this.roomType === 'banheiro' || this.roomType === 'lavanderia' || this.roomType === 'cozinha')) {
+        if (carcassSelect && ['banheiro', 'lavanderia', 'cozinha', 'varanda_gourmet'].includes(this.roomType)) {
           carcassSelect.value = 'branco-ultra';
           this.carcassFinishId = 'branco-ultra';
         }
@@ -251,21 +270,55 @@ export class RoomPlannerController {
       });
     });
 
-    // 4. Kits de ferragem
+    // Estilo das frentes (Lisa / Cava 45 / Provençal / Vidro Reflecta)
+    const frontStyleBtns = document.querySelectorAll('.room-front-style-btn');
+    frontStyleBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        frontStyleBtns.forEach((b) => b.classList.remove('active'));
+        const el = e.currentTarget as HTMLElement;
+        el.classList.add('active');
+        this.frontStyle = (el.dataset.frontStyle as FrontStyleId) || 'lisa';
+        this.applyMaterialAndQuoteUpdate();
+      });
+    });
+
+    // Puxador e Espessura estrutural
+    const handleSelect = document.getElementById('room-handle-style-select') as HTMLSelectElement;
+    handleSelect?.addEventListener('change', () => {
+      this.handleStyle = (handleSelect.value as HandleStyleId) || 'perfil_18';
+      this.applyMaterialAndQuoteUpdate();
+    });
+
+    const thickSelect = document.getElementById('room-thickness-select') as HTMLSelectElement;
+    thickSelect?.addEventListener('change', () => {
+      this.thicknessMode = (thickSelect.value as ThicknessModeId) || '15mm';
+      this.applyMaterialAndQuoteUpdate();
+    });
+
+    // 4. Kits de ferragem (Padrão / Slow / Luxo)
     const hwBtns = document.querySelectorAll('.room-hardware-btn');
     hwBtns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         hwBtns.forEach((b) => b.classList.remove('active'));
         const el = e.currentTarget as HTMLElement;
         el.classList.add('active');
-        this.hardwareId = (el.dataset.hardwareId as 'padrao' | 'slow') || 'slow';
+        this.hardwareId = (el.dataset.hardwareId as HardwareTierId) || 'slow';
         this.applyMaterialAndQuoteUpdate();
       });
     });
 
-    // 5. Analisar Cômodo
+    // 5. Analisar Cômodo ou Montar Manualmente (Sem Foto)
     document.getElementById('btn-analyze-empty-room')?.addEventListener('click', async () => {
       await this.runRoomAnalysis();
+    });
+
+    document.getElementById('btn-start-blank-room')?.addEventListener('click', () => {
+      this.startBlankRoomProject();
+    });
+
+    // Botão adicionar qualquer módulo do catálogo na cena
+    document.getElementById('btn-add-custom-module')?.addEventListener('click', () => {
+      this.addCustomModuleToScene();
     });
 
     // 6. Controles 3D e Exportação
@@ -299,7 +352,7 @@ export class RoomPlannerController {
 
     document.getElementById('room-btn-download-glb')?.addEventListener('click', async () => {
       if (!this.viewer || !this.currentAnalysis) {
-        this.onToast('Gere a proposta 3D a partir de uma foto primeiro.');
+        this.onToast('Gere ou monte uma proposta 3D primeiro.');
         return;
       }
       const ok = await this.viewer.exportProposalGLB();
@@ -308,12 +361,28 @@ export class RoomPlannerController {
 
     document.getElementById('room-btn-export-obj')?.addEventListener('click', () => {
       if (!this.viewer || !this.currentAnalysis) {
-        this.onToast('Gere a proposta 3D a partir de uma foto primeiro.');
+        this.onToast('Gere ou monte uma proposta 3D primeiro.');
         return;
       }
       if (this.viewer.exportProposalOBJ()) {
         this.onToast('Arquivo .OBJ exportado em escala métrica para importar no SketchUp!');
       }
+    });
+
+    document.getElementById('room-btn-export-csv')?.addEventListener('click', () => {
+      if (!this.currentAnalysis) {
+        this.onToast('Gere ou monte uma proposta 3D primeiro.');
+        return;
+      }
+      const quote = calculateCabinetryQuote(
+        this.currentAnalysis.modules,
+        this.frontFinishId,
+        this.hardwareId,
+        this.getEffectiveCarcassId(),
+        this.getStyleOptions()
+      );
+      exportCutlistToCSVDownload(this.currentAnalysis, quote);
+      this.onToast('Plano de Corte técnico (.CSV) baixado!');
     });
   }
 
@@ -346,7 +415,7 @@ export class RoomPlannerController {
     const front = findMdfFinishById(this.frontFinishId);
     const carcass = findMdfFinishById(this.getEffectiveCarcassId());
     if (this.viewer && this.currentAnalysis) {
-      this.viewer.updateMaterialOrHardware(front, this.hardwareId, carcass, this.counterTone);
+      this.viewer.updateMaterialOrHardware(front, this.hardwareId, carcass, this.counterTone, this.getStyleOptions());
     }
     this.refreshSummaryDisplay();
   }
@@ -356,23 +425,42 @@ export class RoomPlannerController {
     const carcass = findMdfFinishById(this.getEffectiveCarcassId());
     const hw = HARDWARE_KIT_OPTIONS.find((h) => h.id === this.hardwareId) || HARDWARE_KIT_OPTIONS[0];
 
+    const frontStyleLabel: Record<FrontStyleId, string> = {
+      lisa: 'Lisa',
+      cava45: 'Cava 45°',
+      provencal: 'Provençal',
+      vidro_reflecta: 'Vidro Reflecta',
+    };
+    const thickLabel: Record<ThicknessModeId, string> = {
+      '15mm': '15mm',
+      '18mm': '18mm',
+      '25mm_engrossado': '25/30mm Engrossado',
+    };
+
     const summaryEl = document.getElementById('room-deal-finish-summary');
     if (summaryEl) {
       const twoTone = front.cod15 !== carcass.cod15 ? `Frentes: ${front.label} + Caixaria: ${carcass.label}` : `${front.label} (${front.cod15})`;
-      summaryEl.textContent = `${twoTone} • ${hw.id === 'padrao' ? 'Ferragens Padrão' : 'Ferragens Slow / Oculta'}`;
+      summaryEl.textContent = `${twoTone} • ${frontStyleLabel[this.frontStyle]} • ${thickLabel[this.thicknessMode]} • ${hw.label}`;
     }
 
     if (!this.currentAnalysis) return;
 
+    const styleOpts = this.getStyleOptions();
     const quote = calculateCabinetryQuote(
       this.currentAnalysis.modules,
       this.frontFinishId,
       this.hardwareId,
-      this.getEffectiveCarcassId()
+      this.getEffectiveCarcassId(),
+      styleOpts
     );
 
     const priceEl = document.getElementById('room-deal-price');
     if (priceEl) priceEl.textContent = quote.formattedRange;
+
+    const dimsPill = document.getElementById('room-dims-pill');
+    if (dimsPill) {
+      dimsPill.textContent = `Parede ${this.currentAnalysis.roomDimensionsCm.widthCm}×${this.currentAnalysis.roomDimensionsCm.heightCm} cm • ${this.currentAnalysis.modules.length} módulos`;
+    }
 
     const titleEl = document.getElementById('room-deal-title');
     if (titleEl) {
@@ -412,40 +500,62 @@ export class RoomPlannerController {
                 `<span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;font-size:0.74rem;font-weight:600;">⚠ ${ptTypeLabel(o.type, o.label)} (${ptWallLabel(o.wall)}: ${o.xStartCm}–${o.xEndCm}cm)</span>`
             )
             .join('')
-        : `<span style="display:inline-flex;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#166534;font-size:0.74rem;font-weight:600;">✓ Parede principal livre detectada</span>`;
+        : `<span style="display:inline-flex;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#166534;font-size:0.74rem;font-weight:600;">✓ Layout livre pronto para personalização</span>`;
     }
 
-    const wallLabel: Record<string, string> = { back: 'Fundo', left: 'Esq.', right: 'Dir.', center: 'Centro' };
     const modWrap = document.getElementById('room-modules-list');
     if (modWrap) {
       const modItems = this.currentAnalysis.modules
         .map(
           (m, idx) =>
-            `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border-subtle);">
-               <div>
-                 <strong>${m.label}</strong>
-                 <span style="font-size:0.72rem;color:var(--text-muted);margin-left:5px;">[${wallLabel[m.wall] || 'Fundo'}]</span>
+            `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 0;border-bottom:1px dashed var(--border-subtle);flex-wrap:wrap;">
+               <div style="display:flex;align-items:center;gap:6px;">
+                 <strong style="font-size:0.83rem;">${m.label}</strong>
+                 <select class="mod-wall-select prompt-input-area" data-idx="${idx}" style="padding:2px 4px;min-height:0;font-size:0.72rem;width:auto;">
+                   <option value="back" ${m.wall === 'back' ? 'selected' : ''}>Fundo</option>
+                   <option value="left" ${m.wall === 'left' ? 'selected' : ''}>Esq.</option>
+                   <option value="right" ${m.wall === 'right' ? 'selected' : ''}>Dir.</option>
+                   <option value="center" ${m.wall === 'center' ? 'selected' : ''}>Centro</option>
+                 </select>
                </div>
-               <div style="display:flex;align-items:center;gap:5px;white-space:nowrap;">
-                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 6px;font-size:0.74rem;" title="Diminuir 10cm">-10</button>
-                 <span style="font-size:0.8rem;font-weight:600;">${m.widthCm} × ${m.heightCm} × ${m.depthCm} cm</span>
-                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="10" style="padding:1px 6px;font-size:0.74rem;" title="Aumentar 10cm">+10</button>
+               <div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 5px;font-size:0.72rem;" title="Largura -10cm">-10</button>
+                 <span style="font-size:0.78rem;font-weight:600;">${m.widthCm}×${m.heightCm}×${m.depthCm}</span>
+                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="10" style="padding:1px 5px;font-size:0.72rem;" title="Largura +10cm">+10</button>
+                 <button type="button" class="ctrl-btn mod-height-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 5px;font-size:0.72rem;" title="Altura -10cm">A-</button>
+                 <button type="button" class="ctrl-btn mod-height-btn" data-idx="${idx}" data-delta="10" style="padding:1px 5px;font-size:0.72rem;" title="Altura +10cm">A+</button>
                  <button type="button" class="ctrl-btn mod-remove-btn" data-idx="${idx}" style="padding:1px 6px;font-size:0.74rem;color:#b91c1c;" title="Remover módulo">&times;</button>
                </div>
              </div>`
         )
         .join('');
       const sheetsDesc = quote.sheets15CarcassCount > 0
-        ? `${quote.sheets15FrontCount} ch. Frente + ${quote.sheets15CarcassCount} ch. Caixaria + ${quote.sheets6Count} ch. 6mm`
-        : `${quote.sheets15Count} ch. 15mm + ${quote.sheets6Count} ch. 6mm`;
+        ? `${quote.sheets15FrontCount} Frente + ${quote.sheets15CarcassCount} Caixaria + ${quote.sheets6Count} ch. 6mm`
+        : `${quote.sheets15Count} ch. Estrut. + ${quote.sheets6Count} ch. 6mm`;
+      const extraDesc = quote.machiningAndGlassSubtotal > 0 ? ` • Vidro/Usin.: R$ ${quote.machiningAndGlassSubtotal.toLocaleString('pt-BR')}` : '';
       modWrap.innerHTML =
         modItems +
-        `<div style="display:flex;justify-content:space-between;padding-top:8px;font-weight:600;color:var(--brasil-verde);font-size:0.8rem;">
-           <span>Consumo estimado (Planilha)</span>
-           <span>${sheetsDesc} • ${quote.hingesCount} dobr. / ${quote.slidesCount} corr.</span>
+        `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;padding-top:8px;font-weight:600;color:var(--brasil-verde);font-size:0.78rem;">
+           <span>Consumo (${thickLabel[this.thicknessMode]})</span>
+           <span>${sheetsDesc} • ${quote.hingesCount + quote.cornerHingesCount} dobr. / ${quote.slidesCount} corr.${extraDesc}</span>
          </div>`;
 
-      // Binding edição rápida de módulos (-10cm / +10cm / remover)
+      modWrap.querySelectorAll('.mod-wall-select').forEach((sel) => {
+        sel.addEventListener('change', (e) => {
+          if (!this.currentAnalysis) return;
+          const el = e.currentTarget as HTMLSelectElement;
+          const idx = Number(el.dataset.idx);
+          const m = this.currentAnalysis.modules[idx];
+          if (!m) return;
+          const newWall = (el.value as 'back' | 'left' | 'right' | 'center') || 'back';
+          m.wall = newWall;
+          if ((newWall === 'left' || newWall === 'right') && m.xCm < 65) m.xCm = 70;
+          if (newWall === 'center' && !m.zCm) m.zCm = 155;
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, false, styleOpts);
+          this.refreshSummaryDisplay();
+        });
+      });
+
       modWrap.querySelectorAll('.mod-resize-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
           if (!this.currentAnalysis) return;
@@ -455,7 +565,21 @@ export class RoomPlannerController {
           const m = this.currentAnalysis.modules[idx];
           if (!m) return;
           m.widthCm = Math.max(35, Math.min(350, m.widthCm + delta));
-          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true);
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true, styleOpts);
+          this.refreshSummaryDisplay();
+        });
+      });
+
+      modWrap.querySelectorAll('.mod-height-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          if (!this.currentAnalysis) return;
+          const el = e.currentTarget as HTMLElement;
+          const idx = Number(el.dataset.idx);
+          const delta = Number(el.dataset.delta);
+          const m = this.currentAnalysis.modules[idx];
+          if (!m) return;
+          m.heightCm = Math.max(20, Math.min(280, m.heightCm + delta));
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true, styleOpts);
           this.refreshSummaryDisplay();
         });
       });
@@ -468,7 +592,7 @@ export class RoomPlannerController {
           }
           const idx = Number((e.currentTarget as HTMLElement).dataset.idx);
           this.currentAnalysis.modules.splice(idx, 1);
-          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true);
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true, styleOpts);
           this.refreshSummaryDisplay();
         });
       });
@@ -479,6 +603,128 @@ export class RoomPlannerController {
       const msg = buildRoomProposalSummaryMessage(this.currentAnalysis, quote);
       waBtn.href = `https://wa.me/558398229900?text=${encodeURIComponent(msg)}`;
     }
+  }
+
+  private startBlankRoomProject(): void {
+    const widthCm = Math.max(150, Math.min(680, Number((document.getElementById('room-ref-cm') as HTMLInputElement)?.value || 320)));
+    const heightCm = 260;
+    const depthCm = Math.round(Math.max(260, widthCm * 1.05));
+
+    const starterByRoom: Record<RoomType, ModuleArchetype[]> = {
+      cozinha: ['balcao_pia', 'balcao_cooktop', 'torre_quente', 'aereo_basculante'],
+      quarto: ['guarda_roupa_correr', 'penteadeira_camarim', 'cabeceira_estofada'],
+      sala: ['painel_tv_ripado', 'rack_suspenso', 'cristaleira_vidro'],
+      banheiro: ['gabinete_banheiro', 'espelheira_armario'],
+      lavanderia: ['bancada_tanque_maquina', 'armario_vassoureiro'],
+      escritorio: ['estacao_trabalho_L', 'arquivo_escritorio', 'painel_muxarabi'],
+      varanda_gourmet: ['balcao_churrasqueira', 'bar_adega', 'ilha_gourmet'],
+    };
+
+    const chosen = starterByRoom[this.roomType] || starterByRoom.cozinha;
+    let backCursor = 10;
+    const modules = chosen.map((type, idx) => {
+      const tpl = MODULE_CATALOG_TEMPLATES.find((t) => t.type === type) || MODULE_CATALOG_TEMPLATES[0];
+      const wall = tpl.defaultWall;
+      let xCm = 10;
+      if (wall === 'back') {
+        const isLayered = type === 'rack_suspenso';
+        xCm = isLayered ? 10 : backCursor;
+        if (xCm + tpl.widthCm > widthCm) xCm = Math.max(0, widthCm - tpl.widthCm);
+        if (!isLayered) backCursor = xCm + tpl.widthCm + 5;
+      } else if (wall === 'center') {
+        xCm = Math.max(20, Math.round((widthCm - tpl.widthCm) / 2));
+      } else {
+        xCm = 70;
+      }
+      return {
+        id: `mod_${idx + 1}`,
+        type: tpl.type,
+        label: tpl.label,
+        wall,
+        xCm,
+        yCm: tpl.defaultYCm,
+        zCm: wall === 'center' ? 160 : undefined,
+        widthCm: Math.min(tpl.widthCm, widthCm),
+        heightCm: tpl.heightCm,
+        depthCm: tpl.depthCm,
+        doorsCount: tpl.doorsCount,
+        drawersCount: tpl.drawersCount,
+        hasLed: tpl.hasLed,
+      };
+    });
+
+    this.currentAnalysis = {
+      success: true,
+      elapsedSec: 0.1,
+      roomType: this.roomType,
+      roomGlbUrl: null,
+      depthMapUrl: null,
+      roomDimensionsCm: { widthCm, heightCm, depthCm },
+      backWallNormBox: [],
+      obstacles: [],
+      modules,
+      architectNotesPtBr: 'Ambiente iniciado manualmente para personalização livre. Adicione módulos de canto em L, tamponamento até o teto, muxarabi ou troque o estilo das frentes abaixo.',
+      aiEngines: { geometry3d: 'Modo Manual Livre', perception: 'Manual', architect: 'Catálogo 38 Móveis' },
+    };
+
+    const front = findMdfFinishById(this.frontFinishId);
+    const carcass = findMdfFinishById(this.getEffectiveCarcassId());
+    this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, false, this.getStyleOptions());
+    document.getElementById('room-status-pill')!.textContent = 'Modo Livre ativo • Adicione ou ajuste móveis';
+    this.refreshSummaryDisplay();
+    this.onToast('Ambiente livre carregado! Teste adicionar módulos ou alterar o estilo das portas.');
+  }
+
+  private addCustomModuleToScene(): void {
+    if (!this.currentAnalysis) {
+      this.startBlankRoomProject();
+    }
+    if (!this.currentAnalysis) return;
+
+    const typeSel = document.getElementById('room-add-module-type') as HTMLSelectElement;
+    const wallSel = document.getElementById('room-add-module-wall') as HTMLSelectElement;
+    const mtype = (typeSel?.value as ModuleArchetype) || 'balcao_canto_L';
+    const wall = (wallSel?.value as 'back' | 'left' | 'right' | 'center') || 'back';
+    const tpl = MODULE_CATALOG_TEMPLATES.find((t) => t.type === mtype) || MODULE_CATALOG_TEMPLATES[0];
+
+    const maxSpan = wall === 'back' || wall === 'center' ? this.currentAnalysis.roomDimensionsCm.widthCm : Math.min(280, this.currentAnalysis.roomDimensionsCm.depthCm);
+    const sameWallSameY = this.currentAnalysis.modules.filter(
+      (m) => m.wall === wall && Math.abs(m.yCm - tpl.defaultYCm) < 40
+    );
+    let xCm = mtype.includes('canto_L')
+      ? 2
+      : wall === 'left' || wall === 'right'
+      ? 70
+      : wall === 'center'
+      ? Math.max(20, Math.round((maxSpan - tpl.widthCm) / 2))
+      : 10;
+    if (sameWallSameY.length > 0 && wall !== 'center' && !mtype.includes('canto_L')) {
+      const maxEnd = Math.max(...sameWallSameY.map((m) => m.xCm + m.widthCm));
+      xCm = Math.min(Math.max(0, maxSpan - tpl.widthCm), maxEnd + 4);
+    }
+    const wCm = Math.min(tpl.widthCm, Math.max(40, maxSpan - xCm));
+
+    this.currentAnalysis.modules.push({
+      id: `mod_${Date.now().toString().slice(-4)}`,
+      type: tpl.type,
+      label: tpl.label,
+      wall,
+      xCm,
+      yCm: tpl.defaultYCm,
+      zCm: wall === 'center' ? 165 : undefined,
+      widthCm: wCm,
+      heightCm: tpl.heightCm,
+      depthCm: tpl.depthCm,
+      doorsCount: tpl.doorsCount,
+      drawersCount: tpl.drawersCount,
+      hasLed: tpl.hasLed,
+    });
+
+    const front = findMdfFinishById(this.frontFinishId);
+    const carcass = findMdfFinishById(this.getEffectiveCarcassId());
+    this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, wall === 'back', this.getStyleOptions());
+    this.refreshSummaryDisplay();
+    this.onToast(`${tpl.label} adicionado na parede ${wall === 'back' ? 'Fundo' : wall === 'left' ? 'Esquerda' : wall === 'right' ? 'Direita' : 'Centro'}!`);
   }
 
   private async runRoomAnalysis(): Promise<void> {
@@ -521,17 +767,13 @@ export class RoomPlannerController {
       const front = findMdfFinishById(this.frontFinishId);
       const carcass = findMdfFinishById(this.getEffectiveCarcassId());
       if (this.viewer) {
-        this.viewer.renderRoomProposal(result, front, this.hardwareId, carcass, this.counterTone);
+        this.viewer.renderRoomProposal(result, front, this.hardwareId, carcass, this.counterTone, false, this.getStyleOptions());
       }
 
       if (mogeBtn) {
         mogeBtn.style.display = result.roomGlbUrl ? 'inline-flex' : 'none';
       }
 
-      const dimsPill = document.getElementById('room-dims-pill');
-      if (dimsPill) {
-        dimsPill.textContent = `Parede ${result.roomDimensionsCm.widthCm}×${result.roomDimensionsCm.heightCm} cm • ${result.modules.length} módulos`;
-      }
       if (statusPill) {
         statusPill.textContent = `Proposta 3D gerada em ${result.elapsedSec}s (${result.aiEngines.architect})`;
       }

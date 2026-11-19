@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
 import {
+  CabinetStyleOptions,
   CabinetryQuoteResult,
+  HardwareTierId,
   MdfFinishOption,
   ProposedCabinetModule,
 } from '../data/pricingCatalog';
@@ -185,12 +187,17 @@ export function buildCabinetModulesGroup(
   modules: ProposedCabinetModule[],
   roomWidthCm: number,
   frontFinish: MdfFinishOption,
-  hardwareId: 'padrao' | 'slow',
+  hardwareId: HardwareTierId,
   carcassFinish?: MdfFinishOption,
-  counterTone: CounterTone = 'claro'
+  counterTone: CounterTone = 'claro',
+  styleOptions: Partial<CabinetStyleOptions> = {}
 ): THREE.Group {
   const root = new THREE.Group();
   root.name = 'TensorTimber_Cabinetry_Proposal';
+
+  const frontStyle = styleOptions.frontStyle || 'lisa';
+  const handleStyle = styleOptions.handleStyle || 'perfil_18';
+  const thicknessMode = styleOptions.thicknessMode || '15mm';
 
   const W = roomWidthCm / 100;
   const frontMat = createMdfMaterial(frontFinish);
@@ -201,10 +208,11 @@ export function buildCabinetModulesGroup(
   const interiorMat = new THREE.MeshStandardMaterial({ color: 0xf4f3ef, roughness: 0.65 });
   const plinthMat = new THREE.MeshStandardMaterial({ color: 0xd6d3cd, roughness: 0.7 });
   const alumMat = new THREE.MeshStandardMaterial({
-    color: hardwareId === 'slow' ? 0x262626 : 0xb8bec6,
+    color: hardwareId === 'padrao' ? 0xb8bec6 : 0x262626,
     roughness: 0.28,
     metalness: 0.82,
   });
+  const cavaGrooveMat = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.55, metalness: 0.1 });
   const stoneColor = counterTone === 'escuro' ? 0x26282b : counterTone === 'madeira' ? 0x9f6c3f : 0xe4e0d8;
   const stoneMat = new THREE.MeshStandardMaterial({
     color: stoneColor,
@@ -213,14 +221,85 @@ export function buildCabinetModulesGroup(
   });
   const ceramicMat = new THREE.MeshStandardMaterial({ color: 0xfefefe, roughness: 0.15, metalness: 0.05 });
   const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.16, metalness: 0.45 });
-  const tintedGlassMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.12, metalness: 0.2, transparent: true, opacity: 0.34 });
+  const reflectaGlassMat = new THREE.MeshStandardMaterial({ color: 0x3b2f2a, roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.44 });
+  const tintedGlassMat = reflectaGlassMat;
   const mirrorMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.06, metalness: 0.88 });
   const steelMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.22, metalness: 0.9 });
   const fabricMat = new THREE.MeshStandardMaterial({ color: 0xebe6de, roughness: 0.88 });
+  const linenHeadMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c3, roughness: 0.92 });
   const ledMat = new THREE.MeshStandardMaterial({ color: 0xfff3d1, emissive: 0xffd27d, emissiveIntensity: 1.4 });
 
-  const panelT = 0.015;
+  const panelT = thicknessMode === '25mm_engrossado' ? 0.024 : thicknessMode === '18mm' ? 0.018 : 0.015;
   const gap = 0.003;
+
+  const addStyledDoor = (
+    g: THREE.Group,
+    w: number,
+    h: number,
+    x: number,
+    y: number,
+    zFront: number,
+    name: string,
+    allowGlass: boolean,
+    isLeftLeaf: boolean
+  ) => {
+    const useGlass = allowGlass && frontStyle === 'vidro_reflecta';
+    if (useGlass) {
+      addBox(g, Math.max(0.04, w - 0.044), Math.max(0.04, h - 0.044), 0.008, x, y, zFront, reflectaGlassMat, `${name}_Glass`);
+      addBox(g, w, 0.022, 0.018, x, y + h / 2 - 0.011, zFront, alumMat, `${name}_AlumTop`);
+      addBox(g, w, 0.022, 0.018, x, y - h / 2 + 0.011, zFront, alumMat, `${name}_AlumBot`);
+      addBox(g, 0.022, h, 0.018, x - w / 2 + 0.011, y, zFront, alumMat, `${name}_AlumL`);
+      addBox(g, 0.022, h, 0.018, x + w / 2 - 0.011, y, zFront, alumMat, `${name}_AlumR`);
+      return;
+    }
+
+    if (frontStyle === 'provencal' && w > 0.16 && h > 0.18) {
+      const frameW = Math.min(0.042, w * 0.18);
+      addBox(g, w - frameW * 1.4, h - frameW * 1.4, 0.010, x, y, zFront - 0.004, frontMat, `${name}_Core`);
+      addBox(g, w, frameW, 0.018, x, y + h / 2 - frameW / 2, zFront, frontMat, `${name}_RailTop`);
+      addBox(g, w, frameW, 0.018, x, y - h / 2 + frameW / 2, zFront, frontMat, `${name}_RailBot`);
+      addBox(g, frameW, h - frameW * 2, 0.018, x - w / 2 + frameW / 2, y, zFront, frontMat, `${name}_StileL`);
+      addBox(g, frameW, h - frameW * 2, 0.018, x + w / 2 - frameW / 2, y, zFront, frontMat, `${name}_StileR`);
+    } else {
+      addBox(g, w, h, 0.018, x, y, zFront, frontMat, name);
+      if (frontStyle === 'cava45') {
+        addBox(g, w - 0.004, 0.012, 0.006, x, y + h / 2 - 0.006, zFront + 0.008, cavaGrooveMat, `${name}_Cava`);
+      }
+    }
+
+    if (handleStyle !== 'fecho_toque' && frontStyle !== 'cava45') {
+      const isLong = handleStyle === 'perfil_15';
+      const hx = x + (isLeftLeaf ? w / 2 - 0.028 : -w / 2 + 0.028);
+      const hh = isLong ? Math.max(0.14, h * 0.88) : Math.min(0.24, h * 0.42);
+      addBox(g, 0.011, hh, 0.014, hx, y + (isLong ? 0 : h * 0.12), zFront + 0.014, alumMat, `${name}_Handle`);
+    }
+  };
+
+  const addStyledDrawer = (
+    g: THREE.Group,
+    w: number,
+    h: number,
+    x: number,
+    y: number,
+    zFront: number,
+    name: string
+  ) => {
+    if (frontStyle === 'provencal' && w > 0.18 && h > 0.12) {
+      const fw = Math.min(0.032, h * 0.22);
+      addBox(g, w - fw, h - fw, 0.010, x, y, zFront - 0.003, frontMat, `${name}_Core`);
+      addBox(g, w, fw, 0.018, x, y + h / 2 - fw / 2, zFront, frontMat, `${name}_Top`);
+      addBox(g, w, fw, 0.018, x, y - h / 2 + fw / 2, zFront, frontMat, `${name}_Bot`);
+    } else {
+      addBox(g, w, h, 0.018, x, y, zFront, frontMat, name);
+      if (frontStyle === 'cava45') {
+        addBox(g, w - 0.004, 0.012, 0.006, x, y + h / 2 - 0.006, zFront + 0.008, cavaGrooveMat, `${name}_Cava`);
+      }
+    }
+    if (handleStyle !== 'fecho_toque' && frontStyle !== 'cava45') {
+      const barW = handleStyle === 'perfil_15' ? w * 0.92 : Math.min(w * 0.55, 0.36);
+      addBox(g, barW, 0.01, 0.014, x, y + h / 2 - 0.02, zFront + 0.014, alumMat, `${name}_Pull`);
+    }
+  };
 
   const buildStandardCarcass = (g: THREE.Group, mw: number, bodyH: number, md: number, plinthH: number) => {
     if (plinthH > 0) {
@@ -353,16 +432,97 @@ export function buildCabinetModulesGroup(
         for (let dIdx = 0; dIdx < doors; dIdx++) {
           const dx = -innerW / 2 + doorW / 2 + dIdx * doorW;
           const zOffset = dIdx % 2 === 0 ? md - 0.012 : md + 0.010;
-          addBox(g, doorW + 0.012, bodyH - 0.04, 0.018, dx, plinthH + bodyH / 2, zOffset, frontMat, `Sliding_Door_${dIdx + 1}`);
-          addBox(g, 0.014, bodyH - 0.04, 0.022, dx - doorW / 2 + 0.008, plinthH + bodyH / 2, zOffset + 0.003, alumMat, `Profile_Handle_${dIdx + 1}`);
+          addStyledDoor(g, doorW + 0.012, bodyH - 0.04, dx, plinthH + bodyH / 2, zOffset, `Sliding_Door_${dIdx + 1}`, true, dIdx % 2 === 0);
         }
       } else {
         for (let dIdx = 0; dIdx < doors; dIdx++) {
           const dx = -innerW / 2 + doorW / 2 + dIdx * doorW;
-          addBox(g, doorW - gap * 2, bodyH - gap * 2, 0.018, dx, plinthH + bodyH / 2, md + 0.009, frontMat, `Door_${dIdx + 1}`);
-          const handleX = dx + (dIdx % 2 === 0 ? doorW / 2 - 0.035 : -doorW / 2 + 0.035);
-          addBox(g, 0.012, Math.min(0.55, bodyH * 0.4), 0.015, handleX, plinthH + bodyH * 0.46, md + 0.024, alumMat, `Handle_${dIdx + 1}`);
+          addStyledDoor(g, doorW - gap * 2, bodyH - gap * 2, dx, plinthH + bodyH / 2, md + 0.009, `Door_${dIdx + 1}`, false, dIdx % 2 === 0);
         }
+      }
+    }
+    // 6B. PAINEL MUXARABI VAZADO
+    else if (mod.type === 'painel_muxarabi') {
+      addBox(g, mw, 0.032, md, 0, 0.016, md / 2, frontMat, 'Muxarabi_Frame_Bot');
+      addBox(g, mw, 0.032, md, 0, mh - 0.016, md / 2, frontMat, 'Muxarabi_Frame_Top');
+      const cols = Math.max(4, Math.floor(mw / 0.14));
+      const rows = Math.max(6, Math.floor(mh / 0.18));
+      for (let c = 0; c <= cols; c++) {
+        const vx = -mw / 2 + 0.02 + ((mw - 0.04) / cols) * c;
+        addBox(g, 0.022, mh - 0.04, md * 0.72, vx, mh / 2, md / 2, frontMat, `Muxarabi_V_${c}`);
+      }
+      for (let r = 1; r < rows; r++) {
+        const hy = (mh / rows) * r;
+        addBox(g, mw - 0.03, 0.022, md * 0.45, 0, hy, md / 2, carcassMat, `Muxarabi_H_${r}`);
+      }
+      if (mod.hasLed) {
+        addBox(g, 0.014, mh * 0.92, 0.012, mw / 2 - 0.01, mh / 2, 0.01, ledMat, 'Muxarabi_LED');
+      }
+    }
+    // 6C. CABECEIRA ESTOFADA MODULADA LED
+    else if (mod.type === 'cabeceira_estofada') {
+      addBox(g, mw, mh, 0.022, 0, mh / 2, 0.011, carcassMat, 'Upholstered_Base');
+      const panels = Math.max(4, Math.round(mw / 0.36));
+      const pw = (mw - 0.03) / panels;
+      for (let p = 0; p < panels; p++) {
+        const px = -(mw - 0.03) / 2 + pw / 2 + p * pw;
+        addBox(g, pw - 0.008, mh - 0.04, 0.058, px, mh / 2, 0.048, linenHeadMat, `Headboard_Pad_${p + 1}`);
+      }
+      if (mod.hasLed !== false) {
+        addBox(g, mw * 0.96, 0.012, 0.014, 0, mh - 0.012, 0.02, ledMat, 'Headboard_Top_LED');
+      }
+    }
+    // 6D. FECHAMENTO SUPERIOR / TAMPONAMENTO TETO
+    else if (mod.type === 'fechamento_teto') {
+      addBox(g, mw, mh, 0.024, 0, mh / 2, md - 0.012, frontMat, 'Soffit_Fascia');
+      addBox(g, mw - 0.02, 0.018, md, 0, 0.009, md / 2, carcassMat, 'Soffit_Return');
+    }
+    // 6E. MESA / BANCADA RETRÁTIL COMPACTA
+    else if (mod.type === 'mesa_retratil') {
+      addBox(g, mw, 0.22, 0.06, 0, mh - 0.11, 0.03, carcassMat, 'Wall_Mount_Cleat');
+      addBox(g, mw, 0.030, md, 0, mh - 0.015, md / 2, frontMat, 'Folding_Top');
+      addBox(g, 0.045, mh - 0.03, 0.045, -mw * 0.42, (mh - 0.03) / 2, md - 0.06, alumMat, 'Fold_Leg_L');
+      addBox(g, 0.045, mh - 0.03, 0.045, mw * 0.42, (mh - 0.03) / 2, md - 0.06, alumMat, 'Fold_Leg_R');
+    }
+    // 6F. BALCÃO DE CANTO L / AÉREO CANTO L
+    else if (mod.type === 'balcao_canto_L' || mod.type === 'aereo_canto_L') {
+      const isBase = mod.type === 'balcao_canto_L';
+      const plinthH = isBase ? 0.12 : 0;
+      const topH = isBase ? 0.032 : 0;
+      const bodyH = mh - plinthH - topH;
+      const armD = Math.min(0.60, md * 0.62);
+      // Braço principal + retorno em L frontal esquerdo
+      addBox(g, mw, bodyH, armD, 0, plinthH + bodyH / 2, armD / 2, carcassMat, 'Corner_Arm_Main');
+      addBox(g, armD, bodyH, Math.max(0.30, md - armD), -mw / 2 + armD / 2, plinthH + bodyH / 2, armD + (md - armD) / 2, carcassMat, 'Corner_Arm_Return');
+      if (isBase) {
+        addBox(g, mw - 0.02, plinthH, armD - 0.04, 0, plinthH / 2, armD / 2, plinthMat, 'Corner_Plinth_Main');
+        addBox(g, mw + 0.02, topH, armD + 0.02, 0, plinthH + bodyH + topH / 2, (armD + 0.02) / 2, stoneMat, 'Corner_Stone_Main');
+        addBox(g, armD + 0.02, topH, Math.max(0.32, md - armD), -mw / 2 + armD / 2, plinthH + bodyH + topH / 2, armD + (md - armD) / 2, stoneMat, 'Corner_Stone_Return');
+      }
+      addStyledDoor(g, (mw - armD) * 0.85, bodyH - gap * 2, armD / 2, plinthH + bodyH / 2, armD + 0.009, 'Corner_Front_Door', !isBase, true);
+      addBox(g, 0.018, bodyH - gap * 2, Math.max(0.28, md - armD) * 0.88, -mw / 2 + armD + 0.009, plinthH + bodyH / 2, armD + (md - armD) / 2, frontMat, 'Corner_Return_Door');
+    }
+    // 6G. BALCÃO LAVA-LOUÇAS / ADEGA EMBUTIDA
+    else if (mod.type === 'balcao_lava_loucas') {
+      const plinthH = 0.12;
+      const topH = 0.032;
+      const bodyH = mh - plinthH - topH;
+      buildStandardCarcass(g, mw, bodyH, md, plinthH);
+      addBox(g, mw * 0.52 - 0.02, bodyH - 0.02, 0.02, -mw * 0.22, plinthH + bodyH / 2, md + 0.008, steelMat, 'Dishwasher_Fascia');
+      addBox(g, mw * 0.44, 0.014, 0.022, -mw * 0.22, plinthH + bodyH - 0.05, md + 0.022, darkGlassMat, 'Dishwasher_Handle');
+      addStyledDoor(g, mw * 0.44 - gap * 2, bodyH - gap * 2, mw * 0.26, plinthH + bodyH / 2, md + 0.009, 'Side_Cab_Door', false, false);
+      addBox(g, mw + 0.02, topH, md + 0.03, 0, plinthH + bodyH + topH / 2, (md + 0.03) / 2, stoneMat, 'Dishwasher_Countertop');
+    }
+    // 6H. BALCÃO RECEPÇÃO / ATENDIMENTO COMERCIAL
+    else if (mod.type === 'balcao_atendimento_comercial') {
+      const baseH = Math.min(0.78, mh * 0.72);
+      const topLedgeH = mh - baseH;
+      buildStandardCarcass(g, mw, baseH, md, 0.06);
+      addBox(g, mw + 0.02, 0.028, md + 0.02, 0, baseH + 0.014, md / 2, stoneMat, 'Work_Surface');
+      addBox(g, mw + 0.02, topLedgeH, 0.024, 0, baseH + topLedgeH / 2, md + 0.012, frontMat, 'Front_Privacy_Fascia');
+      addBox(g, mw + 0.04, 0.030, 0.28, 0, mh - 0.015, md - 0.04, stoneMat, 'Customer_Ledge');
+      if (mod.hasLed !== false) {
+        addBox(g, mw * 0.94, 0.012, 0.012, 0, baseH + 0.04, md + 0.028, ledMat, 'Reception_LED');
       }
     }
     // 7. TORRE QUENTE
@@ -496,24 +656,21 @@ export function buildCabinetModulesGroup(
         const rows = Math.max(1, Math.min(2, mod.doorsCount || 1));
         const fh = bodyH / rows;
         for (let i = 0; i < rows; i++) {
-          addBox(g, innerW - gap * 2, fh - gap * 2, 0.018, 0, plinthH + fh / 2 + i * fh, md + 0.009, frontMat, `Flip_Door_${i + 1}`);
-          addBox(g, innerW * 0.4, 0.01, 0.014, 0, plinthH + fh * i + 0.025, md + 0.022, alumMat, `Flip_Handle_${i + 1}`);
+          addStyledDoor(g, innerW - gap * 2, fh - gap * 2, 0, plinthH + fh / 2 + i * fh, md + 0.009, `Flip_Door_${i + 1}`, true, true);
         }
       } else if (mod.drawersCount > 0 && mod.doorsCount === 0) {
         const dCount = mod.drawersCount;
         const dh = bodyH / dCount;
         for (let i = 0; i < dCount; i++) {
-          addBox(g, innerW - gap * 2, dh - gap * 2, 0.018, 0, plinthH + dh / 2 + i * dh, md + 0.009, frontMat, `Drawer_Front_${i + 1}`);
-          addBox(g, innerW * 0.55, 0.01, 0.014, 0, plinthH + dh * (i + 1) - 0.022, md + 0.022, alumMat, `Drawer_Pull_${i + 1}`);
+          addStyledDrawer(g, innerW - gap * 2, dh - gap * 2, 0, plinthH + dh / 2 + i * dh, md + 0.009, `Drawer_Front_${i + 1}`);
         }
       } else {
         const doors = Math.max(1, mod.doorsCount || Math.round(mw / 0.45));
         const dw = innerW / doors;
+        const allowGlassDoor = mod.type === 'aereo_portas';
         for (let i = 0; i < doors; i++) {
           const dx = -innerW / 2 + dw / 2 + i * dw;
-          addBox(g, dw - gap * 2, bodyH - gap * 2, 0.018, dx, plinthH + bodyH / 2, md + 0.009, frontMat, `Door_${i + 1}`);
-          const hx = dx + (i % 2 === 0 ? dw / 2 - 0.03 : -dw / 2 + 0.03);
-          addBox(g, 0.01, Math.min(0.22, bodyH * 0.4), 0.014, hx, plinthH + bodyH * 0.6, md + 0.022, alumMat, `Handle_${i + 1}`);
+          addStyledDoor(g, dw - gap * 2, bodyH - gap * 2, dx, plinthH + bodyH / 2, md + 0.009, `Door_${i + 1}`, allowGlassDoor, i % 2 === 0);
         }
       }
 
@@ -576,6 +733,52 @@ export function exportObjectToOBJDownload(object: THREE.Object3D, filename: stri
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
+export function exportCutlistToCSVDownload(
+  analysis: RoomAnalysisResult,
+  quote: CabinetryQuoteResult
+): void {
+  const thick = quote.styleOptions?.thicknessMode === '25mm_engrossado'
+    ? '15mm + 25mm'
+    : quote.styleOptions?.thicknessMode === '18mm'
+    ? '18mm'
+    : '15mm';
+  const rows: string[][] = [
+    ['Ambiente', 'Modulo', 'Parede', 'Peca / Funcao', 'Qtd', 'Largura_cm', 'Altura_ou_Prof_cm', 'Espessura', 'Padrao_MDF', 'Cod_SKU'],
+  ];
+
+  const wallPt: Record<string, string> = { back: 'Fundo', left: 'Esquerda', right: 'Direita', center: 'Centro' };
+  for (const m of analysis.modules) {
+    const w = m.widthCm;
+    const h = m.heightCm;
+    const d = m.depthCm;
+    const wn = wallPt[m.wall] || 'Fundo';
+    // Laterais + Base/Topo (Caixaria)
+    rows.push([analysis.roomType, m.label, wn, 'Lateral Esquerda/Direita', '2', `${d}`, `${h}`, thick, quote.carcassFinish.label, quote.carcassFinish.cod15]);
+    rows.push([analysis.roomType, m.label, wn, 'Base / Topo / Prateleiras', `${2 + (m.shelvesCount || 1)}`, `${Math.max(20, w - 3)}`, `${d}`, thick, quote.carcassFinish.label, quote.carcassFinish.cod15]);
+    rows.push([analysis.roomType, m.label, wn, 'Fundo 6mm', '1', `${w}`, `${h}`, '6mm', quote.carcassFinish.name6, quote.carcassFinish.cod6]);
+    if (m.doorsCount > 0) {
+      const dw = (w / m.doorsCount).toFixed(1);
+      const frontSpec = quote.styleOptions?.frontStyle === 'vidro_reflecta' ? `${quote.frontFinish.label} / Vidro` : quote.frontFinish.label;
+      rows.push([analysis.roomType, m.label, wn, `Porta (${quote.styleOptions?.frontStyle || 'lisa'})`, `${m.doorsCount}`, `${dw}`, `${h}`, thick, frontSpec, quote.frontFinish.cod15]);
+    }
+    if (m.drawersCount > 0) {
+      const dh = Math.max(14, Math.round(h / Math.max(2, m.drawersCount)));
+      rows.push([analysis.roomType, m.label, wn, 'Frente Gaveta', `${m.drawersCount}`, `${Math.max(20, w - 4)}`, `${dh}`, thick, quote.frontFinish.label, quote.frontFinish.cod15]);
+    }
+  }
+
+  const csv = '\uFEFF' + rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `83-ambientes-plano-corte-${analysis.roomType}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
 export function buildRoomProposalSummaryMessage(
   analysis: RoomAnalysisResult,
   quote: CabinetryQuoteResult
@@ -595,6 +798,23 @@ export function buildRoomProposalSummaryMessage(
     right: 'Dir.',
     center: 'Centro',
   };
+  const frontLabels: Record<string, string> = {
+    lisa: 'Porta Lisa Contemporânea',
+    cava45: 'Usinada Cava 45°',
+    provencal: 'Estilo Provençal Moldurado',
+    vidro_reflecta: 'Perfil Alumínio + Vidro Reflecta',
+  };
+  const handleLabels: Record<string, string> = {
+    perfil_18: 'Puxador Perfil 18mm',
+    perfil_15: 'Puxador Perfil Slim 15mm',
+    fecho_toque: 'Fecho Toque (Sem Puxador)',
+  };
+  const thickLabels: Record<string, string> = {
+    '15mm': 'Estrutura 15mm',
+    '18mm': 'Reforçado 18mm',
+    '25mm_engrossado': 'Tamponamento Engrossado 25/30mm',
+  };
+
   const modLines = analysis.modules
     .map((m) => `• ${m.label} [${wallPt[m.wall] || 'Fundo'}] (${m.widthCm}×${m.heightCm}×${m.depthCm} cm)`)
     .join('\n');
@@ -608,13 +828,16 @@ export function buildRoomProposalSummaryMessage(
     ? `${quote.frontFinish.label} (Cód. 15mm: ${quote.frontFinish.cod15}${quote.frontFinish.fitaCod ? ` | Fita: ${quote.frontFinish.fitaCod}` : ''})`
     : `Frentes: ${quote.frontFinish.label} (${quote.frontFinish.cod15}) | Caixaria: ${quote.carcassFinish.label} (${quote.carcassFinish.cod15})`;
 
+  const styleTxt = `${frontLabels[quote.styleOptions?.frontStyle || 'lisa']} • ${handleLabels[quote.styleOptions?.handleStyle || 'perfil_18']} • ${thickLabels[quote.styleOptions?.thicknessMode || '15mm']}`;
+
   return (
-    `Olá! Acabei de gerar uma proposta 3D por foto na 83 Ambientes Planejados:\n\n` +
+    `Olá! Acabei de gerar uma proposta 3D na 83 Ambientes Planejados:\n\n` +
     `*Ambiente:* ${roomNames[analysis.roomType] || analysis.roomType}\n` +
-    `*Parede principal calibrada:* ${analysis.roomDimensionsCm.widthCm} cm (L) × ${analysis.roomDimensionsCm.heightCm} cm (A)\n` +
-    `*Obstáculos detectados:* ${obsLines}\n\n` +
-    `*Módulos propostos:*\n${modLines}\n\n` +
+    `*Parede calibrada:* ${analysis.roomDimensionsCm.widthCm} cm (L) × ${analysis.roomDimensionsCm.heightCm} cm (A)\n` +
+    `*Obstáculos:* ${obsLines}\n\n` +
+    `*Módulos do projeto:*\n${modLines}\n\n` +
     `*Acabamento:* ${finishDesc}\n` +
+    `*Detalhamento:* ${styleTxt}\n` +
     `*Ferragens:* ${quote.hardware.label}\n` +
     `*Consumo estimado:* ~${quote.sheets15Count} chapa(s) 15mm + ~${quote.sheets6Count} chapa(s) 6mm\n` +
     `*Estimativa preliminar:* ${quote.formattedRange} (sujeito a medição final no local)\n\n` +

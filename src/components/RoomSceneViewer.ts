@@ -2,7 +2,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-import { MdfFinishOption } from '../data/pricingCatalog';
+import {
+  CabinetStyleOptions,
+  HardwareTierId,
+  MdfFinishOption,
+} from '../data/pricingCatalog';
 import {
   CounterTone,
   buildCabinetModulesGroup,
@@ -107,10 +111,11 @@ export class RoomSceneViewer {
   public renderRoomProposal(
     analysis: RoomAnalysisResult,
     frontFinish: MdfFinishOption,
-    hardwareId: 'padrao' | 'slow',
+    hardwareId: HardwareTierId,
     carcassFinish?: MdfFinishOption,
     counterTone: CounterTone = 'claro',
-    preserveCamera: boolean = false
+    preserveCamera: boolean = false,
+    styleOptions: Partial<CabinetStyleOptions> = {}
   ): void {
     this.currentAnalysis = analysis;
     this.clearRoot();
@@ -126,7 +131,8 @@ export class RoomSceneViewer {
       frontFinish,
       hardwareId,
       carcassFinish,
-      counterTone
+      counterTone,
+      styleOptions
     );
     this.cabinetGroup = cabinet;
     this.rootGroup.add(cabinet);
@@ -142,20 +148,21 @@ export class RoomSceneViewer {
       const hM = analysis.roomDimensionsCm.heightCm / 100;
       const hasCenterOrSide = analysis.modules.some(m => m.wall !== 'back');
       this.camera.position.set(
-        wM * (hasCenterOrSide ? 0.35 : 0.16),
-        hM * (hasCenterOrSide ? 0.78 : 0.62),
-        Math.max(4.4, wM * (hasCenterOrSide ? 1.55 : 1.38))
+        wM * (hasCenterOrSide ? 0.25 : 0.16),
+        hM * (hasCenterOrSide ? 0.84 : 0.62),
+        Math.max(4.8, wM * (hasCenterOrSide ? 1.78 : 1.42))
       );
-      this.controls.target.set(0, hM * 0.43, hasCenterOrSide ? 0.85 : 0.25);
+      this.controls.target.set(0, hM * 0.44, hasCenterOrSide ? 0.78 : 0.25);
       this.controls.update();
     }
   }
 
   public updateMaterialOrHardware(
     frontFinish: MdfFinishOption,
-    hardwareId: 'padrao' | 'slow',
+    hardwareId: HardwareTierId,
     carcassFinish?: MdfFinishOption,
-    counterTone: CounterTone = 'claro'
+    counterTone: CounterTone = 'claro',
+    styleOptions: Partial<CabinetStyleOptions> = {}
   ): void {
     if (!this.currentAnalysis) return;
     if (this.cabinetGroup) {
@@ -167,7 +174,8 @@ export class RoomSceneViewer {
       frontFinish,
       hardwareId,
       carcassFinish,
-      counterTone
+      counterTone,
+      styleOptions
     );
     this.cabinetGroup = cabinet;
     this.rootGroup.add(cabinet);

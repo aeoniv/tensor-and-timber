@@ -142,12 +142,25 @@ export interface MdfFinishOption {
   sellPrice6: number;
 }
 
+export type HardwareTierId = 'padrao' | 'slow' | 'luxo';
+export type FrontStyleId = 'lisa' | 'cava45' | 'provencal' | 'vidro_reflecta';
+export type HandleStyleId = 'perfil_18' | 'perfil_15' | 'fecho_toque';
+export type ThicknessModeId = '15mm' | '18mm' | '25mm_engrossado';
+
+export interface CabinetStyleOptions {
+  frontStyle: FrontStyleId;
+  handleStyle: HandleStyleId;
+  thicknessMode: ThicknessModeId;
+}
+
 export interface HardwareKitOption {
-  id: 'padrao' | 'slow';
+  id: HardwareTierId;
   label: string;
   description: string;
   hingeCod: string;
   hingePrice: number;
+  cornerHingeCod: string;
+  cornerHingePrice: number;
   slideCod: string;
   slidePrice: number;
   pistonCod: string;
@@ -158,15 +171,23 @@ export interface HardwareKitOption {
   sliding3Price: number;
   handleBarCod: string;
   handleBarPrice: number;
+  handleBar15Cod: string;
+  handleBar15Price: number;
+  rodCod: string;
+  rodPrice: number;
 }
 
 export type ModuleArchetype =
   | 'balcao_pia'
   | 'balcao_gavetas'
   | 'balcao_cooktop'
+  | 'balcao_canto_L'
+  | 'balcao_lava_loucas'
   | 'ilha_gourmet'
   | 'aereo_portas'
   | 'aereo_basculante'
+  | 'aereo_canto_L'
+  | 'fechamento_teto'
   | 'torre_quente'
   | 'nicho_geladeira'
   | 'cristaleira_vidro'
@@ -176,10 +197,12 @@ export type ModuleArchetype =
   | 'cama_bau_planejada'
   | 'criado_mudo'
   | 'painel_cabeceira'
+  | 'cabeceira_estofada'
   | 'penteadeira_camarim'
   | 'sapateira_prateleiras'
   | 'bancada_estudo'
   | 'painel_tv_ripado'
+  | 'painel_muxarabi'
   | 'rack_suspenso'
   | 'estante_nichos'
   | 'aparador_buffet'
@@ -188,9 +211,66 @@ export type ModuleArchetype =
   | 'espelheira_armario'
   | 'armario_vassoureiro'
   | 'bancada_tanque_maquina'
+  | 'mesa_retratil'
   | 'estacao_trabalho_L'
   | 'arquivo_escritorio'
-  | 'balcao_churrasqueira';
+  | 'balcao_churrasqueira'
+  | 'balcao_atendimento_comercial';
+
+export interface ModuleTemplateMeta {
+  type: ModuleArchetype;
+  label: string;
+  category: string;
+  defaultWall: 'back' | 'left' | 'right' | 'center';
+  defaultYCm: number;
+  widthCm: number;
+  heightCm: number;
+  depthCm: number;
+  doorsCount: number;
+  drawersCount: number;
+  hasLed: boolean;
+}
+
+export const MODULE_CATALOG_TEMPLATES: ModuleTemplateMeta[] = [
+  { type: 'balcao_pia', label: 'Balcão de Pia', category: 'Cozinha / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 140, heightCm: 86, depthCm: 60, doorsCount: 3, drawersCount: 0, hasLed: false },
+  { type: 'balcao_cooktop', label: 'Balcão Cooktop', category: 'Cozinha / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 90, heightCm: 86, depthCm: 60, doorsCount: 0, drawersCount: 3, hasLed: false },
+  { type: 'balcao_gavetas', label: 'Balcão Gaveteiro', category: 'Cozinha / Geral', defaultWall: 'back', defaultYCm: 0, widthCm: 80, heightCm: 86, depthCm: 58, doorsCount: 0, drawersCount: 4, hasLed: false },
+  { type: 'balcao_canto_L', label: 'Balcão de Canto em L (c/ Giratória)', category: 'Cozinha / Canto', defaultWall: 'back', defaultYCm: 0, widthCm: 105, heightCm: 86, depthCm: 95, doorsCount: 2, drawersCount: 0, hasLed: false },
+  { type: 'balcao_lava_loucas', label: 'Balcão + Nicho Lava-Louças / Adega', category: 'Cozinha / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 110, heightCm: 86, depthCm: 62, doorsCount: 1, drawersCount: 2, hasLed: false },
+  { type: 'ilha_gourmet', label: 'Ilha Gourmet Bancada Cascata', category: 'Cozinha / Gourmet', defaultWall: 'center', defaultYCm: 0, widthCm: 160, heightCm: 92, depthCm: 85, doorsCount: 3, drawersCount: 0, hasLed: false },
+  { type: 'aereo_portas', label: 'Armário Aéreo c/ Portas', category: 'Aéreos & Complementos', defaultWall: 'back', defaultYCm: 150, widthCm: 120, heightCm: 68, depthCm: 35, doorsCount: 3, drawersCount: 0, hasLed: true },
+  { type: 'aereo_basculante', label: 'Armário Aéreo Basculante LED', category: 'Aéreos & Complementos', defaultWall: 'back', defaultYCm: 150, widthCm: 120, heightCm: 68, depthCm: 35, doorsCount: 2, drawersCount: 0, hasLed: true },
+  { type: 'aereo_canto_L', label: 'Aéreo de Canto em L', category: 'Aéreos & Complementos', defaultWall: 'back', defaultYCm: 150, widthCm: 95, heightCm: 68, depthCm: 80, doorsCount: 2, drawersCount: 0, hasLed: true },
+  { type: 'fechamento_teto', label: 'Tamponamento / Vista até o Teto', category: 'Aéreos & Complementos', defaultWall: 'back', defaultYCm: 218, widthCm: 180, heightCm: 32, depthCm: 36, doorsCount: 0, drawersCount: 0, hasLed: false },
+  { type: 'torre_quente', label: 'Torre Quente Forno + Micro', category: 'Cozinha / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 70, heightCm: 220, depthCm: 60, doorsCount: 2, drawersCount: 2, hasLed: false },
+  { type: 'nicho_geladeira', label: 'Nicho Geladeira + Aéreo Superior', category: 'Cozinha / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 88, heightCm: 225, depthCm: 68, doorsCount: 2, drawersCount: 0, hasLed: false },
+  { type: 'cristaleira_vidro', label: 'Cristaleira Vidro & Alumínio LED', category: 'Sala / Cozinha', defaultWall: 'back', defaultYCm: 0, widthCm: 75, heightCm: 220, depthCm: 42, doorsCount: 2, drawersCount: 0, hasLed: true },
+  { type: 'guarda_roupa_correr', label: 'Guarda-Roupa Portas de Correr', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 200, heightCm: 240, depthCm: 60, doorsCount: 3, drawersCount: 4, hasLed: false },
+  { type: 'guarda_roupa_abrir', label: 'Guarda-Roupa Portas de Abrir', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 160, heightCm: 240, depthCm: 58, doorsCount: 4, drawersCount: 3, hasLed: false },
+  { type: 'closet_cabideiro_aberto', label: 'Closet Aberto c/ Cabideiro & Gavetas', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 150, heightCm: 235, depthCm: 56, doorsCount: 0, drawersCount: 3, hasLed: true },
+  { type: 'cama_bau_planejada', label: 'Cama Baú Casal c/ Gavetas', category: 'Quarto / Closet', defaultWall: 'left', defaultYCm: 0, widthCm: 145, heightCm: 60, depthCm: 195, doorsCount: 0, drawersCount: 2, hasLed: false },
+  { type: 'criado_mudo', label: 'Mesa de Cabeceira Suspensa/Base', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 50, heightCm: 55, depthCm: 42, doorsCount: 0, drawersCount: 2, hasLed: false },
+  { type: 'painel_cabeceira', label: 'Painel Ripado Cabeceira LED', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 220, heightCm: 150, depthCm: 6, doorsCount: 0, drawersCount: 0, hasLed: true },
+  { type: 'cabeceira_estofada', label: 'Cabeceira Modulada Estofada LED', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 210, heightCm: 135, depthCm: 9, doorsCount: 0, drawersCount: 0, hasLed: true },
+  { type: 'penteadeira_camarim', label: 'Penteadeira Camarim c/ Espelho LED', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 100, heightCm: 165, depthCm: 45, doorsCount: 0, drawersCount: 2, hasLed: true },
+  { type: 'sapateira_prateleiras', label: 'Sapateira Vertical Prateleiras', category: 'Quarto / Closet', defaultWall: 'back', defaultYCm: 0, widthCm: 75, heightCm: 210, depthCm: 38, doorsCount: 0, drawersCount: 0, hasLed: false },
+  { type: 'bancada_estudo', label: 'Bancada de Estudo / Escrivaninha', category: 'Quarto / Escritório', defaultWall: 'back', defaultYCm: 0, widthCm: 130, heightCm: 76, depthCm: 55, doorsCount: 0, drawersCount: 2, hasLed: false },
+  { type: 'painel_tv_ripado', label: 'Painel Ripado TV c/ Fita LED', category: 'Sala / Escritório', defaultWall: 'back', defaultYCm: 0, widthCm: 220, heightCm: 235, depthCm: 8, doorsCount: 0, drawersCount: 0, hasLed: true },
+  { type: 'painel_muxarabi', label: 'Painel Divisório Muxarabi Vazado', category: 'Sala / Comercial', defaultWall: 'back', defaultYCm: 0, widthCm: 110, heightCm: 240, depthCm: 12, doorsCount: 0, drawersCount: 0, hasLed: true },
+  { type: 'rack_suspenso', label: 'Rack Suspenso Gavetões LED', category: 'Sala / Estar', defaultWall: 'back', defaultYCm: 28, widthCm: 200, heightCm: 38, depthCm: 42, doorsCount: 0, drawersCount: 4, hasLed: true },
+  { type: 'estante_nichos', label: 'Estante / Torre de Nichos Aberta', category: 'Geral', defaultWall: 'back', defaultYCm: 0, widthCm: 70, heightCm: 215, depthCm: 36, doorsCount: 0, drawersCount: 0, hasLed: true },
+  { type: 'aparador_buffet', label: 'Aparador / Buffet 4 Portas', category: 'Sala / Estar', defaultWall: 'back', defaultYCm: 0, widthCm: 150, heightCm: 82, depthCm: 44, doorsCount: 3, drawersCount: 0, hasLed: false },
+  { type: 'bar_adega', label: 'Bar Adega Climatizada c/ Taças LED', category: 'Sala / Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 100, heightCm: 220, depthCm: 45, doorsCount: 2, drawersCount: 0, hasLed: true },
+  { type: 'gabinete_banheiro', label: 'Gabinete Banheiro Suspenso c/ Cuba', category: 'Banheiro / Lavabo', defaultWall: 'back', defaultYCm: 46, widthCm: 120, heightCm: 44, depthCm: 50, doorsCount: 0, drawersCount: 3, hasLed: true },
+  { type: 'espelheira_armario', label: 'Espelheira Armário c/ LED', category: 'Banheiro / Lavabo', defaultWall: 'back', defaultYCm: 115, widthCm: 120, heightCm: 78, depthCm: 16, doorsCount: 3, drawersCount: 0, hasLed: true },
+  { type: 'armario_vassoureiro', label: 'Armário Alto Vassoureiro / Despenseiro', category: 'Lavanderia / Banheiro', defaultWall: 'back', defaultYCm: 0, widthCm: 65, heightCm: 225, depthCm: 52, doorsCount: 2, drawersCount: 0, hasLed: false },
+  { type: 'bancada_tanque_maquina', label: 'Bancada Tanque + Lava e Seca', category: 'Lavanderia', defaultWall: 'back', defaultYCm: 0, widthCm: 180, heightCm: 90, depthCm: 62, doorsCount: 2, drawersCount: 0, hasLed: false },
+  { type: 'mesa_retratil', label: 'Mesa / Bancada Retrátil Dobrável', category: 'Compactos / Lavanderia', defaultWall: 'back', defaultYCm: 0, widthCm: 100, heightCm: 76, depthCm: 55, doorsCount: 1, drawersCount: 0, hasLed: false },
+  { type: 'estacao_trabalho_L', label: 'Estação Home Office c/ Gaveteiro', category: 'Escritório', defaultWall: 'back', defaultYCm: 0, widthCm: 170, heightCm: 75, depthCm: 62, doorsCount: 0, drawersCount: 3, hasLed: false },
+  { type: 'arquivo_escritorio', label: 'Armário Alto Arquivos & Pastas', category: 'Escritório', defaultWall: 'back', defaultYCm: 0, widthCm: 95, heightCm: 220, depthCm: 45, doorsCount: 2, drawersCount: 2, hasLed: false },
+  { type: 'balcao_churrasqueira', label: 'Bancada Churrasqueira & Cervejeira', category: 'Área Gourmet', defaultWall: 'back', defaultYCm: 0, widthCm: 160, heightCm: 88, depthCm: 65, doorsCount: 3, drawersCount: 2, hasLed: false },
+  { type: 'balcao_atendimento_comercial', label: 'Balcão Recepção / Loja Comercial', category: 'Comercial / Corporativo', defaultWall: 'center', defaultYCm: 0, widthCm: 180, heightCm: 112, depthCm: 68, doorsCount: 2, drawersCount: 3, hasLed: true },
+];
 
 export interface ProposedCabinetModule {
   id: string;
@@ -219,10 +299,12 @@ export interface CabinetryQuoteResult {
   sheets15Count: number;
   sheets6Count: number;
   hingesCount: number;
+  cornerHingesCount: number;
   slidesCount: number;
   slidingKitCount: number;
   mdfSellSubtotal: number;
   hardwareSellSubtotal: number;
+  machiningAndGlassSubtotal: number;
   assemblyAndLogistics: number;
   estimatedMinBrl: number;
   estimatedMaxBrl: number;
@@ -230,6 +312,7 @@ export interface CabinetryQuoteResult {
   carcassFinish: MdfFinishOption;
   frontFinish: MdfFinishOption;
   hardware: HardwareKitOption;
+  styleOptions: CabinetStyleOptions;
 }
 
 const SHEET_AREA_M2 = 5.0875;
@@ -255,47 +338,94 @@ export function findMdfFinishById(id: string): MdfFinishOption {
 export function calculateCabinetryQuote(
   modules: ProposedCabinetModule[],
   frontFinishId: string,
-  hardwareId: 'padrao' | 'slow',
-  carcassFinishId?: string
+  hardwareId: HardwareTierId,
+  carcassFinishId?: string,
+  styleOptions: Partial<CabinetStyleOptions> = {}
 ): CabinetryQuoteResult {
+  const resolvedStyle: CabinetStyleOptions = {
+    frontStyle: styleOptions.frontStyle || 'lisa',
+    handleStyle: styleOptions.handleStyle || 'perfil_18',
+    thicknessMode: styleOptions.thicknessMode || '15mm',
+  };
   const frontFinish = findMdfFinishById(frontFinishId);
   const carcassFinish = findMdfFinishById(carcassFinishId || frontFinishId);
   const hardware = HARDWARE_KIT_OPTIONS.find(h => h.id === hardwareId) || HARDWARE_KIT_OPTIONS[0];
+
+  const thicknessFactor =
+    resolvedStyle.thicknessMode === '25mm_engrossado'
+      ? 1.26
+      : resolvedStyle.thicknessMode === '18mm'
+      ? 1.15
+      : 1.0;
 
   let rawCarcass15 = 0;
   let rawFront15 = 0;
   let rawArea6 = 0;
   let hingesCount = 0;
+  let cornerHingesCount = 0;
   let slidesCount = 0;
   let pistonsCount = 0;
   let sliding2Count = 0;
   let sliding3Count = 0;
   let handleMeters = 0;
+  let rodsCount = 0;
+  let touchLatchCount = 0;
+  let glassDoorsAreaM2 = 0;
+  let machinedFrontsAreaM2 = 0;
 
   for (const m of modules) {
     const w = m.widthCm / 100;
     const h = m.heightCm / 100;
     const d = m.depthCm / 100;
 
-    if (m.type === 'painel_tv_ripado' || m.type === 'painel_cabeceira') {
-      rawFront15 += (w * h) * 1.45;
+    if (m.type === 'painel_tv_ripado' || m.type === 'painel_cabeceira' || m.type === 'painel_muxarabi') {
+      rawFront15 += (w * h) * (m.type === 'painel_muxarabi' ? 1.55 : 1.45) * thicknessFactor;
+    } else if (m.type === 'cabeceira_estofada') {
+      rawFront15 += (w * h) * 0.72;
+      machinedFrontsAreaM2 += w * h; // revestimento + estofamento
+    } else if (m.type === 'fechamento_teto') {
+      rawFront15 += (w * h) * 1.15 + (w * d * 0.45);
     } else if (m.type === 'cama_bau_planejada') {
-      rawCarcass15 += (2 * w * 0.35) + (2 * d * 0.35) + (w * d * 0.9);
+      rawCarcass15 += ((2 * w * 0.35) + (2 * d * 0.35) + (w * d * 0.9)) * thicknessFactor;
       rawFront15 += (w * 0.36) + (d * 0.36);
     } else if (m.type === 'nicho_geladeira') {
-      // Apenas envoltório lateral e módulo aéreo superior
-      rawFront15 += (2 * h * d) * 0.45 + (w * 0.45 * d);
+      rawFront15 += ((2 * h * d) * 0.45 + (w * 0.45 * d)) * thicknessFactor;
       rawCarcass15 += (w * 0.45 * 2 * d);
       rawArea6 += w * 0.45;
+    } else if (m.type === 'balcao_canto_L' || m.type === 'aereo_canto_L') {
+      const lArea = (2 * w * d * 0.75) + (2 * h * d * 0.85) + (w * d * 1.6);
+      rawCarcass15 += lArea * thicknessFactor;
+      rawFront15 += (w * h * 0.65);
+      rawArea6 += (w * h) * 1.3;
+      cornerHingesCount += 4;
+    } else if (m.type === 'mesa_retratil') {
+      rawFront15 += (w * d * 2.1 * thicknessFactor) + (w * h * 0.6);
+      rawCarcass15 += (w * 0.25 * 2);
+      hingesCount += 2;
     } else {
       const shelves = m.shelvesCount ?? (m.heightCm > 150 ? 4 : m.heightCm > 90 ? 2 : 1);
-      const carcassArea = (2 * h * d) + (2 * w * d) + (shelves * w * d * 0.85);
+      const carcassArea = ((2 * h * d) + (2 * w * d) + (shelves * w * d * 0.85)) * thicknessFactor;
       const hasFrontPanels = m.doorsCount > 0 || m.drawersCount > 0 || m.type.includes('balcao') || m.type.includes('guarda_roupa') || m.type === 'gabinete_banheiro' || m.type === 'rack_suspenso' || m.type === 'aparador_buffet';
-      const frontArea = hasFrontPanels ? (w * h * (m.type === 'cristaleira_vidro' ? 0.35 : 1.0)) : (h * d * 0.4);
+      const isReflecta = resolvedStyle.frontStyle === 'vidro_reflecta' && (m.type.includes('aereo') || m.type.includes('guarda_roupa') || m.type === 'cristaleira_vidro' || m.type === 'bar_adega');
+      const frontRatio = m.type === 'cristaleira_vidro' || isReflecta ? 0.35 : 1.0;
+      const frontArea = hasFrontPanels ? (w * h * frontRatio) : (h * d * 0.4);
+      if (isReflecta || m.type === 'cristaleira_vidro') {
+        glassDoorsAreaM2 += w * h * 0.88;
+      } else if (hasFrontPanels && (resolvedStyle.frontStyle === 'cava45' || resolvedStyle.frontStyle === 'provencal')) {
+        machinedFrontsAreaM2 += w * h;
+      }
       const drawersBoxArea = m.drawersCount * (w * 0.55 * 0.45 * 2);
 
-      // Em móveis abertos/estantes/nichos externos, a caixa visível também vai no padrão frontal
-      const visibleBody = m.type === 'estante_nichos' || m.type === 'closet_cabideiro_aberto' || m.type === 'sapateira_prateleiras' || m.type === 'bar_adega' || m.type === 'bancada_estudo' || m.type === 'estacao_trabalho_L' || m.type === 'penteadeira_camarim';
+      const visibleBody =
+        m.type === 'estante_nichos' ||
+        m.type === 'closet_cabideiro_aberto' ||
+        m.type === 'sapateira_prateleiras' ||
+        m.type === 'bar_adega' ||
+        m.type === 'bancada_estudo' ||
+        m.type === 'estacao_trabalho_L' ||
+        m.type === 'penteadeira_camarim' ||
+        m.type === 'balcao_atendimento_comercial';
+
       if (visibleBody) {
         rawFront15 += carcassArea + frontArea;
         rawCarcass15 += drawersBoxArea;
@@ -306,6 +436,10 @@ export function calculateCabinetryQuote(
       rawArea6 += (w * h) + (m.drawersCount * w * d * 0.65);
     }
 
+    if (m.type === 'closet_cabideiro_aberto' || m.type === 'guarda_roupa_correr' || m.type === 'guarda_roupa_abrir') {
+      rodsCount += Math.max(1, Math.round(m.widthCm / 95));
+    }
+
     if (m.type === 'guarda_roupa_correr') {
       if (m.doorsCount >= 3) sliding3Count += 1;
       else sliding2Count += 1;
@@ -313,8 +447,12 @@ export function calculateCabinetryQuote(
     } else {
       const hingesPerDoor = m.heightCm >= 180 ? 4 : m.heightCm >= 110 ? 3 : 2;
       hingesCount += m.doorsCount * hingesPerDoor;
-      if (m.type === 'aereo_basculante') pistonsCount += Math.max(2, m.doorsCount * 2);
-      handleMeters += (m.doorsCount * 0.4) + (m.drawersCount * 0.4);
+      if (m.type === 'aereo_basculante' || m.type === 'aereo_canto_L') pistonsCount += Math.max(2, m.doorsCount * 2);
+      if (resolvedStyle.handleStyle === 'fecho_toque') {
+        touchLatchCount += m.doorsCount + m.drawersCount;
+      } else {
+        handleMeters += (m.doorsCount * 0.42) + (m.drawersCount * 0.42);
+      }
     }
 
     slidesCount += m.drawersCount;
@@ -343,23 +481,39 @@ export function calculateCabinetryQuote(
   const sheets6Count = area6m2 > 0.2 ? Math.max(0.5, Math.ceil((area6m2 / SHEET_AREA_M2) * 2) / 2) : 0;
   mdfSellSubtotal += sheets6Count * carcassFinish.sellPrice6;
 
+  const activeHandleBarPrice =
+    resolvedStyle.handleStyle === 'fecho_toque'
+      ? 0
+      : resolvedStyle.handleStyle === 'perfil_15'
+      ? hardware.handleBar15Price
+      : hardware.handleBarPrice;
+
   const consumablesPerModule = modules.length * 24;
-  const handleBars = Math.ceil(handleMeters / 3);
+  const handleBars = resolvedStyle.handleStyle === 'fecho_toque' ? 0 : Math.ceil(handleMeters / 3);
   const hardwareCostRaw =
     (hingesCount * hardware.hingePrice) +
+    (cornerHingesCount * hardware.cornerHingePrice) +
     (slidesCount * hardware.slidePrice) +
     (pistonsCount * hardware.pistonPrice) +
     (sliding2Count * hardware.sliding2Price) +
     (sliding3Count * hardware.sliding3Price) +
-    (handleBars * hardware.handleBarPrice) +
+    (handleBars * activeHandleBarPrice) +
+    (rodsCount * hardware.rodPrice) +
+    (touchLatchCount * 14.5) +
     consumablesPerModule;
+
+  const machiningPerM2 =
+    resolvedStyle.frontStyle === 'provencal' ? 290 : resolvedStyle.frontStyle === 'cava45' ? 145 : 220;
+  const machiningAndGlassSubtotal = Math.round(
+    (glassDoorsAreaM2 * 440) + (machinedFrontsAreaM2 * machiningPerM2)
+  );
 
   const hardwareSellSubtotal = hardwareCostRaw * 1.65;
   const assemblyAndLogistics = modules.length > 0
-    ? Math.max(480, Math.round((mdfSellSubtotal + hardwareSellSubtotal) * 0.22))
+    ? Math.max(480, Math.round((mdfSellSubtotal + hardwareSellSubtotal + machiningAndGlassSubtotal) * 0.22))
     : 0;
 
-  const baseTotal = mdfSellSubtotal + hardwareSellSubtotal + assemblyAndLogistics;
+  const baseTotal = mdfSellSubtotal + hardwareSellSubtotal + machiningAndGlassSubtotal + assemblyAndLogistics;
   const estimatedMinBrl = Math.round((baseTotal * 0.92) / 50) * 50;
   const estimatedMaxBrl = Math.round((baseTotal * 1.10) / 50) * 50;
 
@@ -375,10 +529,12 @@ export function calculateCabinetryQuote(
     sheets15Count,
     sheets6Count,
     hingesCount,
+    cornerHingesCount,
     slidesCount,
     slidingKitCount: sliding2Count + sliding3Count,
     mdfSellSubtotal: Math.round(mdfSellSubtotal),
     hardwareSellSubtotal: Math.round(hardwareSellSubtotal),
+    machiningAndGlassSubtotal,
     assemblyAndLogistics,
     estimatedMinBrl,
     estimatedMaxBrl,
@@ -386,6 +542,7 @@ export function calculateCabinetryQuote(
     carcassFinish,
     frontFinish,
     hardware,
+    styleOptions: resolvedStyle,
   };
 }
 """
@@ -525,13 +682,20 @@ def main():
             'sellPrice6': p6,
         })
 
+    corner_hinge_price = comp_prices.get('0005MUL35D-11/26', {}).get('unitPrice', 25.87)
+    handle15_price = comp_prices.get('0003MULT15AL3-11/26', {}).get('unitPrice', 92.46)
+    handle18_price = comp_prices.get('0004MULT18AL3-11/26', {}).get('unitPrice', 31.98)
+    rod_price = comp_prices.get('0002MULTCO-11/26', {}).get('unitPrice', 43.23) + (2 * comp_prices.get('0001MULTSCO-11/26', {}).get('unitPrice', 1.89))
+
     hardware_kits = [
         {
             'id': 'padrao',
-            'label': 'Linha Padrão (Telescópica + Slide-On)',
+            'label': 'Padrão (Telescópica + Slide-On)',
             'description': 'Dobradiças 35mm slide-on, corrediças telescópicas 400mm, pistão 80N e sistema correr SS150+.',
             'hingeCod': '0004MUL35D-11/26',
             'hingePrice': comp_prices['0004MUL35D-11/26']['unitPrice'],
+            'cornerHingeCod': '0005MUL35D-11/26',
+            'cornerHingePrice': corner_hinge_price,
             'slideCod': '0002MUL400T-11/26',
             'slidePrice': comp_prices['0002MUL400T-11/26']['unitPrice'],
             'pistonCod': '0001MUL80P-11/26',
@@ -541,14 +705,20 @@ def main():
             'sliding3Cod': '0006ROMSS3-11/26',
             'sliding3Price': comp_prices['0006ROMSS3-11/26']['unitPrice'],
             'handleBarCod': '0004MULT18AL3-11/26',
-            'handleBarPrice': comp_prices['0004MULT18AL3-11/26']['unitPrice'],
+            'handleBarPrice': handle18_price,
+            'handleBar15Cod': '0003MULT15AL3-11/26',
+            'handleBar15Price': handle15_price,
+            'rodCod': '0002MULTCO-11/26',
+            'rodPrice': round(rod_price, 2),
         },
         {
             'id': 'slow',
-            'label': 'Linha Slow / Oculta (Amortecimento Suave)',
-            'description': 'Dobradiças slow-motion, corrediças ocultas slow 450mm, puxador perfil alumínio e sistema correr Rometal Dominus.',
+            'label': 'Slow / Oculta (Amortecimento)',
+            'description': 'Dobradiças slow-motion, corrediças ocultas slow 450mm e sistema correr Rometal Dominus.',
             'hingeCod': '0003MUL35D-11/26',
             'hingePrice': comp_prices['0003MUL35D-11/26']['unitPrice'],
+            'cornerHingeCod': '0005MUL35D-11/26',
+            'cornerHingePrice': corner_hinge_price,
             'slideCod': '0002MULT450COS-11/26',
             'slidePrice': comp_prices['0002MULT450COS-11/26']['unitPrice'],
             'pistonCod': '0001MUL80P-11/26',
@@ -557,8 +727,35 @@ def main():
             'sliding2Price': comp_prices['0003ROMD2-11/26']['unitPrice'],
             'sliding3Cod': '0004MULD3-11/26',
             'sliding3Price': comp_prices['0004MULD3-11/26']['unitPrice'],
+            'handleBarCod': '0004MULT18AL3-11/26',
+            'handleBarPrice': handle18_price,
+            'handleBar15Cod': '0003MULT15AL3-11/26',
+            'handleBar15Price': handle15_price,
+            'rodCod': '0002MULTCO-11/26',
+            'rodPrice': round(rod_price, 2),
+        },
+        {
+            'id': 'luxo',
+            'label': 'Luxo (SS 200 Top + Avantbox FGV)',
+            'description': 'Kit gavetas Avantbox FGV Prata, sistema correr Rometal SS 200 Top 50kg e dobradiças slow.',
+            'hingeCod': '0003MUL35D-11/26',
+            'hingePrice': comp_prices['0003MUL35D-11/26']['unitPrice'],
+            'cornerHingeCod': '0005MUL35D-11/26',
+            'cornerHingePrice': corner_hinge_price,
+            'slideCod': '0006FGVTN450GA-11/26',
+            'slidePrice': comp_prices['0006FGVTN450GA-11/26']['unitPrice'],
+            'pistonCod': '0001MUL80P-11/26',
+            'pistonPrice': comp_prices['0001MUL80P-11/26']['unitPrice'],
+            'sliding2Cod': '0001ROM200T2-11/26',
+            'sliding2Price': comp_prices['0001ROM200T2-11/26']['unitPrice'],
+            'sliding3Cod': '0002ROM200T3-11/26',
+            'sliding3Price': comp_prices['0002ROM200T3-11/26']['unitPrice'],
             'handleBarCod': '0003MULT15AL3-11/26',
-            'handleBarPrice': comp_prices['0003MULT15AL3-11/26']['unitPrice'],
+            'handleBarPrice': handle15_price,
+            'handleBar15Cod': '0003MULT15AL3-11/26',
+            'handleBar15Price': handle15_price,
+            'rodCod': '0002MULTCO-11/26',
+            'rodPrice': round(rod_price, 2),
         },
     ]
 

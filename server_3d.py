@@ -48,14 +48,14 @@ _clients_lock = threading.Lock()
 
 VALID_ROOMS = {'cozinha', 'quarto', 'sala', 'banheiro', 'lavanderia', 'escritorio', 'varanda_gourmet'}
 VALID_MODULES = {
-    'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'ilha_gourmet',
-    'aereo_portas', 'aereo_basculante', 'torre_quente', 'nicho_geladeira', 'cristaleira_vidro',
+    'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'balcao_canto_L', 'balcao_lava_loucas', 'ilha_gourmet',
+    'aereo_portas', 'aereo_basculante', 'aereo_canto_L', 'fechamento_teto', 'torre_quente', 'nicho_geladeira', 'cristaleira_vidro',
     'guarda_roupa_correr', 'guarda_roupa_abrir', 'closet_cabideiro_aberto',
-    'cama_bau_planejada', 'criado_mudo', 'painel_cabeceira', 'penteadeira_camarim',
-    'sapateira_prateleiras', 'bancada_estudo', 'painel_tv_ripado', 'rack_suspenso',
+    'cama_bau_planejada', 'criado_mudo', 'painel_cabeceira', 'cabeceira_estofada', 'penteadeira_camarim',
+    'sapateira_prateleiras', 'bancada_estudo', 'painel_tv_ripado', 'painel_muxarabi', 'rack_suspenso',
     'estante_nichos', 'aparador_buffet', 'bar_adega', 'gabinete_banheiro',
-    'espelheira_armario', 'armario_vassoureiro', 'bancada_tanque_maquina',
-    'estacao_trabalho_L', 'arquivo_escritorio', 'balcao_churrasqueira',
+    'espelheira_armario', 'armario_vassoureiro', 'bancada_tanque_maquina', 'mesa_retratil',
+    'estacao_trabalho_L', 'arquivo_escritorio', 'balcao_churrasqueira', 'balcao_atendimento_comercial',
 }
 
 
@@ -363,13 +363,13 @@ def run_planner_task(img_path: Path, room_type: str, dims: dict, obstacles: list
     planner = get_space_client('GanymedeNil/Qwen2-VL-7B')
 
     allowed_by_room = {
-        'cozinha': 'balcao_pia, balcao_gavetas, balcao_cooktop, ilha_gourmet, aereo_portas, aereo_basculante, torre_quente, nicho_geladeira, cristaleira_vidro',
-        'quarto': 'guarda_roupa_correr, guarda_roupa_abrir, closet_cabideiro_aberto, cama_bau_planejada, criado_mudo, painel_cabeceira, penteadeira_camarim, sapateira_prateleiras, bancada_estudo',
-        'sala': 'painel_tv_ripado, rack_suspenso, estante_nichos, aparador_buffet, bar_adega, cristaleira_vidro',
+        'cozinha': 'balcao_pia, balcao_gavetas, balcao_cooktop, balcao_canto_L, balcao_lava_loucas, ilha_gourmet, aereo_portas, aereo_basculante, aereo_canto_L, fechamento_teto, torre_quente, nicho_geladeira, cristaleira_vidro, mesa_retratil',
+        'quarto': 'guarda_roupa_correr, guarda_roupa_abrir, closet_cabideiro_aberto, cama_bau_planejada, criado_mudo, painel_cabeceira, cabeceira_estofada, penteadeira_camarim, sapateira_prateleiras, bancada_estudo, fechamento_teto',
+        'sala': 'painel_tv_ripado, painel_muxarabi, rack_suspenso, estante_nichos, aparador_buffet, bar_adega, cristaleira_vidro, fechamento_teto',
         'banheiro': 'gabinete_banheiro, espelheira_armario, armario_vassoureiro, estante_nichos',
-        'lavanderia': 'bancada_tanque_maquina, armario_vassoureiro, aereo_portas, balcao_gavetas',
-        'escritorio': 'estacao_trabalho_L, arquivo_escritorio, estante_nichos, balcao_gavetas, painel_tv_ripado',
-        'varanda_gourmet': 'balcao_churrasqueira, balcao_pia, bar_adega, ilha_gourmet, aereo_portas, cristaleira_vidro',
+        'lavanderia': 'bancada_tanque_maquina, armario_vassoureiro, aereo_portas, balcao_gavetas, balcao_canto_L, mesa_retratil, fechamento_teto',
+        'escritorio': 'estacao_trabalho_L, arquivo_escritorio, estante_nichos, balcao_gavetas, painel_tv_ripado, painel_muxarabi, mesa_retratil, balcao_atendimento_comercial',
+        'varanda_gourmet': 'balcao_churrasqueira, balcao_pia, balcao_canto_L, balcao_lava_loucas, bar_adega, ilha_gourmet, aereo_portas, cristaleira_vidro, painel_muxarabi',
     }
 
     examples_by_room = {
@@ -461,11 +461,15 @@ def validate_and_resolve_modules(plan_result: dict, dims: dict, obstacles: list,
         return (a1 < b2 - pad) and (a2 > b1 + pad)
 
     def is_layered_ok(t1, t2):
+        if 'fechamento_teto' in (t1, t2):
+            return True
         pair = {t1, t2}
         layered_pairs = [
             {'painel_tv_ripado', 'rack_suspenso'},
             {'painel_cabeceira', 'criado_mudo'},
             {'painel_cabeceira', 'cama_bau_planejada'},
+            {'cabeceira_estofada', 'criado_mudo'},
+            {'cabeceira_estofada', 'cama_bau_planejada'},
             {'gabinete_banheiro', 'espelheira_armario'},
         ]
         return pair in layered_pairs
@@ -520,7 +524,7 @@ def validate_and_resolve_modules(plan_result: dict, dims: dict, obstacles: list,
             if width_cm < 40:
                 continue
 
-        low_counter_types = {'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'rack_suspenso', 'bancada_estudo', 'estacao_trabalho_L', 'criado_mudo', 'gabinete_banheiro', 'bancada_tanque_maquina', 'balcao_churrasqueira'}
+        low_counter_types = {'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'balcao_canto_L', 'balcao_lava_loucas', 'rack_suspenso', 'bancada_estudo', 'estacao_trabalho_L', 'criado_mudo', 'gabinete_banheiro', 'bancada_tanque_maquina', 'balcao_churrasqueira', 'mesa_retratil', 'balcao_atendimento_comercial'}
         if wall == 'back':
             for w in wall_windows:
                 if overlaps_1d(x_cm, x_cm + width_cm, w['xStartCm'], w['xEndCm'], 4) and overlaps_1d(y_cm, y_cm + height_cm, w['yBottomCm'], w['yTopCm'], 4):

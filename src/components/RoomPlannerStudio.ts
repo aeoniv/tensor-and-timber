@@ -2,6 +2,7 @@ import {
   ALL_MDF_FINISHES,
   MDF_FEATURED_FINISHES,
   HARDWARE_KIT_OPTIONS,
+  MODULE_CATALOG_TEMPLATES,
 } from '../data/pricingCatalog';
 
 export function renderRoomPlannerStudio(): string {
@@ -26,30 +27,34 @@ export function renderRoomPlannerStudio(): string {
     </option>
   `).join('');
 
-  const carcassIds = ['branco-artico', 'branco-ultra', 'cinza-platina', 'gianduia-sense'];
-  const carcassOptionsHtml = carcassIds
-    .map((cid) => MDF_FEATURED_FINISHES.find((f) => f.id === cid))
-    .filter((f): f is NonNullable<typeof f> => Boolean(f))
-    .map((f) => `<option value="${f.id}">Caixaria: ${f.label} (R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch)</option>`)
+  const carcassOptionsList = ALL_MDF_FINISHES.filter(
+    (f) => ['branco-artico', 'branco-ultra', 'cinza-platina', 'gianduia-sense'].includes(f.id) || f.name15.toLowerCase().includes('ultra')
+  );
+  const carcassOptionsHtml = carcassOptionsList
+    .map((f) => `<option value="${f.id}">Caixaria: ${f.label}${f.name15.toLowerCase().includes('ultra') && !f.label.toLowerCase().includes('ultra') ? ' (Ultra)' : ''} (R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch)</option>`)
     .join('');
 
-  const hardwareHtml = HARDWARE_KIT_OPTIONS.map((h, idx) => `
+  const hardwareHtml = HARDWARE_KIT_OPTIONS.map((h) => `
     <button
       type="button"
-      class="tension-pill room-hardware-btn ${idx === 1 ? 'active' : ''}"
+      class="tension-pill room-hardware-btn ${h.id === 'slow' ? 'active' : ''}"
       data-hardware-id="${h.id}"
       title="${h.description}"
     >
-      ${h.id === 'padrao' ? 'Padrão (Telescópica)' : 'Alto Padrão (Slow / Oculta)'}
+      ${h.label}
     </button>
   `).join('');
+
+  const addModuleOptionsHtml = MODULE_CATALOG_TEMPLATES.map(
+    (tpl) => `<option value="${tpl.type}">${tpl.category} — ${tpl.label} (${tpl.widthCm}×${tpl.heightCm}×${tpl.depthCm}cm)</option>`
+  ).join('');
 
   return `
     <section class="section section-atelier" id="room-planner-section" style="border-bottom: 1px solid var(--border-subtle);">
       <div class="container">
 
         <div class="section-header text-center">
-          <span class="badge">7 Ambientes &bull; 30+ Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões Duratex</span>
+          <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões Duratex</span>
           <h2 class="section-title">
             Projeto 3D e Pré-Orçamento por <span class="accent-text">Foto do Cômodo</span>
           </h2>
@@ -174,21 +179,54 @@ export function renderRoomPlannerStudio(): string {
                 </div>
               </div>
 
-              <!-- Tampo / Pedra + Ferragens -->
+              <!-- Tampo / Pedra + Estilo Frente + Puxador + Espessura + Ferragens -->
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top: 10px;" id="room-counter-selector">
                 <button type="button" class="ctrl-btn active room-counter-btn" data-counter="claro">Tampo Claro</button>
                 <button type="button" class="ctrl-btn room-counter-btn" data-counter="escuro">Tampo Escuro</button>
                 <button type="button" class="ctrl-btn room-counter-btn" data-counter="madeira">Tampo Madeira</button>
               </div>
 
-              <div class="tension-row" id="room-hardware-selector" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <div style="margin-top: 10px; padding: 9px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 7px;">
+                <div>
+                  <span style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Estilo das Frentes / Vidros</span>
+                  <div style="display:flex; gap:5px; flex-wrap:wrap;" id="room-front-style-selector">
+                    <button type="button" class="ctrl-btn active room-front-style-btn" data-front-style="lisa">Lisa Reta</button>
+                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="cava45">Cava 45°</button>
+                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="provencal">Provençal</button>
+                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="vidro_reflecta">Vidro Reflecta</button>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                  <div>
+                    <label for="room-handle-style-select" style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Puxador / Acionamento</label>
+                    <select id="room-handle-style-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
+                      <option value="perfil_18">Perfil Alumínio 18mm</option>
+                      <option value="perfil_15">Perfil Slim 15mm</option>
+                      <option value="fecho_toque">Fecho Toque (Sem Puxador)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="room-thickness-select" style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Espessura Estrutural</label>
+                    <select id="room-thickness-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
+                      <option value="15mm">15mm Padrão (+6mm)</option>
+                      <option value="18mm">18mm Reforçado</option>
+                      <option value="25mm_engrossado">25/30mm Engrossado</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tension-row" id="room-hardware-selector" style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
                 ${hardwareHtml}
               </div>
             </div>
 
-            <!-- Botão Principal -->
+            <!-- Botão Principal + Modo Livre Sem Foto -->
             <button type="button" class="btn btn-primary btn-block btn-lg" id="btn-analyze-empty-room" style="margin-top: 16px;">
               <span id="btn-analyze-room-text">🔍 Analisar Cômodo e Gerar Proposta 3D</span>
+            </button>
+            <button type="button" class="btn btn-outline btn-block" id="btn-start-blank-room" style="margin-top: 8px; font-size: 0.82rem; padding: 8px 12px;">
+              📐 Montar Ambiente Manualmente (Sem Foto)
             </button>
             <p id="room-ai-engine-hint" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
               Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Tabela real
@@ -214,9 +252,10 @@ export function renderRoomPlannerStudio(): string {
                   <button type="button" class="ctrl-btn active" id="room-btn-shell">Paredes</button>
                   <button type="button" class="ctrl-btn" id="room-btn-moge" style="display: none;">Malha MoGe-2</button>
                 </div>
-                <div style="display: flex; gap: 6px;">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                   <button type="button" class="ctrl-btn" id="room-btn-download-glb">Baixar .GLB</button>
                   <button type="button" class="ctrl-btn" id="room-btn-export-obj">SketchUp (.OBJ)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-csv">Lista Corte (.CSV)</button>
                 </div>
               </div>
             </div>
@@ -235,13 +274,27 @@ export function renderRoomPlannerStudio(): string {
                 <p id="room-architect-notes" style="margin-bottom: 10px; line-height: 1.5;"></p>
                 <div id="room-obstacles-badges" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;"></div>
                 <div id="room-modules-list" style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px;"></div>
+
+                <!-- Adicionar módulo avulso direto na cena 3D -->
+                <div id="room-add-module-bar" style="margin-top: 8px; padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--border-strong); background: #fff; display: grid; grid-template-columns: 1fr 84px auto; gap: 6px; align-items: center;">
+                  <select id="room-add-module-type" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
+                    ${addModuleOptionsHtml}
+                  </select>
+                  <select id="room-add-module-wall" class="prompt-input-area" style="padding: 6px 6px; min-height: 0; font-size: 0.76rem;">
+                    <option value="back">Fundo</option>
+                    <option value="left">Esq.</option>
+                    <option value="right">Dir.</option>
+                    <option value="center">Centro</option>
+                  </select>
+                  <button type="button" class="ctrl-btn active" id="btn-add-custom-module" style="padding: 6px 10px; white-space: nowrap; font-weight: 700;">+ Módulo</button>
+                </div>
               </div>
 
               <div class="deal-perks" id="room-bom-perks">
-                <div class="deal-perk-item">✓ Respeita portas, janelas e tomadas detectadas</div>
-                <div class="deal-perk-item">✓ Chapas 15mm/6mm e ferragens reais da planilha</div>
-                <div class="deal-perk-item">✓ Exportação 3D compatível com SketchUp (.OBJ)</div>
-                <div class="deal-perk-item">✓ Ajuste larguras (-/+ 10 cm) e veja o preço na hora</div>
+                <div class="deal-perk-item">✓ Cantos em L, tamponamento até o teto e muxarabi</div>
+                <div class="deal-perk-item">✓ Cava 45°, Provençal, Vidro Reflecta e 18/25mm</div>
+                <div class="deal-perk-item">✓ Exportação 3D SketchUp (.OBJ) + Lista de Corte (.CSV)</div>
+                <div class="deal-perk-item">✓ Adicione móveis e ajuste medidas (-/+ 10 cm) na hora</div>
               </div>
 
               <div class="deal-actions">
