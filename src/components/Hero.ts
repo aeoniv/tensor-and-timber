@@ -20,7 +20,10 @@ export function renderHero(): string {
 
             <div class="hero-ctas" style="margin-bottom: 18px;">
               <a href="#studio-3d-hub" class="btn btn-primary btn-lg" data-open-hub="room">
-                <span>📐 Abrir Suíte 3D</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                </svg>
+                <span>Abrir Suíte 3D</span>
               </a>
 
               <a
@@ -29,7 +32,7 @@ export function renderHero(): string {
                 rel="noopener noreferrer"
                 class="btn btn-whatsapp btn-lg"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
                 </svg>
                 <span>Falar no WhatsApp</span>
@@ -38,7 +41,7 @@ export function renderHero(): string {
 
             <!-- Direct shortcuts into grouped 3D features right below -->
             <div class="hero-quick-3d">
-              <span class="hero-quick-label">Ir direto para:</span>
+              <span class="hero-quick-label">Atalhos rápidos:</span>
               <a href="#studio-3d-hub" class="prompt-chip" data-open-hub="room">Ambiente por Foto &rarr;</a>
               <a href="#studio-3d-hub" class="prompt-chip" data-open-hub="atelier">Criador de Móvel 3D &rarr;</a>
             </div>
@@ -67,7 +70,7 @@ export function renderHero(): string {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
                 </svg>
-                <span id="hero-model-pill">Mesa Tensegrity Interativa</span>
+                <span id="hero-model-pill">Mesa Ipanema 3D</span>
               </span>
               <span class="stage-hint">Arraste para girar 360&deg;</span>
             </div>

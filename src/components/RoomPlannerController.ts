@@ -125,7 +125,7 @@ export class RoomPlannerController {
     }
     this.bindEvents();
     this.updateChipsForRoom();
-    this.refreshSummaryDisplay();
+    this.startBlankRoomProject(true);
   }
 
   private getEffectiveCarcassId(): string {
@@ -161,6 +161,9 @@ export class RoomPlannerController {
           this.carcassFinishId = 'branco-ultra';
         }
         this.updateChipsForRoom();
+        if (!this.photoDataUrl && this.currentAnalysis?.aiEngines?.perception === 'Manual') {
+          this.startBlankRoomProject(true);
+        }
       });
     });
 
@@ -633,7 +636,7 @@ export class RoomPlannerController {
     }
   }
 
-  private startBlankRoomProject(): void {
+  private startBlankRoomProject(silent: boolean = false): void {
     const widthCm = Math.max(150, Math.min(680, Number((document.getElementById('room-ref-cm') as HTMLInputElement)?.value || 320)));
     const heightCm = 260;
     const depthCm = Math.round(Math.max(260, widthCm * 1.05));
@@ -691,16 +694,22 @@ export class RoomPlannerController {
       backWallNormBox: [],
       obstacles: [],
       modules,
-      architectNotesPtBr: 'Ambiente iniciado manualmente para personalização livre. Adicione módulos de canto em L, tamponamento até o teto, muxarabi ou troque o estilo das frentes abaixo.',
+      architectNotesPtBr: silent
+        ? 'Modelo inicial interativo pronto para personalizar. Envie a foto do seu ambiente para leitura automática ou ajuste medidas, módulos e MDF abaixo.'
+        : 'Ambiente iniciado manualmente para personalização livre. Adicione módulos de canto em L, tamponamento até o teto, muxarabi ou troque o estilo das frentes abaixo.',
       aiEngines: { geometry3d: 'Modo Manual Livre', perception: 'Manual', architect: 'Catálogo 38 Móveis' },
     };
 
     const front = findMdfFinishById(this.frontFinishId);
     const carcass = findMdfFinishById(this.getEffectiveCarcassId());
     this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, false, this.getStyleOptions());
-    document.getElementById('room-status-pill')!.textContent = 'Modo Livre ativo • Adicione ou ajuste móveis';
+    document.getElementById('room-status-pill')!.textContent = silent
+      ? 'Proposta Exemplo Ativa • Envie foto para calibrar o seu cômodo'
+      : 'Modo Livre ativo • Adicione ou ajuste móveis';
     this.refreshSummaryDisplay();
-    this.onToast('Ambiente livre carregado! Teste adicionar módulos ou alterar o estilo das portas.');
+    if (!silent) {
+      this.onToast('Ambiente livre carregado! Teste adicionar módulos ou alterar o estilo das portas.');
+    }
   }
 
   private addCustomModuleToScene(): void {

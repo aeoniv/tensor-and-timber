@@ -21,7 +21,7 @@ export function renderNavbar(): string {
         <nav class="nav-links" id="main-nav" aria-label="Navegação principal">
           <a href="#studio-3d-hub" class="nav-link" data-open-hub="room">Suíte 3D</a>
           <a href="#real-furniture-section" class="nav-link">Portfólio</a>
-          <a href="#philosophy-section" class="nav-link">Como Trabalhamos</a>
+          <a href="#philosophy-section" class="nav-link">Processo</a>
           <a href="#consultation-section" class="nav-link">Contato</a>
         </nav>
 
@@ -50,11 +50,11 @@ export function renderNavbar(): string {
       <!-- Mobile Quick Navigation Bar -->
       <nav class="nav-mobile-strip" aria-label="Atalhos mobile">
         <div class="nav-mobile-strip-inner">
-          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="room">📐 Ambientes 3D</a>
-          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="atelier">✨ Móvel 3D</a>
-          <a href="#real-furniture-section" class="nav-mobile-pill">🪑 Portfólio</a>
-          <a href="#philosophy-section" class="nav-mobile-pill">⚒ Processo</a>
-          <a href="#consultation-section" class="nav-mobile-pill">📞 Contato</a>
+          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="room">Ambientes 3D</a>
+          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="atelier">Móvel 3D</a>
+          <a href="#real-furniture-section" class="nav-mobile-pill">Portfólio</a>
+          <a href="#philosophy-section" class="nav-mobile-pill">Processo</a>
+          <a href="#consultation-section" class="nav-mobile-pill">Contato</a>
         </div>
       </nav>
     </header>

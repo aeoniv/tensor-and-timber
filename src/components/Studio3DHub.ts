@@ -9,7 +9,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
             Projete em <span class="accent-text">3D em Tempo Real</span>
           </h2>
           <p class="section-subtitle">
-            Todas as ferramentas 3D em um único espaço: gere o ambiente completo pela foto (com SketchUp .DAE e corte CNC) ou crie peças avulsas por texto e croqui.
+            Todas as ferramentas 3D reunidas: gere o ambiente completo pela foto (com SketchUp .DAE e corte CNC) ou crie peças exclusivas por texto e croqui.
           </p>
 
           <!-- Unified Switcher Tabs between both 3D Studios -->
@@ -23,7 +23,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
               id="hub-tab-room"
               data-hub-tab="room"
             >
-              <span class="studio-tab-title">📐 Ambientes Planejados</span>
+              <span class="studio-tab-title">Ambientes Planejados 3D</span>
               <span class="studio-tab-sub">Foto do cômodo &bull; 124 MDFs &bull; .DAE / .DXF</span>
             </button>
 
@@ -36,7 +36,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
               id="hub-tab-atelier"
               data-hub-tab="atelier"
             >
-              <span class="studio-tab-title">✨ Criador de Móvel 3D</span>
+              <span class="studio-tab-title">Criador de Móvel 3D</span>
               <span class="studio-tab-sub">Texto ou croqui &bull; Peças exclusivas .GLB</span>
             </button>
           </div>

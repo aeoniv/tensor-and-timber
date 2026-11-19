@@ -74,6 +74,7 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -83,7 +84,7 @@ body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a {
@@ -466,26 +467,37 @@ section[id] {
 }
 
 .hero-stage-header {
-  padding: 14px 18px;
+  padding: 13px 16px;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   background: var(--bg-surface);
 }
 
 .stage-pill-tag {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--accent-wood);
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.stage-pill-tag span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stage-hint {
-  font-size: 0.76rem;
+  font-size: 0.73rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .hero-canvas-box {
@@ -514,16 +526,21 @@ section[id] {
 }
 
 .stage-controls-row {
-  padding: 10px 16px;
+  padding: 9px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .stage-controls-row--export {
   background: var(--bg-subtle);
   border-top: 1px solid var(--border-subtle);
+}
+
+.stage-controls-row--export .ctrl-btn {
+  padding: 5px 8px;
+  font-size: 0.72rem;
 }
 
 .controls-group-label {
@@ -901,10 +918,18 @@ section[id] {
   background: var(--bg-base);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
+  padding: 9px 24px 9px 10px;
   cursor: pointer;
   transition: var(--transition);
   text-align: left;
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+
+.wood-card-btn > div {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .wood-card-btn:hover {
@@ -918,24 +943,32 @@ section[id] {
 }
 
 .wood-color-dot {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.14);
 }
 
 .wood-text-k {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-primary);
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wood-text-v {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wood-notice-text {
@@ -1719,6 +1752,24 @@ section[id] {
   align-items: center;
 }
 
+/* Strict grid containment so narrow mobile screens never clip horizontally */
+.hero-grid > *,
+.atelier-grid > *,
+.consultation-grid > *,
+.furniture-grid > *,
+.process-grid > *,
+.studio-hub-panel,
+.studio-hub-tab,
+.config-box,
+.visualizer-column,
+.atelier-canvas-card,
+.deal-card,
+.hero-stage-card,
+.customizer-accordion {
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
@@ -1742,7 +1793,7 @@ section[id] {
   .nav-mobile-strip {
     display: block;
     border-top: 1px solid var(--border-subtle);
-    background: rgba(250, 249, 246, 0.98);
+    background: rgba(246, 244, 239, 0.98);
   }
 }
 
@@ -1756,23 +1807,41 @@ section[id] {
     padding-right: 16px;
   }
   .section {
-    padding-top: 52px;
-    padding-bottom: 52px;
+    padding-top: 48px;
+    padding-bottom: 48px;
   }
   .section-title {
-    font-size: 1.85rem;
+    font-size: 1.78rem;
   }
   .hero-section {
-    padding-top: 32px;
-    padding-bottom: 44px;
+    padding-top: 28px;
+    padding-bottom: 40px;
   }
   .hero-title {
-    font-size: 2.05rem;
+    font-size: 1.95rem;
+  }
+  .hero-subtitle {
+    font-size: 0.98rem;
+  }
+  .hero-ctas {
+    gap: 10px;
+  }
+  .hero-trust-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .btn {
+    white-space: normal;
+    max-width: 100%;
+  }
+  .btn-lg {
+    padding: 12px 18px;
+    font-size: 0.92rem;
   }
   .hero-canvas-box,
   .atelier-canvas-viewport {
-    height: 310px;
-    min-height: 310px !important;
+    height: 300px;
+    min-height: 300px !important;
   }
   .furniture-grid,
   .process-grid,
@@ -1781,7 +1850,10 @@ section[id] {
     grid-template-columns: 1fr;
   }
   .archetype-tabs-row {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .room-type-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .deal-header,
   .custom-banner {
@@ -1804,6 +1876,9 @@ section[id] {
 }
 
 @media (max-width: 540px) {
+  .brand-name {
+    font-size: 1rem;
+  }
   .brand-sub {
     display: none;
   }
@@ -1813,6 +1888,15 @@ section[id] {
   .nav-cta-btn {
     padding: 8px 12px;
     font-size: 0.78rem;
+  }
+  .hero-ctas .btn {
+    width: 100%;
+  }
+  .config-box,
+  .deal-card,
+  .contact-info-card,
+  .contact-form-card {
+    padding: 18px 14px;
   }
   .wood-grid,
   .tension-pills-row,

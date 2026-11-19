@@ -11,12 +11,12 @@ export function renderRoomPlannerStudio(): string {
       type="button"
       class="wood-card-btn room-finish-btn ${idx === 0 ? 'active' : ''}"
       data-finish-id="${f.id}"
-      title="${f.name15} • Cód: ${f.cod15}"
+      title="${f.name15} • ${f.tierLabel} • Cód: ${f.cod15}"
     >
-      <span class="wood-color-dot" style="background: ${f.hex}; border: 1px solid rgba(0,0,0,0.18);"></span>
+      <span class="wood-color-dot" style="background: ${f.hex};"></span>
       <div>
         <span class="wood-text-k">${f.label}</span>
-        <span class="wood-text-v">${f.tierLabel} &bull; R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch</span>
+        <span class="wood-text-v">R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch</span>
       </div>
     </button>
   `).join('');
@@ -153,13 +153,17 @@ export function renderRoomPlannerStudio(): string {
             <!-- Ação Principal Imediata (antes das opções avançadas) -->
             <div class="planner-cta-block">
               <button type="button" class="btn btn-primary btn-block btn-lg" id="btn-analyze-empty-room">
-                <span id="btn-analyze-room-text">🔍 Analisar Cômodo e Gerar Proposta 3D</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <span id="btn-analyze-room-text">Analisar Foto e Gerar Proposta 3D</span>
               </button>
               <button type="button" class="btn btn-outline btn-block btn-sm" id="btn-start-blank-room">
-                📐 Montar Ambiente Manualmente (Sem Foto)
+                Reiniciar Ambiente em Modo Manual (Sem Foto)
               </button>
               <p id="room-ai-engine-hint" class="planner-cta-hint">
-                Visão Computacional 3D (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Atualiza o 3D ao vivo abaixo
+                Visão Computacional 3D &bull; Layouts em L / Ilha &bull; Atualização ao vivo no painel ao lado
               </p>
             </div>
 
@@ -273,10 +277,10 @@ export function renderRoomPlannerStudio(): string {
                 </div>
                 <div class="stage-controls-row stage-controls-row--export">
                   <span class="controls-group-label">Exportar:</span>
-                  <button type="button" class="ctrl-btn ctrl-btn--primary" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp (.DAE)</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--primary" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp .DAE</button>
                   <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Malha .OBJ em escala métrica">.OBJ</button>
-                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC (.DXF)</button>
-                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte + BOM (.CSV)</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC .DXF</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte .CSV</button>
                   <button type="button" class="ctrl-btn" id="room-btn-download-glb" title="Modelo 3D GLB para Web/Blender">.GLB</button>
                 </div>
               </div>

@@ -125,7 +125,10 @@ export function renderAtelierStudio(): string {
             <!-- PRIMARY ACTION: GENERATE 3D BUTTON -->
             <div class="planner-cta-block" style="margin-bottom: 0;">
               <button class="btn btn-primary btn-block btn-lg" id="btn-generate-custom-3d">
-                <span id="btn-generate-3d-text">✨ Gerar Objeto 3D com IA</span>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+                </svg>
+                <span id="btn-generate-3d-text">Gerar Objeto 3D com IA</span>
               </button>
               <p class="planner-cta-hint">
                 Reconstrução 3D real por texto ou imagem &bull; Download imediato .GLB
