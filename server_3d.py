@@ -135,20 +135,20 @@ def call_hf_router_vision(img_path: Path, prompt_text: str, token: str | None = 
 
 def format_hf_error_ptbr(err: Exception, router_note: str = '') -> str:
     raw = str(err)
-    low = raw.lower()
+    low = (raw + ' ' + router_note).lower()
     is_quota = any(k in low for k in ['quota', 'zerogpu', 'exceeded', 'gpu', 'rate limit', '429'])
-    is_perm = 'inference providers' in low or '403' in low or '401' in low or 'unauthorized' in low or 'token' in low
-    if is_quota or is_perm or router_note:
+    is_perm = 'inference providers' in low or '403' in low or '401' in low or 'unauthorized' in low
+    if is_quota or is_perm:
         details = []
         if is_quota:
-            details.append('Cota diária gratuita/ZeroGPU do Hugging Face esgotada nas Spaces públicas.')
-        if '403' in router_note.lower() or 'inference providers' in router_note.lower() or is_perm:
             details.append(
-                'Seu HF Token Fine-grained atual não tem a permissão "Make calls to Inference Providers" ativada para debitar dos créditos da conta ($).'
+                'Cota ZeroGPU atingida ou token sem autenticação ZeroGPU PRO/créditos extras. '
+                'No Hugging Face, contas PRO têm 40 min/dia no ZeroGPU e consomem créditos pré-pagos após a cota se os créditos gerais estiverem ativos em huggingface.co/settings/billing.'
             )
-        details.append(
-            'Solução: em huggingface.co/settings/tokens crie/edite um Fine-grained Token marcando "Make calls to Inference Providers" e "Read access to contents of all repos", e cole no campo "Token Hugging Face" abaixo (ou no .env).'
-        )
+        if is_perm or '403' in router_note.lower():
+            details.append(
+                'Requisitos exatos do Token em huggingface.co/settings/tokens: para ZeroGPU, crie na aba "Read" (ou Fine-grained com leitura pública); para Inference Providers, use Fine-grained marcando "Inference → Make calls to Inference Providers".'
+            )
         return ' '.join(details)
     return f'Falha no pipeline Hugging Face ao analisar a foto: {raw}'
 
@@ -816,36 +816,46 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 fut_moge = pool.submit(run_moge2_task, temp_img_path, run_id, req_token) if engine_mode != 'router' else None
 
                 det_result = None
-                use_router = bool(req_token) and engine_mode != 'zerogpu'
-                if use_router:
-                    try:
-                        det_result, perception_engine = run_detection_via_router(temp_img_path, req_token)
-                    except Exception as re_err:
-                        router_note = str(re_err)
-                        print(f'[ROOM-AI] HF Router detection skipped ({router_note}), falling back to ZeroGPU...', flush=True)
-                        if engine_mode == 'router':
-                            raise re_err
+                force_router = (engine_mode == 'router')
+                allow_router_fallback = bool(req_token) and (engine_mode in ('auto', 'router'))
 
-                if det_result is None:
-                    det_result = run_detection_task(temp_img_path, req_token)
-                    perception_engine = 'maxiw/Qwen2-VL-Detection (ZeroGPU)'
+                if force_router:
+                    det_result, perception_engine = run_detection_via_router(temp_img_path, req_token)
+                else:
+                    try:
+                        det_result = run_detection_task(temp_img_path, req_token)
+                        perception_engine = 'maxiw/Qwen2-VL-Detection (ZeroGPU PRO)' if req_token else 'maxiw/Qwen2-VL-Detection (ZeroGPU)'
+                    except Exception as zdet_err:
+                        if allow_router_fallback:
+                            print(f'[ROOM-AI] ZeroGPU detection failed ({zdet_err}), trying HF Inference Router...', flush=True)
+                            try:
+                                det_result, perception_engine = run_detection_via_router(temp_img_path, req_token)
+                            except Exception as r_err:
+                                router_note = str(r_err)
+                                raise zdet_err
+                        else:
+                            raise
 
                 dims, back_wall_box, obstacles = calibrate_room_geometry(det_result, img_size, ref_cm, ref_type)
 
                 print(f'[ROOM-AI] Stage 2 Architect {room_type} wall={dims["widthCm"]}x{dims["heightCm"]}cm, obstacles={len(obstacles)}...', flush=True)
                 plan_result = None
-                if use_router and '403' not in router_note and 'inference providers' not in router_note.lower():
+                if force_router:
+                    plan_result, architect_engine = run_planner_via_router(temp_img_path, room_type, dims, obstacles, requirements, req_token)
+                else:
                     try:
-                        plan_result, architect_engine = run_planner_via_router(temp_img_path, room_type, dims, obstacles, requirements, req_token)
-                    except Exception as pe_err:
-                        router_note = router_note or str(pe_err)
-                        print(f'[ROOM-AI] HF Router planner skipped ({pe_err}), falling back to ZeroGPU...', flush=True)
-                        if engine_mode == 'router':
-                            raise pe_err
-
-                if plan_result is None:
-                    plan_result = run_planner_task(temp_img_path, room_type, dims, obstacles, requirements, req_token)
-                    architect_engine = 'GanymedeNil/Qwen2-VL-7B (ZeroGPU)'
+                        plan_result = run_planner_task(temp_img_path, room_type, dims, obstacles, requirements, req_token)
+                        architect_engine = 'GanymedeNil/Qwen2-VL-7B (ZeroGPU PRO)' if req_token else 'GanymedeNil/Qwen2-VL-7B (ZeroGPU)'
+                    except Exception as zplan_err:
+                        if allow_router_fallback:
+                            print(f'[ROOM-AI] ZeroGPU planner failed ({zplan_err}), trying HF Inference Router...', flush=True)
+                            try:
+                                plan_result, architect_engine = run_planner_via_router(temp_img_path, room_type, dims, obstacles, requirements, req_token)
+                            except Exception as rp_err:
+                                router_note = router_note or str(rp_err)
+                                raise zplan_err
+                        else:
+                            raise
 
                 moge_result = {'roomGlbUrl': None, 'depthMapUrl': None, 'fov': {}}
                 moge_ok = False

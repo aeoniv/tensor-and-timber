@@ -1000,7 +1000,7 @@ export class Real3DGeneratorService {
       const { Client } = await import('@gradio/client');
       if (onProgress) onProgress('Connecting to Hugging Face ZeroGPU cluster (trellis-community/TRELLIS)...', 20);
 
-      const options = hfToken ? { hf_token: hfToken as any } : undefined;
+      const options = hfToken ? ({ token: hfToken as `hf_${string}`, headers: { 'x-hf-authorization': `Bearer ${hfToken}` } }) : undefined;
       const app = await Client.connect('trellis-community/TRELLIS', options);
 
       if (onProgress) onProgress('Preprocessing image & extracting alpha contours...', 40);
