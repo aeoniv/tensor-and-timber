@@ -229,35 +229,8 @@ export function renderRoomPlannerStudio(): string {
               📐 Montar Ambiente Manualmente (Sem Foto)
             </button>
             <p id="room-ai-engine-hint" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
-              Visão Computacional Hugging Face (ZeroGPU PRO + Inference Router) &bull; Tabela real
+              Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Tabela real
             </p>
-
-            <details id="room-hf-settings" style="margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); font-size: 0.76rem;">
-              <summary style="cursor: pointer; font-weight: 700; color: var(--text-secondary); user-select: none;">
-                ⚙️ Token Hugging Face (PRO / Créditos ZeroGPU)
-              </summary>
-              <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
-                <select id="room-ai-engine-mode" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
-                  <option value="auto">Automático: ZeroGPU (PRO + Créditos) → Router Fallback</option>
-                  <option value="zerogpu">Somente ZeroGPU Spaces (MoGe-2 + Qwen2-VL)</option>
-                  <option value="router">Inference Providers API (Router Qwen3-VL)</option>
-                </select>
-                <input
-                  id="room-hf-token-input"
-                  type="password"
-                  autocomplete="off"
-                  class="prompt-input-area"
-                  style="padding: 7px 9px; min-height: 0; font-size: 0.76rem;"
-                  placeholder="hf_... (token Read ou Fine-grained — salvo só no navegador)"
-                  aria-label="Token Hugging Face"
-                />
-                <div style="color: var(--text-muted); line-height: 1.45;">
-                  <strong>Qual token criar em <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style="color: var(--brasil-verde); text-decoration: underline;">huggingface.co/settings/tokens</a>:</strong><br/>
-                  &bull; <strong>Para ZeroGPU (recomendado):</strong> use a aba <strong>Read</strong> (mais simples — já autentica seus 40 min/dia PRO e o excedente nos créditos ZeroGPU se o uso extra estiver ativo em <a href="https://huggingface.co/settings/billing" target="_blank" rel="noopener noreferrer" style="color: var(--brasil-verde); text-decoration: underline;">Billing</a>).<br/>
-                  &bull; <strong>Se usar aba Fine-grained:</strong> para fallback pago via Router marque <strong>Inference → Make calls to Inference Providers</strong>; não restrinja o escopo apenas a repos pessoais. Para consultar saldo/billing, marque <strong>User → Read your billing usage and payment method status</strong>.
-                </div>
-              </div>
-            </details>
 
           </div>
 

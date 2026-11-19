@@ -14,8 +14,6 @@ import {
 } from '../data/pricingCatalog';
 import {
   analyzeEmptyRoomPhoto,
-  getStoredHfToken,
-  setStoredHfToken,
   RoomAnalysisResult,
   RoomType,
   ReferenceMeasureType,
@@ -322,15 +320,6 @@ export class RoomPlannerController {
     document.getElementById('btn-add-custom-module')?.addEventListener('click', () => {
       this.addCustomModuleToScene();
     });
-
-    // Token Hugging Face salvo somente no navegador do operador
-    const hfTokenInput = document.getElementById('room-hf-token-input') as HTMLInputElement;
-    if (hfTokenInput) {
-      hfTokenInput.value = getStoredHfToken();
-      hfTokenInput.addEventListener('input', () => {
-        setStoredHfToken(hfTokenInput.value);
-      });
-    }
 
     // 6. Controles 3D e Exportação
     document.getElementById('room-btn-autorotate')?.addEventListener('click', (e) => {
@@ -748,8 +737,6 @@ export class RoomPlannerController {
     const refType = ((document.getElementById('room-ref-type') as HTMLSelectElement)?.value as ReferenceMeasureType) || 'wall_width';
     const refVal = Number((document.getElementById('room-ref-cm') as HTMLInputElement)?.value || 320);
     const reqText = ((document.getElementById('room-requirements-input') as HTMLTextAreaElement)?.value || '').trim();
-    const hfToken = ((document.getElementById('room-hf-token-input') as HTMLInputElement)?.value || getStoredHfToken()).trim();
-    const engineMode = ((document.getElementById('room-ai-engine-mode') as HTMLSelectElement)?.value as 'auto' | 'router' | 'zerogpu') || 'auto';
 
     const btn = document.getElementById('btn-analyze-empty-room') as HTMLButtonElement;
     const btnText = document.getElementById('btn-analyze-room-text');
@@ -757,7 +744,7 @@ export class RoomPlannerController {
     const mogeBtn = document.getElementById('room-btn-moge');
 
     if (btn) btn.disabled = true;
-    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Analisando cômodo via Hugging Face AI...</span>`;
+    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Analisando cômodo via Inteligência 3D...</span>`;
     if (statusPill) statusPill.textContent = 'Processando profundidade 3D e obstáculos...';
 
     try {
@@ -768,8 +755,6 @@ export class RoomPlannerController {
           referenceType: refType,
           referenceValueCm: refVal,
           requirements: reqText,
-          hfToken: hfToken || undefined,
-          engineMode,
         },
         (msg, pct) => {
           if (statusPill) statusPill.textContent = `${msg} (${pct}%)`;
@@ -804,12 +789,8 @@ export class RoomPlannerController {
       this.onToast('Cômodo analisado! Veja a proposta 3D e ajuste medidas se desejar.');
     } catch (err: any) {
       console.error('[RoomPlannerController] Analysis error:', err);
-      const msg = err?.message || 'Não foi possível concluir a análise do cômodo no Hugging Face.';
-      if (statusPill) statusPill.textContent = 'Atenção: Cota/Token Hugging Face';
-      if (msg.toLowerCase().includes('token') || msg.toLowerCase().includes('zerogpu') || msg.toLowerCase().includes('inference') || msg.toLowerCase().includes('cota')) {
-        const detailsEl = document.getElementById('room-hf-settings') as HTMLDetailsElement;
-        if (detailsEl) detailsEl.open = true;
-      }
+      const msg = err?.message || 'Não foi possível concluir a análise do cômodo no momento. Tente novamente em instantes.';
+      if (statusPill) statusPill.textContent = 'Serviço 3D temporariamente ocupado';
       this.onToast(msg);
     } finally {
       if (btn) btn.disabled = false;

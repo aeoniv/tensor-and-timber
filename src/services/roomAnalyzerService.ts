@@ -53,28 +53,9 @@ export interface AnalyzeRoomRequest {
   referenceType: ReferenceMeasureType;
   referenceValueCm: number;
   requirements: string;
-  hfToken?: string;
-  engineMode?: 'auto' | 'router' | 'zerogpu';
 }
 
-export function getStoredHfToken(): string {
-  try {
-    return (typeof localStorage !== 'undefined' ? localStorage.getItem('tt_hf_token') || '' : '').trim();
-  } catch {
-    return '';
-  }
-}
-
-export function setStoredHfToken(token: string): void {
-  try {
-    if (typeof localStorage === 'undefined') return;
-    const trimmed = token.trim();
-    if (trimmed) localStorage.setItem('tt_hf_token', trimmed);
-    else localStorage.removeItem('tt_hf_token');
-  } catch {
-    // ignore storage errors
-  }
-}
+const HOSTED_SPACE_BACKEND = 'https://aeonicc-tensor-and-timber-ai.hf.space';
 
 const VALID_MODULE_TYPES = new Set<string>([
   'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'balcao_canto_L', 'balcao_lava_loucas', 'ilha_gourmet',
@@ -97,6 +78,7 @@ function getBackendEndpoints(): string[] {
   if (host === 'localhost' || host === '127.0.0.1') {
     list.push('/api/analyze-room', 'http://localhost:5175/api/analyze-room');
   }
+  list.push(`${HOSTED_SPACE_BACKEND}/api/analyze-room`);
   return list;
 }
 
@@ -194,84 +176,13 @@ function overlaps1D(a1: number, a2: number, b1: number, b2: number, pad: number 
   return (a1 < b2 - pad) && (a2 > b1 + pad);
 }
 
-const ROUTER_VISION_MODELS = [
-  'Qwen/Qwen3-VL-8B-Instruct',
-  'Qwen/Qwen2.5-VL-72B-Instruct',
-  'Qwen/Qwen3-VL-30B-A3B-Instruct',
-];
-
-async function callHFRouterVisionBrowser(
-  imageDataUrl: string,
-  promptText: string,
-  hfToken: string
-): Promise<{ text: string; model: string }> {
-  let lastErr = '';
-  for (const model of ROUTER_VISION_MODELS) {
-    try {
-      const res = await fetch('https://router.huggingface.co/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${hfToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'image_url', image_url: { url: imageDataUrl } },
-                { type: 'text', text: promptText },
-              ],
-            },
-          ],
-          max_tokens: 1400,
-          temperature: 0.15,
-        }),
-      });
-      if (!res.ok) {
-        const errTxt = await res.text().catch(() => '');
-        if (res.status === 401 || res.status === 403) {
-          throw new Error(
-            `HF Router ${res.status}: token atual sem permissão "Make calls to Inference Providers" (${errTxt.slice(0, 160)})`
-          );
-        }
-        lastErr = `${model} HTTP ${res.status}: ${errTxt.slice(0, 140)}`;
-        continue;
-      }
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content;
-      if (content) return { text: String(content), model };
-    } catch (e: any) {
-      if (String(e?.message || '').includes('Inference Providers') || String(e?.message || '').includes('401') || String(e?.message || '').includes('403')) {
-        throw e;
-      }
-      lastErr = String(e?.message || e);
-    }
-  }
-  throw new Error(lastErr || 'HF Router indisponível.');
-}
-
-function formatFriendlyHfError(err: any, routerNote: string = '', hadToken: boolean = false): Error {
+function formatFriendlyHfError(err: any): Error {
   const raw = String(err?.message || err || '');
-  const low = (raw + ' ' + routerNote).toLowerCase();
-  const isQuota = low.includes('quota') || low.includes('zerogpu') || low.includes('exceeded') || low.includes('429');
-  const isPerm = low.includes('inference providers') || low.includes('403') || low.includes('401') || low.includes('unauthorized');
-  if (isQuota || isPerm) {
-    const parts: string[] = [];
-    if (isQuota) {
-      parts.push('Cota ZeroGPU excedida (anônimo: 2 min/dia; Free: 5 min/dia; PRO: 40 min/dia + excedente pago pelos créditos gerais em Settings → Billing).');
-    }
-    if (!hadToken) {
-      parts.push('Abra "⚙️ Token Hugging Face" abaixo e cole um token da aba "Read" (para autenticar sua cota PRO/créditos no ZeroGPU).');
-    } else if (isPerm) {
-      parts.push('Para usar ZeroGPU com segurança prefira um token clássico da aba "Read" em huggingface.co/settings/tokens; já para Inference Providers API marque no Fine-grained "Inference → Make calls to Inference Providers".');
-    } else {
-      parts.push('Verifique em huggingface.co/settings/tokens (aba Read para ZeroGPU ou Fine-grained com Inference Providers) e confira seu saldo Pay-as-you-go em huggingface.co/settings/billing.');
-    }
-    return new Error(parts.join(' '));
+  const low = raw.toLowerCase();
+  if (low.includes('quota') || low.includes('zerogpu') || low.includes('exceeded') || low.includes('429')) {
+    return new Error('Os servidores de IA 3D estão com alta demanda agora. Tente novamente em instantes ou use o Modo Manual.');
   }
-  return new Error(raw || 'Não foi possível concluir a análise do cômodo no Hugging Face.');
+  return new Error(raw || 'Não foi possível concluir a análise do cômodo no momento.');
 }
 
 async function analyzeViaDirectHuggingFace(
@@ -281,95 +192,38 @@ async function analyzeViaDirectHuggingFace(
   const t0 = performance.now();
   const imageBlob = await dataUrlToBlob(req.imageDataUrl);
   const imgSize = await getImageDimensions(req.imageDataUrl);
-  const activeToken = (req.hfToken || getStoredHfToken() || '').trim();
-  const engineMode = req.engineMode || 'auto';
-  const clientOpts = activeToken
-    ? ({
-        token: activeToken as `hf_${string}`,
-        headers: { 'x-hf-authorization': `Bearer ${activeToken}` },
-      })
-    : undefined;
 
-  if (onProgress) {
-    onProgress(
-      engineMode === 'router'
-        ? '1/3 Conectando ao HF Inference Providers (Router)...'
-        : activeToken
-        ? '1/3 Conectando ao ZeroGPU autenticado (PRO / Créditos)...'
-        : '1/3 Conectando ao Hugging Face ZeroGPU...',
-      18
-    );
-  }
+  if (onProgress) onProgress('1/3 Conectando ao motor de IA 3D Hugging Face...', 18);
 
-  let routerNote = '';
+  const mogePromise = Client.connect('Ruicheng/MoGe-2')
+    .then((c) => c.predict('/run', [imageBlob, 512, 'Medium', true, true]).catch(() => null))
+    .catch(() => null);
+
   let rawDetText = '';
-  let perceptionEngine = 'maxiw/Qwen2-VL-Detection';
+  const perceptionEngine = 'maxiw/Qwen2-VL-Detection';
   let architectEngine = 'GanymedeNil/Qwen2-VL-7B';
-  const forceRouter = engineMode === 'router';
-  const allowRouterFallback = Boolean(activeToken) && (engineMode === 'auto' || engineMode === 'router');
 
-  let detConn: any = null;
-  let planConn: any = null;
-  let mogePromise: Promise<any> = Promise.resolve(null);
-
-  if (!forceRouter) {
-    mogePromise = Client.connect('Ruicheng/MoGe-2', clientOpts)
-      .then((c) => c.predict('/run', [imageBlob, 512, 'Medium', true, true]).catch(() => null))
-      .catch(() => null);
-  }
-
-  const runRouterDet = async () => {
-    const detPrompt =
-      'Detect architectural elements in this empty room interior photo.\n' +
-      'Return ONLY a JSON array of objects [{"label": "...", "bbox": [xmin, ymin, xmax, ymax]}] normalized to 0..1000.\n' +
-      'Only include visible elements: "back wall" (main front-facing wall), "window", "door", "electrical outlet", "plumbing pipe". If door or window is not visible, omit it.';
-    const rDet = await callHFRouterVisionBrowser(req.imageDataUrl, detPrompt, activeToken);
-    rawDetText = rDet.text;
-    perceptionEngine = `HF Router (${rDet.model})`;
-  };
-
-  if (forceRouter) {
-    if (!activeToken) throw formatFriendlyHfError(new Error('Token obrigatório no modo Router'), '', false);
-    if (onProgress) onProgress('2/3 Detectando paredes e aberturas (HF Router)...', 40);
-    try {
-      await runRouterDet();
-    } catch (e: any) {
-      throw formatFriendlyHfError(e, String(e?.message || e), true);
-    }
-  } else {
-    try {
-      if (onProgress) onProgress('2/3 Detectando paredes e obstáculos no ZeroGPU (Qwen2-VL-Detection)...', 42);
-      detConn = await Client.connect('maxiw/Qwen2-VL-Detection', clientOpts);
-      const detRes: any = await detConn.predict('/run_example', [
-        imageBlob,
-        'Identify the window, plumbing water pipe/drain, electrical outlets, doors, and back wall in this empty room.',
-        'You are a helpfull assistant to detect objects in images. When asked to detect elements based on a description you return bounding boxes for all elements in the form of [xmin, ymin, xmax, ymax] whith the values beeing scaled to 1000 by 1000 pixels. When there are more than one result, answer with a list of bounding boxes in the form of [[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ...].',
-        'Qwen/Qwen2-VL-7B-Instruct',
-      ]);
-      let detPayload: any = detRes?.data?.[0];
-      if (typeof detPayload === 'string' && detPayload.trim().startsWith('[')) {
-        try {
-          const unwrapped = JSON.parse(detPayload);
-          if (Array.isArray(unwrapped)) detPayload = unwrapped;
-        } catch {
-          // keep raw
-        }
-      }
-      rawDetText = (Array.isArray(detPayload) ? detPayload.join('\n') : String(detPayload || '')).replace(/\\n/g, '\n');
-      perceptionEngine = activeToken ? 'maxiw/Qwen2-VL-Detection (ZeroGPU PRO)' : 'maxiw/Qwen2-VL-Detection';
-    } catch (zErr: any) {
-      if (allowRouterFallback) {
-        try {
-          if (onProgress) onProgress('2/3 ZeroGPU indisponível, tentando fallback HF Router...', 45);
-          await runRouterDet();
-        } catch (rErr: any) {
-          routerNote = String(rErr?.message || rErr);
-          throw formatFriendlyHfError(zErr, routerNote, Boolean(activeToken));
-        }
-      } else {
-        throw formatFriendlyHfError(zErr, '', Boolean(activeToken));
+  try {
+    if (onProgress) onProgress('2/3 Detectando paredes e obstáculos (Qwen2-VL-Detection)...', 42);
+    const detConn = await Client.connect('maxiw/Qwen2-VL-Detection');
+    const detRes: any = await detConn.predict('/run_example', [
+      imageBlob,
+      'Identify the window, plumbing water pipe/drain, electrical outlets, doors, and back wall in this empty room.',
+      'You are a helpfull assistant to detect objects in images. When asked to detect elements based on a description you return bounding boxes for all elements in the form of [xmin, ymin, xmax, ymax] whith the values beeing scaled to 1000 by 1000 pixels. When there are more than one result, answer with a list of bounding boxes in the form of [[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ...].',
+      'Qwen/Qwen2-VL-7B-Instruct',
+    ]);
+    let detPayload: any = detRes?.data?.[0];
+    if (typeof detPayload === 'string' && detPayload.trim().startsWith('[')) {
+      try {
+        const unwrapped = JSON.parse(detPayload);
+        if (Array.isArray(unwrapped)) detPayload = unwrapped;
+      } catch {
+        // keep raw
       }
     }
+    rawDetText = (Array.isArray(detPayload) ? detPayload.join('\n') : String(detPayload || '')).replace(/\\n/g, '\n');
+  } catch (zErr: any) {
+    throw formatFriendlyHfError(zErr);
   }
   const detParsed = extractJsonPayload(rawDetText);
   const detItems: Array<{ label: string; type: string; bbox: number[] }> = [];
@@ -530,37 +384,17 @@ async function analyzeViaDirectHuggingFace(
     `Return ONLY valid JSON matching:\n{\n  "detectedRoomType":"${req.roomType}",\n  "summaryPtBr":"Explicação objetiva em Português do Brasil",\n  "modules":[\n${exampleByRoom[req.roomType]}\n  ]\n}`;
 
   let rawPlanText: any = null;
-  if (forceRouter) {
-    try {
-      const rPlan = await callHFRouterVisionBrowser(req.imageDataUrl, planPrompt, activeToken);
-      rawPlanText = rPlan.text;
-      architectEngine = `HF Router (${rPlan.model})`;
-    } catch (pe: any) {
-      throw formatFriendlyHfError(pe, String(pe?.message || pe), true);
-    }
-  } else {
-    try {
-      planConn = await Client.connect('GanymedeNil/Qwen2-VL-7B', clientOpts);
-      const planRes: any = await planConn.predict('/run_example', [
-        imageBlob,
-        planPrompt,
-        'Qwen/Qwen2-VL-7B-Instruct',
-      ]);
-      rawPlanText = planRes?.data?.[0];
-      architectEngine = activeToken ? 'GanymedeNil/Qwen2-VL-7B (ZeroGPU PRO)' : 'GanymedeNil/Qwen2-VL-7B';
-    } catch (zErr: any) {
-      if (allowRouterFallback) {
-        try {
-          const rPlan = await callHFRouterVisionBrowser(req.imageDataUrl, planPrompt, activeToken);
-          rawPlanText = rPlan.text;
-          architectEngine = `HF Router (${rPlan.model})`;
-        } catch (rErr: any) {
-          throw formatFriendlyHfError(zErr, String(rErr?.message || rErr), Boolean(activeToken));
-        }
-      } else {
-        throw formatFriendlyHfError(zErr, '', Boolean(activeToken));
-      }
-    }
+  try {
+    const planConn = await Client.connect('GanymedeNil/Qwen2-VL-7B');
+    const planRes: any = await planConn.predict('/run_example', [
+      imageBlob,
+      planPrompt,
+      'Qwen/Qwen2-VL-7B-Instruct',
+    ]);
+    rawPlanText = planRes?.data?.[0];
+    architectEngine = 'GanymedeNil/Qwen2-VL-7B';
+  } catch (zErr: any) {
+    throw formatFriendlyHfError(zErr);
   }
 
   const planJson = extractJsonPayload(rawPlanText);
@@ -735,49 +569,56 @@ export async function analyzeEmptyRoomPhoto(
   onProgress?: (msg: string, pct: number) => void
 ): Promise<RoomAnalysisResult> {
   const endpoints = getBackendEndpoints();
-  const activeToken = (req.hfToken || getStoredHfToken() || '').trim();
-  const engineMode = req.engineMode || 'auto';
 
   for (const ep of endpoints) {
-    try {
-      if (onProgress) onProgress('Conectando ao backend local / Hugging Face AI...', 20);
-      const res = await fetch(ep, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: req.imageDataUrl,
-          roomType: req.roomType,
-          referenceType: req.referenceType,
-          referenceValueCm: req.referenceValueCm,
-          requirements: req.requirements,
-          hfToken: activeToken || undefined,
-          engineMode,
-        }),
-      });
-      if (res.ok) {
-        const data = (await res.json()) as RoomAnalysisResult;
-        if (data && data.success) {
-          data.roomGlbUrl = resolveModelUrl(data.roomGlbUrl, ep);
-          data.depthMapUrl = resolveModelUrl(data.depthMapUrl, ep);
-          if (onProgress) onProgress('Ambiente analisado e módulos 3D calibrados!', 100);
-          return data;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (onProgress) {
+          onProgress(
+            attempt > 0
+              ? 'Acordando motor de IA 3D na nuvem (aguarde alguns segundos)...'
+              : 'Conectando ao servidor Hugging Face PRO (MoGe-2 + Qwen2-VL)...',
+            attempt > 0 ? 25 : 20
+          );
         }
-      } else if (res.status === 502 || res.status === 400) {
-        const errBody = await res.json().catch(() => ({}));
-        if (errBody?.error) {
-          throw new Error(errBody.error);
+        const res = await fetch(ep, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image: req.imageDataUrl,
+            roomType: req.roomType,
+            referenceType: req.referenceType,
+            referenceValueCm: req.referenceValueCm,
+            requirements: req.requirements,
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as RoomAnalysisResult;
+          if (data && data.success) {
+            data.roomGlbUrl = resolveModelUrl(data.roomGlbUrl, ep);
+            data.depthMapUrl = resolveModelUrl(data.depthMapUrl, ep);
+            if (onProgress) onProgress('Ambiente analisado e módulos 3D calibrados!', 100);
+            return data;
+          }
+        } else if (res.status === 503 && attempt === 0) {
+          await new Promise((r) => setTimeout(r, 4500));
+          continue;
+        } else if (res.status === 502 || res.status === 400) {
+          const errBody = await res.json().catch(() => ({}));
+          if (errBody?.error) {
+            throw new Error(errBody.error);
+          }
         }
+        break;
+      } catch (e: any) {
+        if (e instanceof Error && !String(e.message).includes('fetch') && !String(e.message).includes('NetworkError') && !String(e.message).includes('Failed to')) {
+          throw e;
+        }
+        console.warn(`[RoomAnalyzer] Backend ${ep} unreachable, trying next...`, e);
+        break;
       }
-    } catch (e: any) {
-      if (e instanceof Error && !String(e.message).includes('fetch') && !String(e.message).includes('NetworkError') && !String(e.message).includes('Failed to')) {
-        throw e;
-      }
-      console.warn(`[RoomAnalyzer] Backend ${ep} unreachable, trying next...`, e);
     }
   }
 
-  return analyzeViaDirectHuggingFace(
-    { ...req, hfToken: activeToken, engineMode },
-    onProgress
-  );
+  return analyzeViaDirectHuggingFace(req, onProgress);
 }

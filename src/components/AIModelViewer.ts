@@ -3,7 +3,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { Real3DGeneratorService, Generated3DMetadata } from '../services/real3DGenerator';
-import { getStoredHfToken } from '../services/roomAnalyzerService';
+
+const HOSTED_3D_BACKEND = 'https://aeonicc-tensor-and-timber-ai.hf.space';
 
 export interface AIModelViewerOptions {
   autoLoadSample?: boolean;
@@ -129,12 +130,12 @@ export class AIModelViewer {
   public async generateCustom3DObject(prompt: string, attachedImage?: string | null): Promise<Generated3DMetadata> {
     try {
       console.log(`[AIModelViewer] Requesting neural 3D generation...`);
-      const hfToken = getStoredHfToken();
       const host = typeof window !== 'undefined' ? window.location.hostname : '';
       const endpoints = host === 'localhost' || host === '127.0.0.1'
-        ? ['/api/generate-3d', 'http://localhost:5175/api/generate-3d']
-        : [];
+        ? ['/api/generate-3d', 'http://localhost:5175/api/generate-3d', `${HOSTED_3D_BACKEND}/api/generate-3d`]
+        : [`${HOSTED_3D_BACKEND}/api/generate-3d`];
       let res: Response | null = null;
+      let usedEp = '';
 
       for (const ep of endpoints) {
         try {
@@ -144,10 +145,12 @@ export class AIModelViewer {
             body: JSON.stringify({
               prompt,
               image: attachedImage || null,
-              hfToken: hfToken || undefined,
             })
           });
-          if (res.ok) break;
+          if (res.ok) {
+            usedEp = ep;
+            break;
+          }
         } catch (e) {
           // Try next
         }
@@ -156,18 +159,26 @@ export class AIModelViewer {
       if (res && res.ok) {
         const data = await res.json();
         if (data && data.glbUrl) {
-          console.log(`[AIModelViewer] Real neural GLB received: ${data.glbUrl} (${data.fileSize} bytes)`);
-          return await this.loadGLBUrl(data.glbUrl, prompt);
+          let finalUrl: string = data.glbUrl;
+          if (!finalUrl.startsWith('http') && usedEp.startsWith('http')) {
+            try {
+              finalUrl = `${new URL(usedEp).origin}${finalUrl}`;
+            } catch {
+              // keep relative
+            }
+          }
+          console.log(`[AIModelViewer] Real neural GLB received: ${finalUrl} (${data.fileSize} bytes)`);
+          return await this.loadGLBUrl(finalUrl, prompt);
         }
       }
 
       if (attachedImage) {
         const imgBlob = await fetch(attachedImage).then((r) => r.blob());
-        const hfRes = await this.generatorService.generateFromHuggingFaceSpace(imgBlob, hfToken || undefined);
+        const hfRes = await this.generatorService.generateFromHuggingFaceSpace(imgBlob);
         const blobUrl = URL.createObjectURL(hfRes.glbBlob);
         return await this.loadGLBUrl(blobUrl, prompt);
       }
-      throw new Error('Necessário iniciar server_3d.py local ou anexar imagem com HF Token para gerar malha TRELLIS online.');
+      throw new Error('Servidor 3D ocupado no momento.');
     } catch (err) {
       console.warn(`[AIModelViewer] Neural generation fallback to verified baseline GLB:`, err);
       return await this.loadGLBUrl('/models/sample_ai_trellis.glb', prompt);

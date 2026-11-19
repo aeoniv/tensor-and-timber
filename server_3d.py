@@ -135,22 +135,18 @@ def call_hf_router_vision(img_path: Path, prompt_text: str, token: str | None = 
 
 def format_hf_error_ptbr(err: Exception, router_note: str = '') -> str:
     raw = str(err)
+    print(f'[ROOM-AI DIAGNOSTIC] raw={raw} | router={router_note}', flush=True)
     low = (raw + ' ' + router_note).lower()
-    is_quota = any(k in low for k in ['quota', 'zerogpu', 'exceeded', 'gpu', 'rate limit', '429'])
-    is_perm = 'inference providers' in low or '403' in low or '401' in low or 'unauthorized' in low
-    if is_quota or is_perm:
-        details = []
-        if is_quota:
-            details.append(
-                'Cota ZeroGPU atingida ou token sem autenticação ZeroGPU PRO/créditos extras. '
-                'No Hugging Face, contas PRO têm 40 min/dia no ZeroGPU e consomem créditos pré-pagos após a cota se os créditos gerais estiverem ativos em huggingface.co/settings/billing.'
-            )
-        if is_perm or '403' in router_note.lower():
-            details.append(
-                'Requisitos exatos do Token em huggingface.co/settings/tokens: para ZeroGPU, crie na aba "Read" (ou Fine-grained com leitura pública); para Inference Providers, use Fine-grained marcando "Inference → Make calls to Inference Providers".'
-            )
-        return ' '.join(details)
-    return f'Falha no pipeline Hugging Face ao analisar a foto: {raw}'
+    is_busy = any(k in low for k in ['quota', 'zerogpu', 'exceeded', 'gpu', 'rate limit', '429', 'timeout', 'queue', 'busy'])
+    if is_busy:
+        return (
+            'Os motores de IA 3D estão com alta demanda neste instante. '
+            'Tente novamente em alguns segundos ou utilize o Modo Manual abaixo.'
+        )
+    return (
+        'Não foi possível processar a análise automática desta imagem no momento. '
+        'Tente novamente em instantes ou informe as medidas pelo Modo Manual.'
+    )
 
 
 def decode_base64_image(image_data: str, out_path: Path, max_dim: int = 1024) -> tuple[int, int]:
@@ -730,7 +726,7 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
         self._set_headers(200)
 
     def do_GET(self):
-        if self.path in ['/api/health', '/api/status']:
+        if self.path in ['/', '/api/health', '/api/status']:
             self._set_headers(200)
             status_data = {
                 'status': 'online',
@@ -984,8 +980,10 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 self._set_headers(200)
                 self.wfile.write(json.dumps(response_data).encode('utf-8'))
             else:
-                self._set_headers(500)
-                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                self._set_headers(502)
+                self.wfile.write(json.dumps({
+                    'error': 'Serviço de geração 3D temporariamente ocupado. Tente novamente em instantes.',
+                }, ensure_ascii=False).encode('utf-8'))
         finally:
             if temp_img_path.exists():
                 temp_img_path.unlink()
@@ -1008,5 +1006,5 @@ def run_server(port=5175):
 
 
 if __name__ == '__main__':
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5175
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get('PORT', '5175'))
     run_server(port)
