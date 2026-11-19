@@ -7,7 +7,7 @@ export function renderHero(): string {
           <!-- Text Column -->
           <div class="hero-text-col">
             <div class="hero-badge">
-              Marcenaria Sob Medida &bull; João Pessoa, PB &bull; Brasil 🇧🇷
+              Marcenaria Sob Medida &bull; João Pessoa - PB
             </div>
 
             <h1 class="hero-title">
@@ -15,12 +15,12 @@ export function renderHero(): string {
             </h1>
 
             <p class="hero-subtitle">
-              Projetos residenciais e corporativos fabricados em João Pessoa: cozinhas, closets, painéis, mesas e peças em tensegridade. Envie uma foto do cômodo ou personalize cada acabamento ao vivo antes da produção.
+              Projetos residenciais e corporativos fabricados em João Pessoa: cozinhas, closets, painéis, mesas e peças em tensegridade. Tudo em uma única suíte 3D antes da produção.
             </p>
 
-            <div class="hero-ctas">
-              <a href="#room-planner-section" class="btn btn-primary btn-lg">
-                <span>📐 Simular Ambiente por Foto</span>
+            <div class="hero-ctas" style="margin-bottom: 18px;">
+              <a href="#studio-3d-hub" class="btn btn-primary btn-lg" data-open-hub="room">
+                <span>📐 Abrir Suíte 3D</span>
               </a>
 
               <a
@@ -36,6 +36,13 @@ export function renderHero(): string {
               </a>
             </div>
 
+            <!-- Direct shortcuts into grouped 3D features right below -->
+            <div class="hero-quick-3d">
+              <span class="hero-quick-label">Ir direto para:</span>
+              <a href="#studio-3d-hub" class="prompt-chip" data-open-hub="room">Ambiente por Foto &rarr;</a>
+              <a href="#studio-3d-hub" class="prompt-chip" data-open-hub="atelier">Criador de Móvel 3D &rarr;</a>
+            </div>
+
             <!-- Trust Signals -->
             <div class="hero-trust-row">
               <div class="trust-item">
@@ -47,8 +54,8 @@ export function renderHero(): string {
                 <span class="trust-desc">Duratex, Arauco, Cava 45°, Provençal e Reflecta</span>
               </div>
               <div class="trust-item">
-                <span class="trust-title">3D &amp; SketchUp</span>
-                <span class="nav-trust-desc trust-desc">Visualização ao vivo + exportação .DAE / .DXF</span>
+                <span class="trust-title">SketchUp &amp; CNC</span>
+                <span class="trust-desc">Visualização ao vivo + exportação .DAE / .DXF</span>
               </div>
             </div>
           </div>

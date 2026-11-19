@@ -43,7 +43,7 @@ export class RoomSceneViewer {
     this.container = el;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf7f6f2);
+    this.scene.background = new THREE.Color(0xf5f2eb);
 
     const w = this.container.clientWidth || 640;
     const h = this.container.clientHeight || 420;

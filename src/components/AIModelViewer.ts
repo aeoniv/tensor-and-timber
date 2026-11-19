@@ -58,11 +58,13 @@ export class AIModelViewer {
     this.generatorService = new Real3DGeneratorService();
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 100);
+    const initW = this.container.clientWidth || 560;
+    const initH = this.container.clientHeight || 430;
+    this.camera = new THREE.PerspectiveCamera(45, initW / initH, 0.1, 100);
     this.camera.position.set(2.4, 1.6, 2.8);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setSize(initW, initH);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -513,7 +515,7 @@ export class AIModelViewer {
   }
 
   private setupResizeListener(): void {
-    window.addEventListener('resize', () => {
+    const applySize = () => {
       if (!this.container) return;
       const width = this.container.clientWidth;
       const height = this.container.clientHeight;
@@ -522,7 +524,11 @@ export class AIModelViewer {
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
-    });
+    };
+    window.addEventListener('resize', applySize);
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(applySize).observe(this.container);
+    }
   }
 
   private render = (): void => {

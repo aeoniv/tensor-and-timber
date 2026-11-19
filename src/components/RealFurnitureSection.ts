@@ -152,7 +152,7 @@ export function renderRealFurnitureSection(): string {
   `).join('');
 
   return `
-    <section class="section" id="real-furniture-section">
+    <section class="section" id="real-furniture-section" style="background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);">
       <div class="container">
         <div class="section-header text-center">
           <span class="section-tag">

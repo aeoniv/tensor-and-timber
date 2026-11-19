@@ -13,15 +13,14 @@ export function renderNavbar(): string {
           </div>
           <div class="brand-text">
             <span class="brand-name">83 Ambientes Planejados</span>
-            <span class="brand-sub">Tensor &amp; Timber &bull; João Pessoa - PB</span>
+            <span class="brand-sub">Tensor &amp; Timber &bull; Marcenaria &amp; 3D</span>
           </div>
         </a>
 
         <!-- Desktop Navigation Links -->
         <nav class="nav-links" id="main-nav" aria-label="Navegação principal">
-          <a href="#room-planner-section" class="nav-link">Projeto por Foto</a>
-          <a href="#real-furniture-section" class="nav-link">Modelos</a>
-          <a href="#atelier-section" class="nav-link">Estúdio 3D</a>
+          <a href="#studio-3d-hub" class="nav-link" data-open-hub="room">Suíte 3D</a>
+          <a href="#real-furniture-section" class="nav-link">Portfólio</a>
           <a href="#philosophy-section" class="nav-link">Como Trabalhamos</a>
           <a href="#consultation-section" class="nav-link">Contato</a>
         </nav>
@@ -51,9 +50,9 @@ export function renderNavbar(): string {
       <!-- Mobile Quick Navigation Bar -->
       <nav class="nav-mobile-strip" aria-label="Atalhos mobile">
         <div class="nav-mobile-strip-inner">
-          <a href="#room-planner-section" class="nav-mobile-pill">📐 Projeto por Foto</a>
-          <a href="#real-furniture-section" class="nav-mobile-pill">🪑 Modelos</a>
-          <a href="#atelier-section" class="nav-mobile-pill">✨ Estúdio 3D</a>
+          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="room">📐 Ambientes 3D</a>
+          <a href="#studio-3d-hub" class="nav-mobile-pill" data-open-hub="atelier">✨ Móvel 3D</a>
+          <a href="#real-furniture-section" class="nav-mobile-pill">🪑 Portfólio</a>
           <a href="#philosophy-section" class="nav-mobile-pill">⚒ Processo</a>
           <a href="#consultation-section" class="nav-mobile-pill">📞 Contato</a>
         </div>

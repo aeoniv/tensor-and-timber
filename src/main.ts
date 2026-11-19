@@ -2,6 +2,7 @@ import './styles/main.css';
 import confetti from 'canvas-confetti';
 import { renderNavbar } from './components/Navbar';
 import { renderHero } from './components/Hero';
+import { renderStudio3DHub } from './components/Studio3DHub';
 import { renderRealFurnitureSection } from './components/RealFurnitureSection';
 import { renderRoomPlannerStudio } from './components/RoomPlannerStudio';
 import { RoomPlannerController } from './components/RoomPlannerController';
@@ -47,10 +48,8 @@ class AtelierApp {
       ${renderNavbar()}
       <main>
         ${renderHero()}
-        ${renderRoomPlannerStudio()}
+        ${renderStudio3DHub(renderRoomPlannerStudio(), renderAtelierStudio())}
         ${renderRealFurnitureSection()}
-        ${renderAtelierStudio()}
-        
         ${renderPhilosophySection()}
         ${renderConsultationSection()}
       </main>
@@ -90,7 +89,45 @@ class AtelierApp {
     }
   }
 
+  private switchStudioTab(tab: 'room' | 'atelier'): void {
+    const isRoom = tab === 'room';
+    document.getElementById('hub-tab-room')?.classList.toggle('active', isRoom);
+    document.getElementById('hub-tab-room')?.setAttribute('aria-selected', String(isRoom));
+    document.getElementById('hub-tab-atelier')?.classList.toggle('active', !isRoom);
+    document.getElementById('hub-tab-atelier')?.setAttribute('aria-selected', String(!isRoom));
+
+    document.getElementById('hub-panel-room')?.classList.toggle('is-active', isRoom);
+    document.getElementById('hub-panel-atelier')?.classList.toggle('is-active', !isRoom);
+
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+  }
+
   private bindEvents(): void {
+    // Unified 3D Hub Tabs + Quick Anchors
+    document.querySelectorAll<HTMLElement>('[data-hub-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.hubTab === 'atelier' ? 'atelier' : 'room';
+        this.switchStudioTab(tab);
+      });
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-open-hub]').forEach((link) => {
+      link.addEventListener('click', () => {
+        const tab = link.dataset.openHub === 'atelier' ? 'atelier' : 'room';
+        this.switchStudioTab(tab);
+      });
+    });
+
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#atelier-section"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.switchStudioTab('atelier');
+        document.getElementById('studio-3d-hub')?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
     // Hero Controls
     document.getElementById('hero-btn-autorotate')?.addEventListener('click', (e) => {
       if (this.heroAIViewer) {
@@ -164,8 +201,9 @@ class AtelierApp {
         const dealPrice = document.getElementById('deal-price-bracket');
         if (dealPrice) dealPrice.textContent = price;
 
-        this.showToast(`Carregando ${pieceName} no Ateliê 3D...`);
-        document.getElementById('atelier-section')?.scrollIntoView({ behavior: 'smooth' });
+        this.showToast(`Carregando ${pieceName} no Estúdio 3D...`);
+        this.switchStudioTab('atelier');
+        document.getElementById('studio-3d-hub')?.scrollIntoView({ behavior: 'smooth' });
 
         await this.regenerateAtelier3D();
       });
@@ -193,7 +231,7 @@ class AtelierApp {
 
   private initAtelierConfigurator(): void {
     // 1. Archetype Selectors
-    const archTabs = document.querySelectorAll('.archetype-tab');
+    const archTabs = document.querySelectorAll('#archetype-selector .archetype-tab');
     archTabs.forEach(tab => {
       tab.addEventListener('click', async (e) => {
         archTabs.forEach(t => t.classList.remove('active'));
@@ -223,7 +261,7 @@ class AtelierApp {
     });
 
     // 2. Wood Species Selectors
-    const woodBtns = document.querySelectorAll('.wood-card-btn, .wood-option-btn');
+    const woodBtns = document.querySelectorAll('#wood-species-selector .wood-card-btn, #wood-species-selector .wood-option-btn');
     woodBtns.forEach(btn => {
       btn.addEventListener('click', async (e) => {
         woodBtns.forEach(b => b.classList.remove('active'));
@@ -237,7 +275,7 @@ class AtelierApp {
     });
 
     // 3. Tension Selectors
-    const tensionPills = document.querySelectorAll('.tension-pill');
+    const tensionPills = document.querySelectorAll('#atelier-section .tension-pill');
     tensionPills.forEach(pill => {
       pill.addEventListener('click', async (e) => {
         tensionPills.forEach(p => p.classList.remove('active'));
@@ -252,7 +290,7 @@ class AtelierApp {
 
     // 4. Prompt Inspiration Chips
     const promptInput = document.getElementById('atelier-custom-prompt-input') as HTMLTextAreaElement;
-    document.querySelectorAll('.prompt-chip').forEach(chip => {
+    document.querySelectorAll('#atelier-section .prompt-chip').forEach(chip => {
       chip.addEventListener('click', (e) => {
         const phrase = (e.currentTarget as HTMLElement).dataset.phrase || '';
         if (promptInput) {

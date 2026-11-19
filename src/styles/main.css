@@ -4,47 +4,47 @@
    ========================================================================== */
 
 :root {
-  /* Warm Architectural Palette with Brazilian Flag Colors */
-  --bg-base: #faf9f6;
+  /* Contemporary Brazilian Joinery & Architectural Limestone Palette */
+  --bg-base: #f6f4ef;
   --bg-surface: #ffffff;
-  --bg-subtle: #f2f6f3;
-  --bg-accent-soft: #edf5ef;
-  --bg-dark: #0f1712;
+  --bg-subtle: #edeae2;
+  --bg-accent-soft: #e7efe9;
+  --bg-dark: #181714;
 
-  /* Cores Oficiais da Bandeira do Brasil (Harmonizadas) */
-  --brasil-verde: #00843D;
-  --brasil-verde-hover: #006830;
-  --brasil-verde-soft: rgba(0, 132, 61, 0.08);
+  /* Core Joinery Accents: Atlantic Forest Pine & Warm Freijó Brass */
+  --brasil-verde: #1d4d38;
+  --brasil-verde-hover: #143728;
+  --brasil-verde-soft: rgba(29, 77, 56, 0.09);
 
-  --brasil-amarelo: #f5a623;
-  --brasil-amarelo-hover: #d98f18;
-  --brasil-amarelo-soft: rgba(245, 166, 35, 0.12);
+  --brasil-amarelo: #b67b3e;
+  --brasil-amarelo-hover: #98632d;
+  --brasil-amarelo-soft: rgba(182, 123, 62, 0.12);
 
-  --brasil-azul: #002776;
-  --brasil-azul-hover: #001f5c;
-  --brasil-azul-soft: rgba(0, 39, 118, 0.08);
+  --brasil-azul: #23332c;
+  --brasil-azul-hover: #17231e;
+  --brasil-azul-soft: rgba(35, 51, 44, 0.08);
 
   --brasil-branco: #ffffff;
 
   /* Text & Contrast */
-  --text-primary: #141c16;
-  --text-secondary: #475249;
-  --text-muted: #6f7b72;
-  --text-inverse: #f5f5f4;
+  --text-primary: #1a1916;
+  --text-secondary: #524f48;
+  --text-muted: #7c776e;
+  --text-inverse: #f5f3ed;
 
-  /* Borders & Lines */
-  --border-subtle: #e2ebe4;
-  --border-medium: #c8d7cb;
+  /* Borders & Hairlines */
+  --border-subtle: #e5e0d6;
+  --border-medium: #ccc4b6;
   --border-focus: var(--brasil-verde);
 
-  /* Brazilian Craft Accents */
+  /* Editorial Craft Accents */
   --accent-wood: var(--brasil-verde);
   --accent-wood-hover: var(--brasil-verde-hover);
   --accent-brass: var(--brasil-amarelo);
 
-  /* High-Converting WhatsApp */
-  --whatsapp-green: #25d366;
-  --whatsapp-hover: #20bd5a;
+  /* Harmonized WhatsApp CTA */
+  --whatsapp-green: #1b874b;
+  --whatsapp-hover: #146d3c;
 
   /* Typography */
   --font-serif: 'Playfair Display', Georgia, serif;
@@ -186,17 +186,17 @@ button, input, select, textarea {
 }
 
 .btn-primary {
-  background-color: var(--brasil-azul);
+  background-color: var(--brasil-verde);
   color: #ffffff;
-  border: 1.5px solid var(--brasil-amarelo);
-  box-shadow: 0 3px 10px rgba(0, 39, 118, 0.18);
+  border: 1px solid var(--brasil-verde);
+  box-shadow: 0 3px 12px rgba(29, 77, 56, 0.18);
 }
 
 .btn-primary:hover {
-  background-color: var(--brasil-azul-hover);
-  border-color: #ffdf00;
+  background-color: var(--brasil-verde-hover);
+  border-color: var(--brasil-verde-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 39, 118, 0.26);
+  box-shadow: 0 6px 18px rgba(29, 77, 56, 0.25);
 }
 
 .btn-outline {
@@ -244,11 +244,11 @@ button, input, select, textarea {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(250, 249, 246, 0.94);
+  background: rgba(246, 244, 239, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-subtle);
-  box-shadow: 0 2px 12px rgba(15, 23, 18, 0.04);
+  box-shadow: 0 2px 12px rgba(26, 25, 22, 0.04);
   display: flex;
   flex-direction: column;
 }
@@ -257,8 +257,8 @@ button, input, select, textarea {
   content: '';
   display: block;
   width: 100%;
-  height: 3.5px;
-  background: linear-gradient(90deg, #00843D 0%, #00843D 42%, #f5a623 42%, #f5a623 70%, #002776 70%, #002776 100%);
+  height: 3px;
+  background: linear-gradient(90deg, var(--brasil-verde) 0%, var(--brasil-amarelo) 55%, var(--text-primary) 100%);
 }
 
 .nav-inner {
@@ -318,12 +318,12 @@ section[id] {
   height: 38px;
   border-radius: var(--radius-sm);
   background: var(--brasil-verde);
-  border: 1.5px solid var(--brasil-amarelo);
+  border: 1px solid var(--brasil-amarelo);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 132, 61, 0.22);
+  box-shadow: 0 2px 8px rgba(29, 77, 56, 0.22);
 }
 
 .brand-text {
@@ -1897,34 +1897,151 @@ section[id] {
 
 
 
-/* Brazilian Flag Enhancements */
+/* Refinements: Forest Pine, Warm Freijó Brass & Unified 3D Hub */
 .section-tag, .badge {
   color: var(--brasil-verde);
   background: var(--brasil-verde-soft);
-  border: 1px solid rgba(245, 166, 35, 0.35);
+  border: 1px solid rgba(29, 77, 56, 0.22);
 }
 
 .hero-badge {
-  background: var(--brasil-verde-soft);
-  border: 1px solid rgba(245, 166, 35, 0.4);
-  color: var(--brasil-verde);
+  background: var(--brasil-amarelo-soft);
+  border: 1px solid rgba(182, 123, 62, 0.32);
+  color: var(--brasil-amarelo-hover);
 }
 
 .accent-text {
   color: var(--brasil-verde) !important;
 }
 
-#btn-generate-custom-3d {
-  background: linear-gradient(135deg, #00843D 0%, #006830 100%) !important;
-  color: #ffffff !important;
-  border: 1.5px solid #f5a623 !important;
-  box-shadow: 0 4px 16px rgba(0, 132, 61, 0.28) !important;
+.hero-quick-3d {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
 }
 
-#btn-generate-custom-3d:hover {
-  background: linear-gradient(135deg, #006830 0%, #004d24 100%) !important;
-  border-color: #ffdf00 !important;
-  box-shadow: 0 6px 20px rgba(0, 132, 61, 0.38) !important;
+.hero-quick-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.studio-hub-section {
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.studio-hub-header {
+  margin-bottom: 32px;
+}
+
+.studio-hub-switcher {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-width: 680px;
+  margin: 26px auto 0;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.studio-hub-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+}
+
+.studio-hub-tab:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-primary);
+}
+
+.studio-hub-tab.active {
+  background: var(--bg-surface);
+  border-color: var(--brasil-verde);
+  color: var(--text-primary);
+  box-shadow: 0 4px 14px rgba(29, 77, 56, 0.12);
+}
+
+.studio-tab-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.studio-hub-tab.active .studio-tab-title {
+  color: var(--brasil-verde);
+}
+
+.studio-tab-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.studio-hub-panel {
+  display: none;
+}
+
+.studio-hub-panel.is-active {
+  display: block;
+}
+
+.hub-inner-workspace {
+  scroll-margin-top: 120px;
+}
+
+.hub-workspace-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.hub-workspace-caption strong {
+  color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .studio-hub-switcher {
+    grid-template-columns: 1fr;
+  }
+}
+
+#btn-generate-custom-3d,
+#btn-analyze-empty-room {
+  background: linear-gradient(135deg, var(--brasil-verde) 0%, var(--brasil-verde-hover) 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--brasil-verde-hover) !important;
+  box-shadow: 0 4px 16px rgba(29, 77, 56, 0.22) !important;
+}
+
+#btn-generate-custom-3d:hover:not(:disabled),
+#btn-analyze-empty-room:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(29, 77, 56, 0.30) !important;
 }
 
 .site-footer {
@@ -1935,24 +2052,11 @@ section[id] {
   content: '';
   display: block;
   width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #00843D 0%, #00843D 42%, #f5a623 42%, #f5a623 70%, #002776 70%, #002776 100%);
+  height: 3px;
+  background: linear-gradient(90deg, var(--brasil-verde) 0%, var(--brasil-amarelo) 55%, #44403c 100%);
   margin-bottom: 48px;
 }
 
-
-/* Room Planner Studio Additions */
-#btn-analyze-empty-room {
-  background: linear-gradient(135deg, var(--brasil-azul) 0%, var(--brasil-azul-hover) 100%) !important;
-  color: #ffffff !important;
-  border: 1.5px solid var(--brasil-amarelo) !important;
-  box-shadow: 0 4px 16px rgba(0, 39, 118, 0.25) !important;
-}
-#btn-analyze-empty-room:hover:not(:disabled) {
-  border-color: #ffdf00 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 39, 118, 0.34) !important;
-}
 #room-finish-selector {
   max-height: 220px;
   overflow-y: auto;
@@ -1961,7 +2065,7 @@ section[id] {
 
 .room-type-tab.active {
   background: var(--brasil-verde) !important;
-  border-color: var(--brasil-amarelo) !important;
+  border-color: var(--brasil-verde) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0, 132, 61, 0.22);
+  box-shadow: 0 2px 8px rgba(29, 77, 56, 0.22);
 }

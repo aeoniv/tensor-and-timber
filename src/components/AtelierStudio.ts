@@ -1,17 +1,12 @@
 export function renderAtelierStudio(): string {
   return `
-    <section class="section section-atelier" id="atelier-section">
-      <div class="container">
-        
-        <div class="section-header text-center">
-          <span class="badge">Estúdio 3D Interativo &bull; Móveis Autorais &amp; Tensegridade</span>
-          <h2 class="section-title">Geração 3D por <span class="accent-text">Texto ou Croqui</span></h2>
-          <p class="section-subtitle">
-            Descreva uma peça exclusiva ou envie um croqui/foto de referência. A IA reconstrói a geometria em 3D real (.GLB) para visualização e orçamento sob medida.
-          </p>
-        </div>
+    <div id="atelier-section" class="hub-inner-workspace">
+      <div class="hub-workspace-caption">
+        <span><strong>Criador de Móvel 3D por Texto ou Croqui</strong> &bull; Reconstrua peças exclusivas com cabos tensores e madeira.</span>
+        <span class="badge">Malha 3D Real (.GLB)</span>
+      </div>
 
-        <div class="atelier-grid">
+      <div class="atelier-grid">
           
           <!-- Configurator Column -->
           <div class="config-box">
@@ -197,7 +192,6 @@ export function renderAtelierStudio(): string {
 
         </div>
 
-      </div>
-    </section>
+    </div>
   `;
 }

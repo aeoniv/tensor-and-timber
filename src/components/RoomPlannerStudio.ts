@@ -50,20 +50,13 @@ export function renderRoomPlannerStudio(): string {
   ).join('');
 
   return `
-    <section class="section section-atelier" id="room-planner-section" style="border-bottom: 1px solid var(--border-subtle);">
-      <div class="container">
+    <div id="room-planner-section" class="hub-inner-workspace">
+      <div class="hub-workspace-caption">
+        <span><strong>Projeto por Foto do Cômodo</strong> &bull; A IA identifica vãos e pontos hidráulicos e propõe os módulos em 3D.</span>
+        <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões MDF</span>
+      </div>
 
-        <div class="section-header text-center">
-          <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões MDF</span>
-          <h2 class="section-title">
-            Projeto 3D e Pré-Orçamento por <span class="accent-text">Foto do Cômodo</span>
-          </h2>
-          <p class="section-subtitle">
-            Envie a foto de qualquer ambiente vazio ou inicie manualmente. A IA detecta portas, janelas e pontos hidráulicos, propõe a modulação em 3D e libera o corte CNC em milímetros + SketchUp (.DAE).
-          </p>
-        </div>
-
-        <div class="atelier-grid">
+      <div class="atelier-grid">
 
           <!-- Coluna Esquerda: Fluxo Rápido -> Ação IA -> Personalização Ao Vivo -->
           <div class="config-box">
@@ -346,7 +339,6 @@ export function renderRoomPlannerStudio(): string {
 
         </div>
 
-      </div>
-    </section>
+    </div>
   `;
 }
