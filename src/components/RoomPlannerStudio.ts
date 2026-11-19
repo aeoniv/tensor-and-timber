@@ -253,9 +253,11 @@ export function renderRoomPlannerStudio(): string {
                   <button type="button" class="ctrl-btn" id="room-btn-moge" style="display: none;">Malha MoGe-2</button>
                 </div>
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                  <button type="button" class="ctrl-btn" id="room-btn-download-glb">Baixar .GLB</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-obj">SketchUp (.OBJ)</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-csv">Lista Corte (.CSV)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp (.DAE)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Malha .OBJ em escala métrica">OBJ</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC (.DXF)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte + BOM (.CSV)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-download-glb" title="Modelo 3D GLB para Web/Blender">.GLB</button>
                 </div>
               </div>
             </div>
@@ -293,7 +295,7 @@ export function renderRoomPlannerStudio(): string {
               <div class="deal-perks" id="room-bom-perks">
                 <div class="deal-perk-item">✓ Cantos em L, tamponamento até o teto e muxarabi</div>
                 <div class="deal-perk-item">✓ Cava 45°, Provençal, Vidro Reflecta e 18/25mm</div>
-                <div class="deal-perk-item">✓ Exportação 3D SketchUp (.OBJ) + Lista de Corte (.CSV)</div>
+                <div class="deal-perk-item">✓ SketchUp nativo (.DAE / .OBJ) + Corte CNC (.DXF / .CSV em mm)</div>
                 <div class="deal-perk-item">✓ Adicione móveis e ajuste medidas (-/+ 10 cm) na hora</div>
               </div>
 

@@ -22,8 +22,11 @@ import { RoomSceneViewer } from './RoomSceneViewer';
 import {
   CounterTone,
   buildRoomProposalSummaryMessage,
-  exportCutlistToCSVDownload,
 } from '../services/parametricCabinetBuilder';
+import {
+  exportManufacturingCSVDownload,
+  exportManufacturingDXFDownload,
+} from '../services/manufacturingExporter';
 
 const ROOM_CHIPS: Record<RoomType, Array<{ label: string; phrase: string }>> = {
   cozinha: [
@@ -350,6 +353,23 @@ export class RoomPlannerController {
       (e.currentTarget as HTMLElement).classList.toggle('active', vis);
     });
 
+    const buildExportQuote = () => {
+      if (!this.currentAnalysis) {
+        this.onToast('Gere ou monte uma proposta 3D primeiro.');
+        return null;
+      }
+      return {
+        analysis: this.currentAnalysis,
+        quote: calculateCabinetryQuote(
+          this.currentAnalysis.modules,
+          this.frontFinishId,
+          this.hardwareId,
+          this.getEffectiveCarcassId(),
+          this.getStyleOptions()
+        ),
+      };
+    };
+
     document.getElementById('room-btn-download-glb')?.addEventListener('click', async () => {
       if (!this.viewer || !this.currentAnalysis) {
         this.onToast('Gere ou monte uma proposta 3D primeiro.');
@@ -357,6 +377,16 @@ export class RoomPlannerController {
       }
       const ok = await this.viewer.exportProposalGLB();
       if (ok) this.onToast('Download .GLB concluído!');
+    });
+
+    document.getElementById('room-btn-export-dae')?.addEventListener('click', () => {
+      if (!this.viewer || !this.currentAnalysis) {
+        this.onToast('Gere ou monte uma proposta 3D primeiro.');
+        return;
+      }
+      if (this.viewer.exportProposalDAE()) {
+        this.onToast('Arquivo Collada (.DAE) baixado — abra direto no SketchUp via Arquivo > Importar!');
+      }
     });
 
     document.getElementById('room-btn-export-obj')?.addEventListener('click', () => {
@@ -369,20 +399,18 @@ export class RoomPlannerController {
       }
     });
 
+    document.getElementById('room-btn-export-dxf')?.addEventListener('click', () => {
+      const ctx = buildExportQuote();
+      if (!ctx) return;
+      exportManufacturingDXFDownload(ctx.analysis, ctx.quote);
+      this.onToast('Plano de Chapas CNC (.DXF em mm) baixado!');
+    });
+
     document.getElementById('room-btn-export-csv')?.addEventListener('click', () => {
-      if (!this.currentAnalysis) {
-        this.onToast('Gere ou monte uma proposta 3D primeiro.');
-        return;
-      }
-      const quote = calculateCabinetryQuote(
-        this.currentAnalysis.modules,
-        this.frontFinishId,
-        this.hardwareId,
-        this.getEffectiveCarcassId(),
-        this.getStyleOptions()
-      );
-      exportCutlistToCSVDownload(this.currentAnalysis, quote);
-      this.onToast('Plano de Corte técnico (.CSV) baixado!');
+      const ctx = buildExportQuote();
+      if (!ctx) return;
+      exportManufacturingCSVDownload(ctx.analysis, ctx.quote);
+      this.onToast('Plano de Corte mm + Fita de Borda + BOM (.CSV) baixado!');
     });
   }
 

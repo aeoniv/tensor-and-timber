@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
+import { exportManufacturingCSVDownload } from './manufacturingExporter';
 import {
   CabinetStyleOptions,
   CabinetryQuoteResult,
@@ -42,18 +43,24 @@ function createMdfMaterial(finish: MdfFinishOption): THREE.MeshStandardMaterial 
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
     tex.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.MeshStandardMaterial({
+    const woodMat = new THREE.MeshStandardMaterial({
+      name: finish.label,
       map: tex,
       roughness: 0.56,
       metalness: 0.04,
     });
+    woodMat.userData.exportColorHex = finish.hex;
+    return woodMat;
   }
 
-  return new THREE.MeshStandardMaterial({
+  const solidMat = new THREE.MeshStandardMaterial({
+    name: finish.label,
     color,
     roughness: finish.gloss ? 0.14 : 0.54,
     metalness: finish.gloss ? 0.12 : 0.04,
   });
+  solidMat.userData.exportColorHex = finish.hex;
+  return solidMat;
 }
 
 function addBox(
@@ -205,29 +212,31 @@ export function buildCabinetModulesGroup(
     ? createMdfMaterial(carcassFinish)
     : frontMat;
 
-  const interiorMat = new THREE.MeshStandardMaterial({ color: 0xf4f3ef, roughness: 0.65 });
-  const plinthMat = new THREE.MeshStandardMaterial({ color: 0xd6d3cd, roughness: 0.7 });
+  const interiorMat = new THREE.MeshStandardMaterial({ name: 'Fundo_6mm', color: 0xf4f3ef, roughness: 0.65 });
+  const plinthMat = new THREE.MeshStandardMaterial({ name: 'Rodape_Alvenaria', color: 0xd6d3cd, roughness: 0.7 });
   const alumMat = new THREE.MeshStandardMaterial({
+    name: 'Perfil_Aluminio',
     color: hardwareId === 'padrao' ? 0xb8bec6 : 0x262626,
     roughness: 0.28,
     metalness: 0.82,
   });
-  const cavaGrooveMat = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.55, metalness: 0.1 });
+  const cavaGrooveMat = new THREE.MeshStandardMaterial({ name: 'Friso_Cava_45', color: 0x1c1917, roughness: 0.55, metalness: 0.1 });
   const stoneColor = counterTone === 'escuro' ? 0x26282b : counterTone === 'madeira' ? 0x9f6c3f : 0xe4e0d8;
   const stoneMat = new THREE.MeshStandardMaterial({
+    name: 'Tampo_Pedra',
     color: stoneColor,
     roughness: counterTone === 'madeira' ? 0.5 : 0.22,
     metalness: 0.06,
   });
-  const ceramicMat = new THREE.MeshStandardMaterial({ color: 0xfefefe, roughness: 0.15, metalness: 0.05 });
-  const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.16, metalness: 0.45 });
-  const reflectaGlassMat = new THREE.MeshStandardMaterial({ color: 0x3b2f2a, roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.44 });
+  const ceramicMat = new THREE.MeshStandardMaterial({ name: 'Louca_Ceramica', color: 0xfefefe, roughness: 0.15, metalness: 0.05 });
+  const darkGlassMat = new THREE.MeshStandardMaterial({ name: 'Vidro_Fume', color: 0x18181b, roughness: 0.16, metalness: 0.45 });
+  const reflectaGlassMat = new THREE.MeshStandardMaterial({ name: 'Vidro_Reflecta', color: 0x3b2f2a, roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.44 });
   const tintedGlassMat = reflectaGlassMat;
-  const mirrorMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, roughness: 0.06, metalness: 0.88 });
-  const steelMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.22, metalness: 0.9 });
-  const fabricMat = new THREE.MeshStandardMaterial({ color: 0xebe6de, roughness: 0.88 });
-  const linenHeadMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c3, roughness: 0.92 });
-  const ledMat = new THREE.MeshStandardMaterial({ color: 0xfff3d1, emissive: 0xffd27d, emissiveIntensity: 1.4 });
+  const mirrorMat = new THREE.MeshStandardMaterial({ name: 'Espelho_Prata', color: 0xdbeafe, roughness: 0.06, metalness: 0.88 });
+  const steelMat = new THREE.MeshStandardMaterial({ name: 'Inox_Escovado', color: 0xcbd5e1, roughness: 0.22, metalness: 0.9 });
+  const fabricMat = new THREE.MeshStandardMaterial({ name: 'Tecido_Linho', color: 0xebe6de, roughness: 0.88 });
+  const linenHeadMat = new THREE.MeshStandardMaterial({ name: 'Estofado_Cabeceira', color: 0xd8d0c3, roughness: 0.92 });
+  const ledMat = new THREE.MeshStandardMaterial({ name: 'Perfil_LED', color: 0xfff3d1, emissive: 0xffd27d, emissiveIntensity: 1.4 });
 
   const panelT = thicknessMode === '25mm_engrossado' ? 0.024 : thicknessMode === '18mm' ? 0.018 : 0.015;
   const gap = 0.003;
@@ -737,46 +746,7 @@ export function exportCutlistToCSVDownload(
   analysis: RoomAnalysisResult,
   quote: CabinetryQuoteResult
 ): void {
-  const thick = quote.styleOptions?.thicknessMode === '25mm_engrossado'
-    ? '15mm + 25mm'
-    : quote.styleOptions?.thicknessMode === '18mm'
-    ? '18mm'
-    : '15mm';
-  const rows: string[][] = [
-    ['Ambiente', 'Modulo', 'Parede', 'Peca / Funcao', 'Qtd', 'Largura_cm', 'Altura_ou_Prof_cm', 'Espessura', 'Padrao_MDF', 'Cod_SKU'],
-  ];
-
-  const wallPt: Record<string, string> = { back: 'Fundo', left: 'Esquerda', right: 'Direita', center: 'Centro' };
-  for (const m of analysis.modules) {
-    const w = m.widthCm;
-    const h = m.heightCm;
-    const d = m.depthCm;
-    const wn = wallPt[m.wall] || 'Fundo';
-    // Laterais + Base/Topo (Caixaria)
-    rows.push([analysis.roomType, m.label, wn, 'Lateral Esquerda/Direita', '2', `${d}`, `${h}`, thick, quote.carcassFinish.label, quote.carcassFinish.cod15]);
-    rows.push([analysis.roomType, m.label, wn, 'Base / Topo / Prateleiras', `${2 + (m.shelvesCount || 1)}`, `${Math.max(20, w - 3)}`, `${d}`, thick, quote.carcassFinish.label, quote.carcassFinish.cod15]);
-    rows.push([analysis.roomType, m.label, wn, 'Fundo 6mm', '1', `${w}`, `${h}`, '6mm', quote.carcassFinish.name6, quote.carcassFinish.cod6]);
-    if (m.doorsCount > 0) {
-      const dw = (w / m.doorsCount).toFixed(1);
-      const frontSpec = quote.styleOptions?.frontStyle === 'vidro_reflecta' ? `${quote.frontFinish.label} / Vidro` : quote.frontFinish.label;
-      rows.push([analysis.roomType, m.label, wn, `Porta (${quote.styleOptions?.frontStyle || 'lisa'})`, `${m.doorsCount}`, `${dw}`, `${h}`, thick, frontSpec, quote.frontFinish.cod15]);
-    }
-    if (m.drawersCount > 0) {
-      const dh = Math.max(14, Math.round(h / Math.max(2, m.drawersCount)));
-      rows.push([analysis.roomType, m.label, wn, 'Frente Gaveta', `${m.drawersCount}`, `${Math.max(20, w - 4)}`, `${dh}`, thick, quote.frontFinish.label, quote.frontFinish.cod15]);
-    }
-  }
-
-  const csv = '\uFEFF' + rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `83-ambientes-plano-corte-${analysis.roomType}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  exportManufacturingCSVDownload(analysis, quote);
 }
 
 export function buildRoomProposalSummaryMessage(

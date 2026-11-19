@@ -13,6 +13,7 @@ import {
   buildRoomShellGroup,
   exportObjectToOBJDownload,
 } from '../services/parametricCabinetBuilder';
+import { exportObjectToDAEDownload } from '../services/manufacturingExporter';
 import { RoomAnalysisResult } from '../services/roomAnalyzerService';
 
 export class RoomSceneViewer {
@@ -261,6 +262,30 @@ export class RoomSceneViewer {
     this.shellGroup = null;
     this.cabinetGroup = null;
     this.mogeGroup = null;
+  }
+
+  public exportProposalDAE(): boolean {
+    if (!this.currentAnalysis) return false;
+    const target = new THREE.Group();
+    target.name = `83_Ambientes_${this.currentAnalysis.roomType}`;
+    if (this.showShell && this.shellGroup) {
+      const shell = this.shellGroup.clone();
+      shell.name = 'Paredes_Ambiente';
+      target.add(shell);
+    }
+    if (this.cabinetGroup) {
+      const cabs = this.cabinetGroup.clone();
+      cabs.name = 'Moveis_Planejados';
+      target.add(cabs);
+    } else {
+      target.add(this.rootGroup.clone());
+    }
+    exportObjectToDAEDownload(
+      target,
+      `83-ambientes-${this.currentAnalysis.roomType}-sketchup.dae`,
+      target.name
+    );
+    return true;
   }
 
   public exportProposalOBJ(): boolean {
