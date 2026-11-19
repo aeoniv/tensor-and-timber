@@ -1464,3 +1464,16 @@ button, input, select, textarea {
   border-color: var(--brasil-amarelo) !important;
   color: #ffffff !important;
 }
+
+
+#room-type-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#room-type-selector .room-type-tab {
+  flex: 1 1 auto;
+  min-width: 96px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+}

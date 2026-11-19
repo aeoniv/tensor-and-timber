@@ -1,8 +1,9 @@
 import confetti from 'canvas-confetti';
 import {
-  MDF_FINISH_OPTIONS,
+  MDF_FEATURED_FINISHES,
   HARDWARE_KIT_OPTIONS,
   calculateCabinetryQuote,
+  findMdfFinishById,
 } from '../data/pricingCatalog';
 import {
   analyzeEmptyRoomPhoto,
@@ -11,37 +12,80 @@ import {
   ReferenceMeasureType,
 } from '../services/roomAnalyzerService';
 import { RoomSceneViewer } from './RoomSceneViewer';
-import { buildRoomProposalSummaryMessage } from '../services/parametricCabinetBuilder';
+import {
+  CounterTone,
+  buildRoomProposalSummaryMessage,
+} from '../services/parametricCabinetBuilder';
 
 const ROOM_CHIPS: Record<RoomType, Array<{ label: string; phrase: string }>> = {
   cozinha: [
     {
-      label: 'Cozinha c/ Torre Quente',
-      phrase: 'Cozinha com balcão de pia, gaveteiro, torre quente para forno/micro e aéreo sem bloquear a janela',
+      label: 'Cozinha L + Ilha Gourmet',
+      phrase: 'Cozinha planejada em L com balcão de pia, cooktop, torre quente e ilha gourmet central',
     },
     {
-      label: 'Cozinha + Nicho Geladeira',
-      phrase: 'Balcão inferior completo com gavetões, espaço para geladeira 70cm e armário aéreo',
+      label: 'Pia + Torre + Cristaleira',
+      phrase: 'Cozinha com balcão de pia, gaveteiro, torre quente para forno/micro e cristaleira iluminada com vidro',
     },
   ],
   quarto: [
     {
-      label: 'Guarda-Roupa 3 Portas + Mesa',
-      phrase: 'Guarda-roupa 3 portas de correr com gavetas internas e bancada de estudo lateral',
+      label: 'Guarda-Roupa + Penteadeira LED',
+      phrase: 'Guarda-roupa portas de correr e penteadeira camarim com espelho LED ao lado',
     },
     {
-      label: 'Painel Cabeceira + Criados',
-      phrase: 'Painel ripado de cabeceira com LED, dois criados-mudos suspensos e armário lateral',
+      label: 'Closet Aberto + Cama Baú',
+      phrase: 'Closet aberto com cabideiro, prateleiras sapateira e cama baú com gavetas em L',
     },
   ],
   sala: [
     {
-      label: 'Painel Ripado TV + Rack',
-      phrase: 'Painel ripado do piso ao teto com fita LED e rack suspenso com gavetões',
+      label: 'Painel Ripado + Rack + Cristaleira',
+      phrase: 'Painel ripado TV do piso ao teto com LED, rack suspenso e cristaleira lateral em vidro',
     },
     {
-      label: 'Home Theater + Cristaleira',
-      phrase: 'Painel de TV central com rack baixo e estante lateral de nichos decorativos',
+      label: 'Home Theater + Bar Adega',
+      phrase: 'Painel ripado para TV, rack com gavetões e bar adega com nicho para garrafas e taças',
+    },
+  ],
+  banheiro: [
+    {
+      label: 'Gabinete Suspenso + Espelheira LED',
+      phrase: 'Gabinete de banheiro suspenso com cuba de apoio, 3 gavetas e espelheira superior com LED',
+    },
+    {
+      label: 'Lavabo + Torre Nichos',
+      phrase: 'Gabinete suspenso com tampo pedra, espelheira e torre lateral de nichos para toalhas',
+    },
+  ],
+  lavanderia: [
+    {
+      label: 'Tanque + Máquina + Vassoureiro',
+      phrase: 'Bancada contínua para tanque e máquina lava e seca, armário alto vassoureiro e aéreos',
+    },
+    {
+      label: 'Lavanderia Compacta + Aéreos',
+      phrase: 'Bancada de lavanderia com portas inferiores, nicho máquina e armário aéreo amplo',
+    },
+  ],
+  escritorio: [
+    {
+      label: 'Estação Home Office + Arquivo',
+      phrase: 'Estação de trabalho com gaveteiro, armário alto para arquivos/pastas e nichos com LED',
+    },
+    {
+      label: 'Mesa L + Estante Livros',
+      phrase: 'Mesa ampla de escritório, estante aberta de nichos e painel ripado decorativo',
+    },
+  ],
+  varanda_gourmet: [
+    {
+      label: 'Churrasqueira + Bar Adega + Ilha',
+      phrase: 'Bancada para churrasqueira com cervejeira, bar adega lateral com LED e ilha gourmet',
+    },
+    {
+      label: 'Balcão Gourmet + Cristaleira',
+      phrase: 'Balcão gourmet completo com pia, gavetas e cristaleira de vidro para taças',
     },
   ],
 };
@@ -49,8 +93,11 @@ const ROOM_CHIPS: Record<RoomType, Array<{ label: string; phrase: string }>> = {
 export class RoomPlannerController {
   private viewer: RoomSceneViewer | null = null;
   private roomType: RoomType = 'cozinha';
-  private finishId: string = MDF_FINISH_OPTIONS[0]?.id || 'branco-artico';
+  private frontFinishId: string = MDF_FEATURED_FINISHES[0]?.id || 'branco-artico';
+  private carcassFinishId: string = 'branco-artico';
+  private splitCarcass: boolean = true;
   private hardwareId: 'padrao' | 'slow' = 'slow';
+  private counterTone: CounterTone = 'claro';
   private photoDataUrl: string | null = null;
   private currentAnalysis: RoomAnalysisResult | null = null;
   private onToast: (msg: string) => void;
@@ -67,8 +114,12 @@ export class RoomPlannerController {
     this.refreshSummaryDisplay();
   }
 
+  private getEffectiveCarcassId(): string {
+    return this.splitCarcass ? this.carcassFinishId : this.frontFinishId;
+  }
+
   private bindEvents(): void {
-    // 1. Seletor de Cômodo
+    // 1. Seletor dos 7 Cômodos
     const roomTabs = document.querySelectorAll('.room-type-tab');
     roomTabs.forEach((tab) => {
       tab.addEventListener('click', (e) => {
@@ -76,6 +127,17 @@ export class RoomPlannerController {
         const el = e.currentTarget as HTMLElement;
         el.classList.add('active');
         this.roomType = (el.dataset.roomType as RoomType) || 'cozinha';
+
+        const refInput = document.getElementById('room-ref-cm') as HTMLInputElement;
+        if (refInput && el.dataset.defaultCm) {
+          refInput.value = el.dataset.defaultCm;
+        }
+        // Sugerir caixaria resistente umidade se cozinha/banheiro/lavanderia
+        const carcassSelect = document.getElementById('room-carcass-select') as HTMLSelectElement;
+        if (carcassSelect && (this.roomType === 'banheiro' || this.roomType === 'lavanderia' || this.roomType === 'cozinha')) {
+          carcassSelect.value = 'branco-ultra';
+          this.carcassFinishId = 'branco-ultra';
+        }
         this.updateChipsForRoom();
       });
     });
@@ -107,7 +169,7 @@ export class RoomPlannerController {
           emptyBox.style.display = 'none';
           this.clearDetectionCanvas();
         }
-        this.onToast('Foto do cômodo carregada! Informe a medida e clique em Analisar Cômodo.');
+        this.onToast('Foto carregada! Escolha o ambiente, informe a medida e clique em Analisar Cômodo.');
       };
       reader.readAsDataURL(file);
     };
@@ -138,19 +200,58 @@ export class RoomPlannerController {
       this.clearDetectionCanvas();
     });
 
-    // 3. Padrões MDF (atualiza 3D + orçamento instantaneamente!)
+    // 3. Padrões MDF (swatches rápidos + seletor completo dos 124 padrões)
     const finishBtns = document.querySelectorAll('.room-finish-btn');
+    const fullCatalogSelect = document.getElementById('room-full-catalog-select') as HTMLSelectElement;
+
     finishBtns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         finishBtns.forEach((b) => b.classList.remove('active'));
         const el = e.currentTarget as HTMLElement;
         el.classList.add('active');
-        this.finishId = el.dataset.finishId || MDF_FINISH_OPTIONS[0].id;
+        this.frontFinishId = el.dataset.finishId || MDF_FEATURED_FINISHES[0].id;
+        if (fullCatalogSelect) fullCatalogSelect.value = this.frontFinishId;
         this.applyMaterialAndQuoteUpdate();
       });
     });
 
-    // 4. Kits de ferragem (atualiza orçamento + detalhes!)
+    fullCatalogSelect?.addEventListener('change', () => {
+      this.frontFinishId = fullCatalogSelect.value;
+      finishBtns.forEach((b) => {
+        b.classList.toggle('active', (b as HTMLElement).dataset.finishId === this.frontFinishId);
+      });
+      this.applyMaterialAndQuoteUpdate();
+    });
+
+    // Composição 2 Cores (Caixaria interna)
+    const splitToggle = document.getElementById('room-split-carcass-toggle') as HTMLInputElement;
+    const carcassWrap = document.getElementById('room-carcass-select-wrap');
+    const carcassSelect = document.getElementById('room-carcass-select') as HTMLSelectElement;
+
+    splitToggle?.addEventListener('change', () => {
+      this.splitCarcass = splitToggle.checked;
+      if (carcassWrap) carcassWrap.style.display = this.splitCarcass ? 'block' : 'none';
+      this.applyMaterialAndQuoteUpdate();
+    });
+
+    carcassSelect?.addEventListener('change', () => {
+      this.carcassFinishId = carcassSelect.value;
+      this.applyMaterialAndQuoteUpdate();
+    });
+
+    // Tom do Tampo / Bancada
+    const counterBtns = document.querySelectorAll('.room-counter-btn');
+    counterBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        counterBtns.forEach((b) => b.classList.remove('active'));
+        const el = e.currentTarget as HTMLElement;
+        el.classList.add('active');
+        this.counterTone = (el.dataset.counter as CounterTone) || 'claro';
+        this.applyMaterialAndQuoteUpdate();
+      });
+    });
+
+    // 4. Kits de ferragem
     const hwBtns = document.querySelectorAll('.room-hardware-btn');
     hwBtns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -162,7 +263,7 @@ export class RoomPlannerController {
       });
     });
 
-    // 5. Botão principal: Analisar Cômodo e Gerar Proposta 3D
+    // 5. Analisar Cômodo
     document.getElementById('btn-analyze-empty-room')?.addEventListener('click', async () => {
       await this.runRoomAnalysis();
     });
@@ -211,7 +312,7 @@ export class RoomPlannerController {
         return;
       }
       if (this.viewer.exportProposalOBJ()) {
-        this.onToast('Arquivo .OBJ exportado em escala métrica para importar direto no SketchUp!');
+        this.onToast('Arquivo .OBJ exportado em escala métrica para importar no SketchUp!');
       }
     });
   }
@@ -242,25 +343,33 @@ export class RoomPlannerController {
   }
 
   private applyMaterialAndQuoteUpdate(): void {
-    const finish = MDF_FINISH_OPTIONS.find((f) => f.id === this.finishId) || MDF_FINISH_OPTIONS[0];
+    const front = findMdfFinishById(this.frontFinishId);
+    const carcass = findMdfFinishById(this.getEffectiveCarcassId());
     if (this.viewer && this.currentAnalysis) {
-      this.viewer.updateMaterialOrHardware(finish, this.hardwareId);
+      this.viewer.updateMaterialOrHardware(front, this.hardwareId, carcass, this.counterTone);
     }
     this.refreshSummaryDisplay();
   }
 
   private refreshSummaryDisplay(): void {
-    const finish = MDF_FINISH_OPTIONS.find((f) => f.id === this.finishId) || MDF_FINISH_OPTIONS[0];
+    const front = findMdfFinishById(this.frontFinishId);
+    const carcass = findMdfFinishById(this.getEffectiveCarcassId());
     const hw = HARDWARE_KIT_OPTIONS.find((h) => h.id === this.hardwareId) || HARDWARE_KIT_OPTIONS[0];
 
     const summaryEl = document.getElementById('room-deal-finish-summary');
     if (summaryEl) {
-      summaryEl.textContent = `${finish.label} (${finish.cod15}) • ${hw.id === 'padrao' ? 'Ferragens Padrão' : 'Ferragens Slow / Oculta'}`;
+      const twoTone = front.cod15 !== carcass.cod15 ? `Frentes: ${front.label} + Caixaria: ${carcass.label}` : `${front.label} (${front.cod15})`;
+      summaryEl.textContent = `${twoTone} • ${hw.id === 'padrao' ? 'Ferragens Padrão' : 'Ferragens Slow / Oculta'}`;
     }
 
     if (!this.currentAnalysis) return;
 
-    const quote = calculateCabinetryQuote(this.currentAnalysis.modules, this.finishId, this.hardwareId);
+    const quote = calculateCabinetryQuote(
+      this.currentAnalysis.modules,
+      this.frontFinishId,
+      this.hardwareId,
+      this.getEffectiveCarcassId()
+    );
 
     const priceEl = document.getElementById('room-deal-price');
     if (priceEl) priceEl.textContent = quote.formattedRange;
@@ -270,7 +379,11 @@ export class RoomPlannerController {
       const labels: Record<string, string> = {
         cozinha: 'Proposta de Cozinha Planejada',
         quarto: 'Proposta de Quarto / Closet',
-        sala: 'Proposta de Sala / Painel & Rack',
+        sala: 'Proposta de Sala / Home',
+        banheiro: 'Proposta de Banheiro / Lavabo',
+        lavanderia: 'Proposta de Lavanderia',
+        escritorio: 'Proposta de Escritório / Home Office',
+        varanda_gourmet: 'Proposta de Área Gourmet',
       };
       titleEl.textContent = `${labels[this.currentAnalysis.roomType] || 'Proposta Sob Medida'} (${this.currentAnalysis.roomDimensionsCm.widthCm}×${this.currentAnalysis.roomDimensionsCm.heightCm} cm)`;
     }
@@ -302,37 +415,68 @@ export class RoomPlannerController {
         : `<span style="display:inline-flex;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#166534;font-size:0.74rem;font-weight:600;">✓ Parede principal livre detectada</span>`;
     }
 
+    const wallLabel: Record<string, string> = { back: 'Fundo', left: 'Esq.', right: 'Dir.', center: 'Centro' };
     const modWrap = document.getElementById('room-modules-list');
     if (modWrap) {
       const modItems = this.currentAnalysis.modules
         .map(
-          (m) =>
-            `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--border-subtle);">
-               <strong>${m.label}</strong>
-               <span>${m.widthCm} × ${m.heightCm} × ${m.depthCm} cm</span>
+          (m, idx) =>
+            `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border-subtle);">
+               <div>
+                 <strong>${m.label}</strong>
+                 <span style="font-size:0.72rem;color:var(--text-muted);margin-left:5px;">[${wallLabel[m.wall] || 'Fundo'}]</span>
+               </div>
+               <div style="display:flex;align-items:center;gap:5px;white-space:nowrap;">
+                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 6px;font-size:0.74rem;" title="Diminuir 10cm">-10</button>
+                 <span style="font-size:0.8rem;font-weight:600;">${m.widthCm} × ${m.heightCm} × ${m.depthCm} cm</span>
+                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="10" style="padding:1px 6px;font-size:0.74rem;" title="Aumentar 10cm">+10</button>
+                 <button type="button" class="ctrl-btn mod-remove-btn" data-idx="${idx}" style="padding:1px 6px;font-size:0.74rem;color:#b91c1c;" title="Remover módulo">&times;</button>
+               </div>
              </div>`
         )
         .join('');
+      const sheetsDesc = quote.sheets15CarcassCount > 0
+        ? `${quote.sheets15FrontCount} ch. Frente + ${quote.sheets15CarcassCount} ch. Caixaria + ${quote.sheets6Count} ch. 6mm`
+        : `${quote.sheets15Count} ch. 15mm + ${quote.sheets6Count} ch. 6mm`;
       modWrap.innerHTML =
         modItems +
-        `<div style="display:flex;justify-content:space-between;padding-top:8px;font-weight:600;color:var(--brasil-verde);">
+        `<div style="display:flex;justify-content:space-between;padding-top:8px;font-weight:600;color:var(--brasil-verde);font-size:0.8rem;">
            <span>Consumo estimado (Planilha)</span>
-           <span>${quote.sheets15Count} ch. 15mm + ${quote.sheets6Count} ch. 6mm • ${quote.hingesCount} dobr. / ${quote.slidesCount} corr.</span>
+           <span>${sheetsDesc} • ${quote.hingesCount} dobr. / ${quote.slidesCount} corr.</span>
          </div>`;
+
+      // Binding edição rápida de módulos (-10cm / +10cm / remover)
+      modWrap.querySelectorAll('.mod-resize-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          if (!this.currentAnalysis) return;
+          const el = e.currentTarget as HTMLElement;
+          const idx = Number(el.dataset.idx);
+          const delta = Number(el.dataset.delta);
+          const m = this.currentAnalysis.modules[idx];
+          if (!m) return;
+          m.widthCm = Math.max(35, Math.min(350, m.widthCm + delta));
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true);
+          this.refreshSummaryDisplay();
+        });
+      });
+
+      modWrap.querySelectorAll('.mod-remove-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          if (!this.currentAnalysis || this.currentAnalysis.modules.length <= 1) {
+            this.onToast('Mantenha pelo menos 1 módulo na proposta.');
+            return;
+          }
+          const idx = Number((e.currentTarget as HTMLElement).dataset.idx);
+          this.currentAnalysis.modules.splice(idx, 1);
+          this.viewer?.renderRoomProposal(this.currentAnalysis, front, this.hardwareId, carcass, this.counterTone, true);
+          this.refreshSummaryDisplay();
+        });
+      });
     }
 
     const waBtn = document.getElementById('room-btn-whatsapp') as HTMLAnchorElement;
     if (waBtn) {
-      const msg = buildRoomProposalSummaryMessage(
-        this.currentAnalysis,
-        finish.label,
-        finish.cod15,
-        finish.fitaCod,
-        hw.label,
-        quote.formattedRange,
-        quote.sheets15Count,
-        quote.sheets6Count
-      );
+      const msg = buildRoomProposalSummaryMessage(this.currentAnalysis, quote);
       waBtn.href = `https://wa.me/558398229900?text=${encodeURIComponent(msg)}`;
     }
   }
@@ -374,9 +518,10 @@ export class RoomPlannerController {
       this.currentAnalysis = result;
       this.drawDetectionOverlay(result);
 
-      const finish = MDF_FINISH_OPTIONS.find((f) => f.id === this.finishId) || MDF_FINISH_OPTIONS[0];
+      const front = findMdfFinishById(this.frontFinishId);
+      const carcass = findMdfFinishById(this.getEffectiveCarcassId());
       if (this.viewer) {
-        this.viewer.renderRoomProposal(result, finish, this.hardwareId);
+        this.viewer.renderRoomProposal(result, front, this.hardwareId, carcass, this.counterTone);
       }
 
       if (mogeBtn) {
@@ -399,7 +544,7 @@ export class RoomPlannerController {
         origin: { y: 0.7 },
         colors: ['#00843D', '#f5a623', '#002776'],
       });
-      this.onToast('Cômodo analisado! Veja a proposta 3D e a estimativa real.');
+      this.onToast('Cômodo analisado! Veja a proposta 3D e ajuste medidas se desejar.');
     } catch (err: any) {
       console.error('[RoomPlannerController] Analysis error:', err);
       if (statusPill) statusPill.textContent = 'Erro na análise do Hugging Face';
@@ -432,7 +577,6 @@ export class RoomPlannerController {
 
     ctx.clearRect(0, 0, w, h);
 
-    // Desenhar caixa da parede principal
     if (analysis.backWallNormBox?.length === 4) {
       const [wx1, wy1, wx2, wy2] = analysis.backWallNormBox;
       ctx.strokeStyle = '#00843D';
@@ -442,14 +586,12 @@ export class RoomPlannerController {
       ctx.setLineDash([]);
     }
 
-    // Desenhar caixas dos obstáculos detectados
     const colors: Record<string, string> = {
       window: '#0284c7',
       door: '#dc2626',
       plumbing: '#0ea5e9',
       outlet: '#f5a623',
     };
-
     const shortNames: Record<string, string> = {
       window: 'Janela',
       door: 'Porta',

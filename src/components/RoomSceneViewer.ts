@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-import { MdfFinishOption, ProposedCabinetModule } from '../data/pricingCatalog';
+import { MdfFinishOption } from '../data/pricingCatalog';
 import {
+  CounterTone,
   buildCabinetModulesGroup,
   buildRoomShellGroup,
   exportObjectToOBJDownload,
@@ -30,8 +31,6 @@ export class RoomSceneViewer {
   private showMoGeOverlay = false;
 
   private currentAnalysis: RoomAnalysisResult | null = null;
-  private currentFinish: MdfFinishOption | null = null;
-  private currentHardware: 'padrao' | 'slow' = 'slow';
 
   constructor(containerId: string) {
     const el = document.getElementById(containerId);
@@ -80,7 +79,6 @@ export class RoomSceneViewer {
     this.scene.add(this.rootGroup);
     this.gltfLoader = new GLTFLoader();
 
-    // Limite de referencia inicial (piso limpo aguardando foto)
     const initGrid = new THREE.GridHelper(5, 20, 0xcbd5e1, 0xe2e8f0);
     this.rootGroup.add(initGrid);
 
@@ -108,16 +106,16 @@ export class RoomSceneViewer {
 
   public renderRoomProposal(
     analysis: RoomAnalysisResult,
-    finish: MdfFinishOption,
-    hardwareId: 'padrao' | 'slow'
+    frontFinish: MdfFinishOption,
+    hardwareId: 'padrao' | 'slow',
+    carcassFinish?: MdfFinishOption,
+    counterTone: CounterTone = 'claro',
+    preserveCamera: boolean = false
   ): void {
     this.currentAnalysis = analysis;
-    this.currentFinish = finish;
-    this.currentHardware = hardwareId;
-
     this.clearRoot();
 
-    const shell = buildRoomShellGroup(analysis.roomDimensionsCm, analysis.obstacles);
+    const shell = buildRoomShellGroup(analysis.roomDimensionsCm, analysis.obstacles, analysis.modules);
     shell.visible = this.showShell;
     this.shellGroup = shell;
     this.rootGroup.add(shell);
@@ -125,8 +123,10 @@ export class RoomSceneViewer {
     const cabinet = buildCabinetModulesGroup(
       analysis.modules,
       analysis.roomDimensionsCm.widthCm,
-      finish,
-      hardwareId
+      frontFinish,
+      hardwareId,
+      carcassFinish,
+      counterTone
     );
     this.cabinetGroup = cabinet;
     this.rootGroup.add(cabinet);
@@ -136,26 +136,38 @@ export class RoomSceneViewer {
     }
 
     this.applyWireframe();
-    const wM = analysis.roomDimensionsCm.widthCm / 100;
-    const hM = analysis.roomDimensionsCm.heightCm / 100;
-    this.camera.position.set(wM * 0.16, hM * 0.62, Math.max(4.4, wM * 1.38));
-    this.controls.target.set(0, hM * 0.43, 0.25);
-    this.controls.update();
+
+    if (!preserveCamera) {
+      const wM = analysis.roomDimensionsCm.widthCm / 100;
+      const hM = analysis.roomDimensionsCm.heightCm / 100;
+      const hasCenterOrSide = analysis.modules.some(m => m.wall !== 'back');
+      this.camera.position.set(
+        wM * (hasCenterOrSide ? 0.35 : 0.16),
+        hM * (hasCenterOrSide ? 0.78 : 0.62),
+        Math.max(4.4, wM * (hasCenterOrSide ? 1.55 : 1.38))
+      );
+      this.controls.target.set(0, hM * 0.43, hasCenterOrSide ? 0.85 : 0.25);
+      this.controls.update();
+    }
   }
 
-  public updateMaterialOrHardware(finish: MdfFinishOption, hardwareId: 'padrao' | 'slow'): void {
+  public updateMaterialOrHardware(
+    frontFinish: MdfFinishOption,
+    hardwareId: 'padrao' | 'slow',
+    carcassFinish?: MdfFinishOption,
+    counterTone: CounterTone = 'claro'
+  ): void {
     if (!this.currentAnalysis) return;
-    this.currentFinish = finish;
-    this.currentHardware = hardwareId;
-
     if (this.cabinetGroup) {
       this.rootGroup.remove(this.cabinetGroup);
     }
     const cabinet = buildCabinetModulesGroup(
       this.currentAnalysis.modules,
       this.currentAnalysis.roomDimensionsCm.widthCm,
-      finish,
-      hardwareId
+      frontFinish,
+      hardwareId,
+      carcassFinish,
+      counterTone
     );
     this.cabinetGroup = cabinet;
     this.rootGroup.add(cabinet);
@@ -177,7 +189,6 @@ export class RoomSceneViewer {
         const center = new THREE.Vector3();
         box.getCenter(center);
 
-        // Escalar a malha reconstruida do MoGe-2 para alinhar à parede principal calibrada
         if (this.currentAnalysis && size.x > 0.01) {
           const targetW = (this.currentAnalysis.roomDimensionsCm.widthCm / 100) * 1.25;
           const s = targetW / size.x;
@@ -237,8 +248,7 @@ export class RoomSceneViewer {
 
   private clearRoot(): void {
     while (this.rootGroup.children.length > 0) {
-      const child = this.rootGroup.children[0];
-      this.rootGroup.remove(child);
+      this.rootGroup.remove(this.rootGroup.children[0]);
     }
     this.shellGroup = null;
     this.cabinetGroup = null;

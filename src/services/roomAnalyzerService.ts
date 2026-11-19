@@ -1,7 +1,15 @@
 import { Client } from '@gradio/client';
-import { ProposedCabinetModule } from '../data/pricingCatalog';
+import { ModuleArchetype, ProposedCabinetModule } from '../data/pricingCatalog';
 
-export type RoomType = 'cozinha' | 'quarto' | 'sala';
+export type RoomType =
+  | 'cozinha'
+  | 'quarto'
+  | 'sala'
+  | 'banheiro'
+  | 'lavanderia'
+  | 'escritorio'
+  | 'varanda_gourmet';
+
 export type ReferenceMeasureType = 'wall_width' | 'ceiling_height';
 
 export interface DetectedObstacle {
@@ -9,7 +17,7 @@ export interface DetectedObstacle {
   type: 'window' | 'door' | 'outlet' | 'plumbing' | string;
   label: string;
   wall: 'back' | 'left' | 'right';
-  bbox: number[]; // [xmin, ymin, xmax, ymax] in 0..1000
+  bbox: number[];
   xStartCm: number;
   xEndCm: number;
   yBottomCm: number;
@@ -46,6 +54,17 @@ export interface AnalyzeRoomRequest {
   referenceValueCm: number;
   requirements: string;
 }
+
+const VALID_MODULE_TYPES = new Set<string>([
+  'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'ilha_gourmet',
+  'aereo_portas', 'aereo_basculante', 'torre_quente', 'nicho_geladeira', 'cristaleira_vidro',
+  'guarda_roupa_correr', 'guarda_roupa_abrir', 'closet_cabideiro_aberto',
+  'cama_bau_planejada', 'criado_mudo', 'painel_cabeceira', 'penteadeira_camarim',
+  'sapateira_prateleiras', 'bancada_estudo', 'painel_tv_ripado', 'rack_suspenso',
+  'estante_nichos', 'aparador_buffet', 'bar_adega', 'gabinete_banheiro',
+  'espelheira_armario', 'armario_vassoureiro', 'bancada_tanque_maquina',
+  'estacao_trabalho_L', 'arquivo_escritorio', 'balcao_churrasqueira',
+]);
 
 function getBackendEndpoints(): string[] {
   const envUrl = (import.meta as any).env?.VITE_AI_BACKEND_URL;
@@ -136,14 +155,24 @@ function normalizeObstacleType(label: string): string {
   return 'other';
 }
 
+function bboxIoU(a: number[], b: number[]): number {
+  const ix1 = Math.max(a[0], b[0]);
+  const iy1 = Math.max(a[1], b[1]);
+  const ix2 = Math.min(a[2], b[2]);
+  const iy2 = Math.min(a[3], b[3]);
+  const iw = Math.max(0, ix2 - ix1);
+  const ih = Math.max(0, iy2 - iy1);
+  const inter = iw * ih;
+  if (inter <= 0) return 0;
+  const areaA = Math.max(1, (a[2] - a[0]) * (a[3] - a[1]));
+  const areaB = Math.max(1, (b[2] - b[0]) * (b[3] - b[1]));
+  return inter / (areaA + areaB - inter);
+}
+
 function overlaps1D(a1: number, a2: number, b1: number, b2: number, pad: number = 3): boolean {
   return (a1 < b2 - pad) && (a2 > b1 + pad);
 }
 
-/**
- * Fallback direto via @gradio/client no navegador caso a página esteja hospedada no Firebase
- * sem servidor Python local ou URL de backend configurada.
- */
 async function analyzeViaDirectHuggingFace(
   req: AnalyzeRoomRequest,
   onProgress?: (msg: string, pct: number) => void
@@ -199,6 +228,7 @@ async function analyzeViaDirectHuggingFace(
   }
   if (!detItems.length && rawDetText) {
     let currentLabel = 'element';
+    const skipPhrases = ['not visible', 'not explicitly visible', 'not present', 'not detected', 'no door', 'no window', 'assuming'];
     for (const line of rawDetText.split('\n')) {
       const clean = line.replace(/\*/g, '').trim();
       if (!clean) continue;
@@ -206,46 +236,77 @@ async function analyzeViaDirectHuggingFace(
       if (headMatch && !headMatch[1].toLowerCase().includes('bounding box')) {
         currentLabel = headMatch[1].trim();
       }
+      const lowClean = clean.toLowerCase();
+      if (skipPhrases.some(p => lowClean.includes(p))) continue;
       const rx = /\[(\d{1,4})\s*,\s*(\d{1,4})\s*,\s*(\d{1,4})\s*,\s*(\d{1,4})\]/g;
       let m: RegExpExecArray | null;
       while ((m = rx.exec(clean)) !== null) {
-        detItems.push({
-          label: currentLabel,
-          type: normalizeObstacleType(currentLabel),
-          bbox: [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])],
-        });
+        const coords = [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])];
+        if (coords[2] > coords[0] && coords[3] > coords[1]) {
+          detItems.push({
+            label: currentLabel,
+            type: normalizeObstacleType(currentLabel),
+            bbox: coords,
+          });
+        }
       }
     }
   }
 
-  const wallBoxes = detItems.filter(i => i.type === 'back_wall').map(i => i.bbox);
-  const [wx1, wy1, wx2, wy2] = wallBoxes.length
-    ? wallBoxes.reduce((a, b) => ((b[2] - b[0]) * (b[3] - b[1]) > (a[2] - a[0]) * (a[3] - a[1]) ? b : a))
-    : [140, 150, 860, 820];
+  const openingBoxes = detItems.filter(i => i.type === 'window' || i.type === 'door').map(i => i.bbox);
+  const validWallBoxes = detItems
+    .filter(i => i.type === 'back_wall')
+    .map(i => i.bbox)
+    .filter(b => {
+      const bw = b[2] - b[0];
+      const bh = b[3] - b[1];
+      if (bw < 280 || bh < 280) return false;
+      if ((bw >= 880 && bh >= 880) || (b[0] <= 20 && b[2] >= 980)) return false;
+      if (openingBoxes.some(ob => bboxIoU(b, ob) > 0.72)) return false;
+      return true;
+    });
+
+  const [wx1, wy1, wx2, wy2] = validWallBoxes.length
+    ? validWallBoxes.reduce((a, b) => ((b[2] - b[0]) * (b[3] - b[1]) > (a[2] - a[0]) * (a[3] - a[1]) ? b : a))
+    : [160, 140, 840, 800];
 
   const pxW = Math.max(80, ((wx2 - wx1) / 1000) * imgSize.width);
   const pxH = Math.max(80, ((wy2 - wy1) / 1000) * imgSize.height);
   const aspectHW = pxH / pxW;
 
   const widthCm = req.referenceType === 'ceiling_height'
-    ? Math.round(clamp(req.referenceValueCm / aspectHW, 180, 680))
-    : Math.round(clamp(req.referenceValueCm, 150, 750));
+    ? Math.round(clamp(req.referenceValueCm / aspectHW, 150, 680))
+    : Math.round(clamp(req.referenceValueCm, 120, 750));
   const heightCm = req.referenceType === 'ceiling_height'
     ? Math.round(clamp(req.referenceValueCm, 210, 380))
     : Math.round(clamp(widthCm * aspectHW, 245, 290));
-  const depthCm = Math.round(clamp(widthCm * 1.05, 250, 560));
+  const depthCm = Math.round(clamp(widthCm * 1.08, 220, 580));
 
-  const obstacles: DetectedObstacle[] = detItems
+  const windowBoxes = detItems.filter(i => i.type === 'window').map(i => i.bbox);
+  const obstacles: DetectedObstacle[] = [];
+  detItems
     .filter(i => !['back_wall', 'floor', 'other'].includes(i.type))
-    .map((it, idx) => {
+    .forEach((it, idx) => {
       const [bx1, by1, bx2, by2] = it.bbox;
+      if (bx2 <= bx1 || by2 <= by1) return;
+      if (it.type === 'door' && windowBoxes.some(wb => bboxIoU(it.bbox, wb) > 0.70)) return;
+      if (it.type === 'window' || it.type === 'door') {
+        if ((bx2 - bx1) > (wx2 - wx1) * 0.85 && (by2 - by1) > (wy2 - wy1) * 0.85) return;
+      }
+
       const cx = (bx1 + bx2) / 2;
-      const wall: 'back' | 'left' | 'right' = cx < wx1 - 25 ? 'left' : cx > wx2 + 25 ? 'right' : 'back';
+      const wall: 'back' | 'left' | 'right' = cx < wx1 + 10 ? 'left' : cx > wx2 - 10 ? 'right' : 'back';
       const xStartCm = Math.round(clamp(((bx1 - wx1) / Math.max(1, wx2 - wx1)) * widthCm, 0, widthCm));
       const xEndCm = Math.round(clamp(((bx2 - wx1) / Math.max(1, wx2 - wx1)) * widthCm, xStartCm + 10, widthCm));
       const yBottomCm = Math.round(clamp(((wy2 - by2) / Math.max(1, wy2 - wy1)) * heightCm, 0, heightCm - 10));
       const yTopCm = Math.round(clamp(((wy2 - by1) / Math.max(1, wy2 - wy1)) * heightCm, yBottomCm + 10, heightCm));
-      return {
+
+      const obsW = xEndCm - xStartCm;
+      const obsH = yTopCm - yBottomCm;
+      if (it.type === 'door' && wall === 'back' && (obsW < 40 || yTopCm < 150 || obsH < 130)) return;
+      if (it.type === 'window' && wall === 'back' && (obsW < 25 || obsH < 30)) return;
+
+      obstacles.push({
         id: `obs_${idx}`,
         type: it.type,
         label: it.label,
@@ -255,15 +316,19 @@ async function analyzeViaDirectHuggingFace(
         xEndCm,
         yBottomCm,
         yTopCm,
-      };
+      });
     });
 
   if (onProgress) onProgress('3/3 Gerando layout paramétrico de móveis sob medida...', 72);
 
   const allowedTypes: Record<RoomType, string> = {
-    cozinha: 'balcao_pia, balcao_gavetas, aereo_portas, aereo_basculante, torre_quente, nicho_geladeira',
-    quarto: 'guarda_roupa_correr, guarda_roupa_abrir, criado_mudo, painel_cabeceira, bancada_estudo',
-    sala: 'painel_tv_ripado, rack_suspenso, estante_nichos',
+    cozinha: 'balcao_pia, balcao_gavetas, balcao_cooktop, ilha_gourmet, aereo_portas, aereo_basculante, torre_quente, nicho_geladeira, cristaleira_vidro',
+    quarto: 'guarda_roupa_correr, guarda_roupa_abrir, closet_cabideiro_aberto, cama_bau_planejada, criado_mudo, painel_cabeceira, penteadeira_camarim, sapateira_prateleiras, bancada_estudo',
+    sala: 'painel_tv_ripado, rack_suspenso, estante_nichos, aparador_buffet, bar_adega, cristaleira_vidro',
+    banheiro: 'gabinete_banheiro, espelheira_armario, armario_vassoureiro, estante_nichos',
+    lavanderia: 'bancada_tanque_maquina, armario_vassoureiro, aereo_portas, balcao_gavetas',
+    escritorio: 'estacao_trabalho_L, arquivo_escritorio, estante_nichos, balcao_gavetas, painel_tv_ripado',
+    varanda_gourmet: 'balcao_churrasqueira, balcao_pia, bar_adega, ilha_gourmet, aereo_portas, cristaleira_vidro',
   };
 
   const obsSummary = obstacles.length
@@ -272,25 +337,38 @@ async function analyzeViaDirectHuggingFace(
 
   const exampleByRoom: Record<RoomType, string> = {
     cozinha:
-      '    {"type": "balcao_gavetas", "label": "Balcão Gaveteiro", "wall": "back", "xCm": 5, "yCm": 0, "widthCm": 80, "heightCm": 86, "depthCm": 60, "doorsCount": 0, "drawersCount": 3, "hasLed": false},\n' +
-      '    {"type": "balcao_pia", "label": "Balcão de Pia", "wall": "back", "xCm": 85, "yCm": 0, "widthCm": 150, "heightCm": 86, "depthCm": 60, "doorsCount": 3, "drawersCount": 0, "hasLed": false},\n' +
-      '    {"type": "torre_quente", "label": "Torre Quente Forno/Micro", "wall": "back", "xCm": 235, "yCm": 0, "widthCm": 70, "heightCm": 220, "depthCm": 60, "doorsCount": 2, "drawersCount": 2, "hasLed": false},\n' +
-      '    {"type": "aereo_basculante", "label": "Armário Aéreo Basculante", "wall": "back", "xCm": 5, "yCm": 150, "widthCm": 100, "heightCm": 68, "depthCm": 35, "doorsCount": 2, "drawersCount": 0, "hasLed": true}',
+      '    {"type": "balcao_pia", "label": "Balcão de Pia", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 140, "heightCm": 86, "depthCm": 60, "doorsCount": 3, "drawersCount": 0, "hasLed": false},\n' +
+      '    {"type": "balcao_cooktop", "label": "Balcão Cooktop", "wall": "back", "xCm": 150, "yCm": 0, "widthCm": 90, "heightCm": 86, "depthCm": 60, "doorsCount": 0, "drawersCount": 3, "hasLed": false},\n' +
+      '    {"type": "torre_quente", "label": "Torre Quente", "wall": "back", "xCm": 240, "yCm": 0, "widthCm": 70, "heightCm": 220, "depthCm": 60, "doorsCount": 2, "drawersCount": 2, "hasLed": false}',
     quarto:
-      '    {"type": "guarda_roupa_correr", "label": "Guarda-Roupa 3 Portas de Correr", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 210, "heightCm": 240, "depthCm": 60, "doorsCount": 3, "drawersCount": 4, "hasLed": false},\n' +
-      '    {"type": "bancada_estudo", "label": "Escrivaninha Planejada", "wall": "back", "xCm": 225, "yCm": 0, "widthCm": 105, "heightCm": 76, "depthCm": 55, "doorsCount": 0, "drawersCount": 2, "hasLed": false}',
+      '    {"type": "guarda_roupa_correr", "label": "Guarda-Roupa 3 Portas de Correr", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 200, "heightCm": 240, "depthCm": 60, "doorsCount": 3, "drawersCount": 4, "hasLed": false},\n' +
+      '    {"type": "penteadeira_camarim", "label": "Penteadeira Camarim c/ LED", "wall": "back", "xCm": 215, "yCm": 0, "widthCm": 100, "heightCm": 165, "depthCm": 45, "doorsCount": 0, "drawersCount": 2, "hasLed": true}',
     sala:
-      '    {"type": "painel_tv_ripado", "label": "Painel Ripado TV c/ Fita LED", "wall": "back", "xCm": 20, "yCm": 0, "widthCm": 240, "heightCm": 235, "depthCm": 8, "doorsCount": 0, "drawersCount": 0, "hasLed": true},\n' +
-      '    {"type": "rack_suspenso", "label": "Rack Suspenso", "wall": "back", "xCm": 20, "yCm": 28, "widthCm": 240, "heightCm": 38, "depthCm": 42, "doorsCount": 0, "drawersCount": 4, "hasLed": true}',
+      '    {"type": "painel_tv_ripado", "label": "Painel Ripado TV c/ LED", "wall": "back", "xCm": 15, "yCm": 0, "widthCm": 220, "heightCm": 235, "depthCm": 8, "doorsCount": 0, "drawersCount": 0, "hasLed": true},\n' +
+      '    {"type": "rack_suspenso", "label": "Rack Suspenso", "wall": "back", "xCm": 15, "yCm": 28, "widthCm": 220, "heightCm": 38, "depthCm": 42, "doorsCount": 0, "drawersCount": 4, "hasLed": true},\n' +
+      '    {"type": "cristaleira_vidro", "label": "Cristaleira Vidro c/ LED", "wall": "back", "xCm": 240, "yCm": 0, "widthCm": 75, "heightCm": 235, "depthCm": 42, "doorsCount": 2, "drawersCount": 0, "hasLed": true}',
+    banheiro:
+      '    {"type": "gabinete_banheiro", "label": "Gabinete Suspenso c/ Cuba", "wall": "back", "xCm": 20, "yCm": 46, "widthCm": 130, "heightCm": 44, "depthCm": 50, "doorsCount": 0, "drawersCount": 3, "hasLed": true},\n' +
+      '    {"type": "espelheira_armario", "label": "Espelheira Armário c/ LED", "wall": "back", "xCm": 20, "yCm": 115, "widthCm": 130, "heightCm": 78, "depthCm": 16, "doorsCount": 3, "drawersCount": 0, "hasLed": true}',
+    lavanderia:
+      '    {"type": "bancada_tanque_maquina", "label": "Bancada Tanque + Máquina", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 180, "heightCm": 90, "depthCm": 62, "doorsCount": 2, "drawersCount": 0, "hasLed": false},\n' +
+      '    {"type": "armario_vassoureiro", "label": "Armário Vassoureiro", "wall": "back", "xCm": 195, "yCm": 0, "widthCm": 70, "heightCm": 225, "depthCm": 55, "doorsCount": 2, "drawersCount": 0, "hasLed": false}',
+    escritorio:
+      '    {"type": "estacao_trabalho_L", "label": "Estação Home Office c/ Gaveteiro", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 180, "heightCm": 75, "depthCm": 62, "doorsCount": 0, "drawersCount": 3, "hasLed": false},\n' +
+      '    {"type": "arquivo_escritorio", "label": "Armário Arquivos Alto", "wall": "back", "xCm": 195, "yCm": 0, "widthCm": 95, "heightCm": 220, "depthCm": 45, "doorsCount": 2, "drawersCount": 2, "hasLed": false}',
+    varanda_gourmet:
+      '    {"type": "balcao_churrasqueira", "label": "Bancada Churrasqueira", "wall": "back", "xCm": 10, "yCm": 0, "widthCm": 160, "heightCm": 88, "depthCm": 65, "doorsCount": 3, "drawersCount": 2, "hasLed": false},\n' +
+      '    {"type": "bar_adega", "label": "Bar Adega c/ LED", "wall": "back", "xCm": 175, "yCm": 0, "widthCm": 100, "heightCm": 220, "depthCm": 45, "doorsCount": 2, "drawersCount": 0, "hasLed": true}',
   };
 
   const planPrompt =
     `You are a senior Brazilian custom cabinetry architect (móveis projetados).\n` +
-    `Room type: ${req.roomType}. Calibrated back wall size: width=${widthCm}cm, height=${heightCm}cm.\n` +
+    `Room type: ${req.roomType}. Calibrated back wall size: width=${widthCm}cm, height=${heightCm}cm, room depth=${depthCm}cm.\n` +
     `Detected obstacles:\n${obsSummary}\n` +
     `Client requirements: ${req.requirements || `Projeto funcional de ${req.roomType}`}\n` +
     `Allowed module types: ${allowedTypes[req.roomType]}.\n` +
-    `Design 3 to 5 coordinated cabinetry modules on wall="back" from xCm=0 up to ${widthCm}cm avoiding doors/windows/plumbing.\n` +
+    `Allowed walls: "back", "left", "right" (if L-layout fits cleanly past 65cm from corner), or "center" (for ilha_gourmet).\n` +
+    `Design 3 to 5 tailored cabinetry modules avoiding doors/windows/plumbing.\n` +
     `Return ONLY valid JSON matching:\n{\n  "detectedRoomType":"${req.roomType}",\n  "summaryPtBr":"Explicação objetiva em Português do Brasil",\n  "modules":[\n${exampleByRoom[req.roomType]}\n  ]\n}`;
 
   const planRes: any = await planConn.predict('/run_example', [
@@ -304,58 +382,114 @@ async function analyzeViaDirectHuggingFace(
     throw new Error('O modelo Qwen2-VL não retornou módulos válidos para a imagem.');
   }
 
-  const backDoors = obstacles.filter(o => o.wall === 'back' && o.type === 'door');
-  const backWindows = obstacles.filter(o => o.wall === 'back' && o.type === 'window');
+  const isLayeredOk = (t1: string, t2: string) => {
+    const a = [t1, t2].sort().join('+');
+    return (
+      a === 'painel_tv_ripado+rack_suspenso' ||
+      a === 'criado_mudo+painel_cabeceira' ||
+      a === 'cama_bau_planejada+painel_cabeceira' ||
+      a === 'espelheira_armario+gabinete_banheiro'
+    );
+  };
 
-  const isLayeredOk = (t1: string, t2: string) =>
-    (t1 === 'painel_tv_ripado' && t2 === 'rack_suspenso') ||
-    (t2 === 'painel_tv_ripado' && t1 === 'rack_suspenso') ||
-    (t1 === 'painel_cabeceira' && t2 === 'criado_mudo') ||
-    (t2 === 'painel_cabeceira' && t1 === 'criado_mudo');
+  const lowCounterTypes = new Set([
+    'balcao_pia', 'balcao_gavetas', 'balcao_cooktop', 'rack_suspenso',
+    'bancada_estudo', 'estacao_trabalho_L', 'criado_mudo', 'gabinete_banheiro',
+    'bancada_tanque_maquina', 'balcao_churrasqueira',
+  ]);
 
-  const lowCounterTypes = new Set(['balcao_pia', 'balcao_gavetas', 'rack_suspenso', 'bancada_estudo', 'criado_mudo']);
   const modules: ProposedCabinetModule[] = [];
   for (const raw of planJson.modules) {
-    if (!raw || !raw.type) continue;
-    let xCm = Math.round(clamp(Number(raw.xCm ?? 0), 0, Math.max(0, widthCm - 35)));
-    let wCm = Math.round(clamp(Number(raw.widthCm ?? 90), 35, widthCm - xCm));
-    const yCm = Math.round(clamp(Number(raw.yCm ?? 0), 0, Math.max(0, heightCm - 35)));
-    let hCm = Math.round(clamp(Number(raw.heightCm ?? 86), 30, Math.max(30, heightCm - yCm)));
-    const dCm = Math.round(clamp(Number(raw.depthCm ?? 58), 6, 75));
+    if (!raw || !raw.type || !VALID_MODULE_TYPES.has(String(raw.type).trim())) continue;
+    const mtype = String(raw.type).trim() as ModuleArchetype;
+    let wall = String(raw.wall || 'back').trim().toLowerCase() as 'back' | 'left' | 'right' | 'center';
+    if (!['back', 'left', 'right', 'center'].includes(wall)) wall = 'back';
 
-    if (backDoors.some(d => overlaps1D(xCm, xCm + wCm, d.xStartCm, d.xEndCm, 4))) continue;
-    for (const w of backWindows) {
-      if (overlaps1D(xCm, xCm + wCm, w.xStartCm, w.xEndCm, 4) && overlaps1D(yCm, yCm + hCm, w.yBottomCm, w.yTopCm, 4)) {
-        if (lowCounterTypes.has(raw.type) && yCm < 50 && w.yBottomCm >= 72) {
-          hCm = Math.min(hCm, w.yBottomCm - 4);
-        } else {
-          const overlapRight = w.xEndCm - xCm;
-          const overlapLeft = xCm + wCm - w.xStartCm;
-          if (overlapRight <= 30 && w.xEndCm + 3 + 45 <= widthCm) {
-            xCm = w.xEndCm + 3;
-            wCm = Math.min(wCm, widthCm - xCm);
-          } else if (overlapLeft <= 30 && w.xStartCm - 3 - xCm >= 40) {
-            wCm = w.xStartCm - 3 - xCm;
+    const maxSpan = wall === 'back' || wall === 'center' ? widthCm : Math.min(280, depthCm);
+    let xCm = Math.round(clamp(Number(raw.xCm ?? 0), 0, Math.max(0, maxSpan - 35)));
+    let wCm = Math.round(clamp(Number(raw.widthCm ?? 90), 35, maxSpan - xCm));
+    const yCm = Math.round(clamp(Number(raw.yCm ?? 0), 0, Math.max(0, heightCm - 35)));
+    let hCm = Math.round(clamp(Number(raw.heightCm ?? 86), 25, Math.max(25, heightCm - yCm)));
+    const dCm = Math.round(clamp(Number(raw.depthCm ?? 58), 6, 205));
+    const zCm = wall === 'center' ? Math.round(clamp(Number(raw.zCm ?? 155), 120, Math.max(130, depthCm - 80))) : undefined;
+
+    if (wall === 'left' && modules.some(m => m.wall === 'back' && m.xCm < 62) && xCm < 64) {
+      xCm = 64;
+      wCm = Math.min(wCm, Math.max(35, maxSpan - xCm));
+    } else if (wall === 'right' && modules.some(m => m.wall === 'back' && (m.xCm + m.widthCm) > widthCm - 62) && xCm < 64) {
+      xCm = 64;
+      wCm = Math.min(wCm, Math.max(35, maxSpan - xCm));
+    }
+
+    const wallDoors = obstacles.filter(o => o.wall === wall && o.type === 'door');
+    const wallWindows = obstacles.filter(o => o.wall === wall && o.type === 'window');
+
+    if (wall === 'back' && wallDoors.some(d => overlaps1D(xCm, xCm + wCm, d.xStartCm, d.xEndCm, 4))) continue;
+    if ((wall === 'left' || wall === 'right') && wallDoors.length > 0 && xCm < 120) {
+      xCm = 125;
+      wCm = Math.min(wCm, maxSpan - xCm);
+      if (wCm < 40) continue;
+    }
+
+    if (wall === 'back') {
+      for (const w of wallWindows) {
+        if (overlaps1D(xCm, xCm + wCm, w.xStartCm, w.xEndCm, 4) && overlaps1D(yCm, yCm + hCm, w.yBottomCm, w.yTopCm, 4)) {
+          if (lowCounterTypes.has(mtype) && yCm < 50 && w.yBottomCm >= 72) {
+            hCm = Math.min(hCm, w.yBottomCm - 4);
           } else {
-            wCm = 0;
+            const rightAvail = widthCm - (w.xEndCm + 3);
+            const leftAvail = w.xStartCm - 3;
+            if (rightAvail >= 55 && rightAvail >= leftAvail) {
+              xCm = w.xEndCm + 3;
+              wCm = Math.min(wCm, rightAvail);
+            } else if (leftAvail >= 55) {
+              wCm = Math.min(wCm, leftAvail);
+              xCm = Math.max(0, leftAvail - wCm);
+            } else {
+              wCm = 0;
+            }
           }
         }
       }
     }
     if (wCm < 35) continue;
 
-    const collides = modules.some(
-      m => !isLayeredOk(raw.type, m.type) &&
-      overlaps1D(xCm, xCm + wCm, m.xCm, m.xCm + m.widthCm, 2) &&
-      overlaps1D(yCm, yCm + hCm, m.yCm, m.yCm + m.heightCm, 2)
-    );
-    if (collides) continue;
+    const hasCollision = (candX: number, candW: number) =>
+      modules.some(
+        m => m.wall === wall &&
+        !isLayeredOk(mtype, m.type) &&
+        overlaps1D(candX, candX + candW, m.xCm, m.xCm + m.widthCm, 2) &&
+        overlaps1D(yCm, yCm + hCm, m.yCm, m.yCm + m.heightCm, 2)
+      );
 
-    modules.push({
+    if (hasCollision(xCm, wCm)) {
+      if (wall === 'back' || wall === 'left' || wall === 'right') {
+        let placed = false;
+        for (let stepX = 0; stepX <= Math.max(0, maxSpan - 45); stepX += 10) {
+          const candW = Math.min(wCm, maxSpan - stepX);
+          if (candW < 45) break;
+          const hitsDoor = wall === 'back' && wallDoors.some(d => overlaps1D(stepX, stepX + candW, d.xStartCm, d.xEndCm, 4));
+          const hitsWin = wall === 'back' && wallWindows.some(
+            w => overlaps1D(stepX, stepX + candW, w.xStartCm, w.xEndCm, 4) && overlaps1D(yCm, yCm + hCm, w.yBottomCm, w.yTopCm, 4)
+          );
+          if (!hitsDoor && !hitsWin && !hasCollision(stepX, candW)) {
+            xCm = stepX;
+            wCm = candW;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) continue;
+      } else {
+        continue;
+      }
+    }
+
+    const mod: ProposedCabinetModule = {
       id: `mod_${modules.length + 1}`,
-      type: raw.type,
-      label: String(raw.label || raw.type),
-      wall: 'back',
+      type: mtype,
+      label: String(raw.label || mtype),
+      wall,
       xCm,
       yCm,
       widthCm: wCm,
@@ -364,7 +498,9 @@ async function analyzeViaDirectHuggingFace(
       doorsCount: Math.round(clamp(Number(raw.doorsCount ?? 2), 0, 6)),
       drawersCount: Math.round(clamp(Number(raw.drawersCount ?? 0), 0, 8)),
       hasLed: Boolean(raw.hasLed),
-    });
+    };
+    if (zCm !== undefined) mod.zCm = zCm;
+    modules.push(mod);
   }
 
   if (!modules.length) {

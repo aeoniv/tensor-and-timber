@@ -1,7 +1,11 @@
-import { MDF_FINISH_OPTIONS, HARDWARE_KIT_OPTIONS } from '../data/pricingCatalog';
+import {
+  ALL_MDF_FINISHES,
+  MDF_FEATURED_FINISHES,
+  HARDWARE_KIT_OPTIONS,
+} from '../data/pricingCatalog';
 
 export function renderRoomPlannerStudio(): string {
-  const finishesHtml = MDF_FINISH_OPTIONS.map((f, idx) => `
+  const finishesHtml = MDF_FEATURED_FINISHES.map((f, idx) => `
     <button
       type="button"
       class="wood-card-btn room-finish-btn ${idx === 0 ? 'active' : ''}"
@@ -15,6 +19,19 @@ export function renderRoomPlannerStudio(): string {
       </div>
     </button>
   `).join('');
+
+  const catalogOptionsHtml = ALL_MDF_FINISHES.map((f) => `
+    <option value="${f.id}">
+      ${f.label} — ${f.tierLabel} (${f.cod15}) • R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch
+    </option>
+  `).join('');
+
+  const carcassIds = ['branco-artico', 'branco-ultra', 'cinza-platina', 'gianduia-sense'];
+  const carcassOptionsHtml = carcassIds
+    .map((cid) => MDF_FEATURED_FINISHES.find((f) => f.id === cid))
+    .filter((f): f is NonNullable<typeof f> => Boolean(f))
+    .map((f) => `<option value="${f.id}">Caixaria: ${f.label} (R$ ${f.sellPrice15.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/ch)</option>`)
+    .join('');
 
   const hardwareHtml = HARDWARE_KIT_OPTIONS.map((h, idx) => `
     <button
@@ -32,12 +49,12 @@ export function renderRoomPlannerStudio(): string {
       <div class="container">
 
         <div class="section-header text-center">
-          <span class="badge">IA Espacial + Tabela Real &bull; Cozinha, Quarto e Sala</span>
+          <span class="badge">7 Ambientes &bull; 30+ Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões Duratex</span>
           <h2 class="section-title">
             Projeto 3D e Pré-Orçamento por <span class="accent-text">Foto do Cômodo</span>
           </h2>
           <p class="section-subtitle">
-            Envie uma foto do ambiente vazio e informe uma medida de referência. A IA mapeia paredes, portas, janelas, hidráulica e tomadas via Hugging Face, gera a proposta em 3D e calcula a estimativa real pela nossa tabela.
+            Envie a foto de qualquer cômodo vazio (cozinha, quarto, closet, sala, banheiro, lavanderia, escritório ou área gourmet). A IA detecta aberturas e pontos técnicos, propõe os móveis em 3D e calcula pela nossa tabela real.
           </p>
         </div>
 
@@ -46,22 +63,20 @@ export function renderRoomPlannerStudio(): string {
           <!-- Coluna Esquerda: Inputs do Cômodo -->
           <div class="config-box">
 
-            <!-- Passo 1: Cômodo -->
+            <!-- Passo 1: 7 Tipos de Cômodo -->
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">1</span>
-                <span class="step-label">Tipo de Cômodo</span>
+                <span class="step-label">Escolha o Ambiente</span>
               </div>
-              <div class="archetype-tabs-row" id="room-type-selector">
-                <button type="button" class="archetype-tab room-type-tab active" data-room-type="cozinha">
-                  Cozinha
-                </button>
-                <button type="button" class="archetype-tab room-type-tab" data-room-type="quarto">
-                  Quarto / Closet
-                </button>
-                <button type="button" class="archetype-tab room-type-tab" data-room-type="sala">
-                  Sala / Painel TV
-                </button>
+              <div class="archetype-tabs-row" id="room-type-selector" style="flex-wrap: wrap;">
+                <button type="button" class="archetype-tab room-type-tab active" data-room-type="cozinha" data-default-cm="320">Cozinha</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="quarto" data-default-cm="340">Quarto / Closet</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="sala" data-default-cm="340">Sala / Home</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="banheiro" data-default-cm="180">Banheiro</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="lavanderia" data-default-cm="240">Lavanderia</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="escritorio" data-default-cm="280">Escritório</button>
+                <button type="button" class="archetype-tab room-type-tab" data-room-type="varanda_gourmet" data-default-cm="320">Área Gourmet</button>
               </div>
             </div>
 
@@ -121,25 +136,52 @@ export function renderRoomPlannerStudio(): string {
                 id="room-requirements-input"
                 rows="2"
                 class="prompt-input-area"
-                placeholder="Ex: Quero balcão de pia, gaveteiro, torre quente para forno/micro e armário aéreo sem tampar a janela..."
+                placeholder="Ex: Quero balcão de pia, cooktop, torre quente e armário aéreo..."
               ></textarea>
-              <div class="prompt-chips-row" id="room-req-chips">
-                <button type="button" class="prompt-chip room-req-chip" data-phrase="Cozinha com balcão de pia, gaveteiro, torre quente e aéreo">Cozinha c/ Torre Quente</button>
-                <button type="button" class="prompt-chip room-req-chip" data-phrase="Balcão inferior completo com gavetas profundas e nicho para geladeira">Cozinha + Nicho Geladeira</button>
-              </div>
+              <div class="prompt-chips-row" id="room-req-chips"></div>
             </div>
 
-            <!-- Passo 4: Padrão MDF + Ferragens da Planilha -->
+            <!-- Passo 4: Padrão MDF (2 Cores + Catálogo Completo) & Ferragens -->
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">4</span>
-                <span class="step-label">Padrão MDF (Tabela Atual) &amp; Ferragens</span>
+                <span class="step-label">Padrões MDF (Frentes &amp; Caixaria) &amp; Ferragens</span>
               </div>
+
               <div class="wood-grid" id="room-finish-selector">
                 ${finishesHtml}
               </div>
 
-              <div class="tension-row" id="room-hardware-selector" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <div style="margin-top: 10px;">
+                <label for="room-full-catalog-select" style="display:block; font-size:0.74rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">
+                  Ou pesquise todos os ${ALL_MDF_FINISHES.length} padrões da tabela (${ALL_MDF_FINISHES.length} Duratex/Arauco):
+                </label>
+                <select id="room-full-catalog-select" class="prompt-input-area" style="padding: 8px 10px; min-height: 0; font-size: 0.8rem;">
+                  ${catalogOptionsHtml}
+                </select>
+              </div>
+
+              <!-- Combinação 2 cores: Caixaria interna -->
+              <div style="margin-top: 10px; padding: 9px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle);">
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.79rem; font-weight:600; cursor:pointer; color:var(--text-primary);">
+                  <input type="checkbox" id="room-split-carcass-toggle" checked />
+                  <span>Combinar Caixaria Interna em Branco (economia de chapas)</span>
+                </label>
+                <div id="room-carcass-select-wrap" style="margin-top: 6px;">
+                  <select id="room-carcass-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.78rem;">
+                    ${carcassOptionsHtml}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Tampo / Pedra + Ferragens -->
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top: 10px;" id="room-counter-selector">
+                <button type="button" class="ctrl-btn active room-counter-btn" data-counter="claro">Tampo Claro</button>
+                <button type="button" class="ctrl-btn room-counter-btn" data-counter="escuro">Tampo Escuro</button>
+                <button type="button" class="ctrl-btn room-counter-btn" data-counter="madeira">Tampo Madeira</button>
+              </div>
+
+              <div class="tension-row" id="room-hardware-selector" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
                 ${hardwareHtml}
               </div>
             </div>
@@ -149,12 +191,12 @@ export function renderRoomPlannerStudio(): string {
               <span id="btn-analyze-room-text">🔍 Analisar Cômodo e Gerar Proposta 3D</span>
             </button>
             <p id="room-ai-engine-hint" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
-              Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Escala real &bull; Estimativa vinculada à planilha
+              Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Tabela real
             </p>
 
           </div>
 
-          <!-- Coluna Direita: Visualizador 3D + Estimativa + WhatsApp -->
+          <!-- Coluna Direita: Visualizador 3D + Estimativa + Edição Rápida + WhatsApp -->
           <div class="visualizer-column">
 
             <div class="atelier-canvas-card">
@@ -184,7 +226,7 @@ export function renderRoomPlannerStudio(): string {
               <div class="deal-header">
                 <div>
                   <h3 class="deal-title" id="room-deal-title">Proposta Sob Medida (Pré-Orçamento)</h3>
-                  <p class="deal-summary" id="room-deal-finish-summary">Branco Ártico Trama &bull; Linha Slow / Oculta</p>
+                  <p class="deal-summary" id="room-deal-finish-summary">Frentes: Branco Ártico Trama &bull; Ferragens Slow / Oculta</p>
                 </div>
                 <div class="deal-price" id="room-deal-price">Envie uma foto</div>
               </div>
@@ -197,9 +239,9 @@ export function renderRoomPlannerStudio(): string {
 
               <div class="deal-perks" id="room-bom-perks">
                 <div class="deal-perk-item">✓ Respeita portas, janelas e tomadas detectadas</div>
-                <div class="deal-perk-item">✓ Chapas MDF 15mm/6mm e ferragens reais</div>
+                <div class="deal-perk-item">✓ Chapas 15mm/6mm e ferragens reais da planilha</div>
                 <div class="deal-perk-item">✓ Exportação 3D compatível com SketchUp (.OBJ)</div>
-                <div class="deal-perk-item">✓ Estimativa sujeita à medição final no local</div>
+                <div class="deal-perk-item">✓ Ajuste larguras (-/+ 10 cm) e veja o preço na hora</div>
               </div>
 
               <div class="deal-actions">
