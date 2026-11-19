@@ -525,10 +525,10 @@ export class RoomPlannerController {
         ? this.currentAnalysis.obstacles
             .map(
               (o) =>
-                `<span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;font-size:0.74rem;font-weight:600;">⚠ ${ptTypeLabel(o.type, o.label)} (${ptWallLabel(o.wall)}: ${o.xStartCm}–${o.xEndCm}cm)</span>`
+                `<span class="obstacle-badge">⚠ ${ptTypeLabel(o.type, o.label)} (${ptWallLabel(o.wall)}: ${o.xStartCm}–${o.xEndCm}cm)</span>`
             )
             .join('')
-        : `<span style="display:inline-flex;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#166534;font-size:0.74rem;font-weight:600;">✓ Layout livre pronto para personalização</span>`;
+        : `<span class="obstacle-badge obstacle-badge--clear">✓ Layout livre pronto para personalização</span>`;
     }
 
     const modWrap = document.getElementById('room-modules-list');
@@ -536,23 +536,23 @@ export class RoomPlannerController {
       const modItems = this.currentAnalysis.modules
         .map(
           (m, idx) =>
-            `<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 0;border-bottom:1px dashed var(--border-subtle);flex-wrap:wrap;">
-               <div style="display:flex;align-items:center;gap:6px;">
-                 <strong style="font-size:0.83rem;">${m.label}</strong>
-                 <select class="mod-wall-select prompt-input-area" data-idx="${idx}" style="padding:2px 4px;min-height:0;font-size:0.72rem;width:auto;">
+            `<div class="module-item-row">
+               <div class="module-item-left">
+                 <strong class="module-item-title">${m.label}</strong>
+                 <select class="mod-wall-select select-control module-wall-select" data-idx="${idx}" aria-label="Parede do módulo ${m.label}">
                    <option value="back" ${m.wall === 'back' ? 'selected' : ''}>Fundo</option>
                    <option value="left" ${m.wall === 'left' ? 'selected' : ''}>Esq.</option>
                    <option value="right" ${m.wall === 'right' ? 'selected' : ''}>Dir.</option>
                    <option value="center" ${m.wall === 'center' ? 'selected' : ''}>Centro</option>
                  </select>
                </div>
-               <div style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
-                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 5px;font-size:0.72rem;" title="Largura -10cm">-10</button>
-                 <span style="font-size:0.78rem;font-weight:600;">${m.widthCm}×${m.heightCm}×${m.depthCm}</span>
-                 <button type="button" class="ctrl-btn mod-resize-btn" data-idx="${idx}" data-delta="10" style="padding:1px 5px;font-size:0.72rem;" title="Largura +10cm">+10</button>
-                 <button type="button" class="ctrl-btn mod-height-btn" data-idx="${idx}" data-delta="-10" style="padding:1px 5px;font-size:0.72rem;" title="Altura -10cm">A-</button>
-                 <button type="button" class="ctrl-btn mod-height-btn" data-idx="${idx}" data-delta="10" style="padding:1px 5px;font-size:0.72rem;" title="Altura +10cm">A+</button>
-                 <button type="button" class="ctrl-btn mod-remove-btn" data-idx="${idx}" style="padding:1px 6px;font-size:0.74rem;color:#b91c1c;" title="Remover módulo">&times;</button>
+               <div class="module-action-group">
+                 <button type="button" class="ctrl-btn ctrl-btn--mini mod-resize-btn" data-idx="${idx}" data-delta="-10" title="Largura -10cm">-10</button>
+                 <span class="module-dim-pill">${m.widthCm}×${m.heightCm}×${m.depthCm}</span>
+                 <button type="button" class="ctrl-btn ctrl-btn--mini mod-resize-btn" data-idx="${idx}" data-delta="10" title="Largura +10cm">+10</button>
+                 <button type="button" class="ctrl-btn ctrl-btn--mini mod-height-btn" data-idx="${idx}" data-delta="-10" title="Altura -10cm">A-</button>
+                 <button type="button" class="ctrl-btn ctrl-btn--mini mod-height-btn" data-idx="${idx}" data-delta="10" title="Altura +10cm">A+</button>
+                 <button type="button" class="ctrl-btn ctrl-btn--mini ctrl-btn--danger mod-remove-btn" data-idx="${idx}" title="Remover módulo">&times;</button>
                </div>
              </div>`
         )
@@ -563,7 +563,7 @@ export class RoomPlannerController {
       const extraDesc = quote.machiningAndGlassSubtotal > 0 ? ` • Vidro/Usin.: R$ ${quote.machiningAndGlassSubtotal.toLocaleString('pt-BR')}` : '';
       modWrap.innerHTML =
         modItems +
-        `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;padding-top:8px;font-weight:600;color:var(--brasil-verde);font-size:0.78rem;">
+        `<div class="module-bom-footer">
            <span>Consumo (${thickLabel[this.thicknessMode]})</span>
            <span>${sheetsDesc} • ${quote.hingesCount + quote.cornerHingesCount} dobr. / ${quote.slidesCount} corr.${extraDesc}</span>
          </div>`;

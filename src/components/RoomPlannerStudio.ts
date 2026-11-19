@@ -54,18 +54,18 @@ export function renderRoomPlannerStudio(): string {
       <div class="container">
 
         <div class="section-header text-center">
-          <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões Duratex</span>
+          <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões MDF</span>
           <h2 class="section-title">
             Projeto 3D e Pré-Orçamento por <span class="accent-text">Foto do Cômodo</span>
           </h2>
           <p class="section-subtitle">
-            Envie a foto de qualquer cômodo vazio (cozinha, quarto, closet, sala, banheiro, lavanderia, escritório ou área gourmet). A IA detecta aberturas e pontos técnicos, propõe os móveis em 3D e calcula pela nossa tabela real.
+            Envie a foto de qualquer ambiente vazio ou inicie manualmente. A IA detecta portas, janelas e pontos hidráulicos, propõe a modulação em 3D e libera o corte CNC em milímetros + SketchUp (.DAE).
           </p>
         </div>
 
         <div class="atelier-grid">
 
-          <!-- Coluna Esquerda: Inputs do Cômodo -->
+          <!-- Coluna Esquerda: Fluxo Rápido -> Ação IA -> Personalização Ao Vivo -->
           <div class="config-box">
 
             <!-- Passo 1: 7 Tipos de Cômodo -->
@@ -74,7 +74,7 @@ export function renderRoomPlannerStudio(): string {
                 <span class="step-number">1</span>
                 <span class="step-label">Escolha o Ambiente</span>
               </div>
-              <div class="archetype-tabs-row" id="room-type-selector" style="flex-wrap: wrap;">
+              <div class="room-type-grid" id="room-type-selector">
                 <button type="button" class="archetype-tab room-type-tab active" data-room-type="cozinha" data-default-cm="320">Cozinha</button>
                 <button type="button" class="archetype-tab room-type-tab" data-room-type="quarto" data-default-cm="340">Quarto / Closet</button>
                 <button type="button" class="archetype-tab room-type-tab" data-room-type="sala" data-default-cm="340">Sala / Home</button>
@@ -95,7 +95,7 @@ export function renderRoomPlannerStudio(): string {
                 <input type="file" id="room-photo-input" accept="image/png,image/jpeg,image/webp" style="display: none;" />
 
                 <div class="sketch-empty-state" id="room-photo-empty">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                     <circle cx="12" cy="13" r="4"/>
                   </svg>
@@ -117,124 +117,149 @@ export function renderRoomPlannerStudio(): string {
             <div class="config-step">
               <div class="step-header">
                 <span class="step-number">3</span>
-                <span class="step-label">Medida de Referência &amp; Requisitos</span>
+                <span class="step-label">Medida Real &amp; O que Você Precisa</span>
               </div>
-              <div style="display: grid; grid-template-columns: 1fr 96px; gap: 8px; margin-bottom: 10px;">
-                <select id="room-ref-type" class="prompt-input-area" style="padding: 9px 10px; min-height: 0;">
-                  <option value="wall_width">Largura da parede (cm)</option>
-                  <option value="ceiling_height">Altura pé-direito (cm)</option>
-                </select>
-                <input
-                  id="room-ref-cm"
-                  type="number"
-                  min="120"
-                  max="900"
-                  step="5"
-                  value="320"
-                  class="prompt-input-area"
-                  style="padding: 9px 10px; min-height: 0; text-align: center; font-weight: 700;"
-                  aria-label="Medida de referência em centímetros"
-                />
+              <div class="measure-grid">
+                <div class="field-group">
+                  <label for="room-ref-type" class="field-label">Referência da foto</label>
+                  <select id="room-ref-type" class="select-control">
+                    <option value="wall_width">Largura da parede</option>
+                    <option value="ceiling_height">Altura pé-direito</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label for="room-ref-cm" class="field-label">Medida exata</label>
+                  <div class="input-unit-wrap">
+                    <input
+                      id="room-ref-cm"
+                      type="number"
+                      min="120"
+                      max="900"
+                      step="5"
+                      value="320"
+                      class="number-control"
+                      aria-label="Medida de referência em centímetros"
+                    />
+                    <span class="input-unit-suffix">cm</span>
+                  </div>
+                </div>
               </div>
 
-              <textarea
-                id="room-requirements-input"
-                rows="2"
-                class="prompt-input-area"
-                placeholder="Ex: Quero balcão de pia, cooktop, torre quente e armário aéreo..."
-              ></textarea>
+              <div class="field-group">
+                <label for="room-requirements-input" class="field-label">Móveis desejados ou observações</label>
+                <textarea
+                  id="room-requirements-input"
+                  rows="2"
+                  class="prompt-input-area"
+                  placeholder="Ex: Quero balcão de pia, cooktop, torre quente e armário aéreo..."
+                ></textarea>
+              </div>
               <div class="prompt-chips-row" id="room-req-chips"></div>
             </div>
 
-            <!-- Passo 4: Padrão MDF (2 Cores + Catálogo Completo) & Ferragens -->
-            <div class="config-step">
-              <div class="step-header">
-                <span class="step-number">4</span>
-                <span class="step-label">Padrões MDF (Frentes &amp; Caixaria) &amp; Ferragens</span>
-              </div>
-
-              <div class="wood-grid" id="room-finish-selector">
-                ${finishesHtml}
-              </div>
-
-              <div style="margin-top: 10px;">
-                <label for="room-full-catalog-select" style="display:block; font-size:0.74rem; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">
-                  Ou pesquise todos os ${ALL_MDF_FINISHES.length} padrões da tabela (${ALL_MDF_FINISHES.length} Duratex/Arauco):
-                </label>
-                <select id="room-full-catalog-select" class="prompt-input-area" style="padding: 8px 10px; min-height: 0; font-size: 0.8rem;">
-                  ${catalogOptionsHtml}
-                </select>
-              </div>
-
-              <!-- Combinação 2 cores: Caixaria interna -->
-              <div style="margin-top: 10px; padding: 9px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle);">
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.79rem; font-weight:600; cursor:pointer; color:var(--text-primary);">
-                  <input type="checkbox" id="room-split-carcass-toggle" checked />
-                  <span>Combinar Caixaria Interna em Branco (economia de chapas)</span>
-                </label>
-                <div id="room-carcass-select-wrap" style="margin-top: 6px;">
-                  <select id="room-carcass-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.78rem;">
-                    ${carcassOptionsHtml}
-                  </select>
-                </div>
-              </div>
-
-              <!-- Tampo / Pedra + Estilo Frente + Puxador + Espessura + Ferragens -->
-              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top: 10px;" id="room-counter-selector">
-                <button type="button" class="ctrl-btn active room-counter-btn" data-counter="claro">Tampo Claro</button>
-                <button type="button" class="ctrl-btn room-counter-btn" data-counter="escuro">Tampo Escuro</button>
-                <button type="button" class="ctrl-btn room-counter-btn" data-counter="madeira">Tampo Madeira</button>
-              </div>
-
-              <div style="margin-top: 10px; padding: 9px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 7px;">
-                <div>
-                  <span style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Estilo das Frentes / Vidros</span>
-                  <div style="display:flex; gap:5px; flex-wrap:wrap;" id="room-front-style-selector">
-                    <button type="button" class="ctrl-btn active room-front-style-btn" data-front-style="lisa">Lisa Reta</button>
-                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="cava45">Cava 45°</button>
-                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="provencal">Provençal</button>
-                    <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="vidro_reflecta">Vidro Reflecta</button>
-                  </div>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                  <div>
-                    <label for="room-handle-style-select" style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Puxador / Acionamento</label>
-                    <select id="room-handle-style-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
-                      <option value="perfil_18">Perfil Alumínio 18mm</option>
-                      <option value="perfil_15">Perfil Slim 15mm</option>
-                      <option value="fecho_toque">Fecho Toque (Sem Puxador)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="room-thickness-select" style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-secondary); margin-bottom:3px;">Espessura Estrutural</label>
-                    <select id="room-thickness-select" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
-                      <option value="15mm">15mm Padrão (+6mm)</option>
-                      <option value="18mm">18mm Reforçado</option>
-                      <option value="25mm_engrossado">25/30mm Engrossado</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tension-row" id="room-hardware-selector" style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
-                ${hardwareHtml}
-              </div>
+            <!-- Ação Principal Imediata (antes das opções avançadas) -->
+            <div class="planner-cta-block">
+              <button type="button" class="btn btn-primary btn-block btn-lg" id="btn-analyze-empty-room">
+                <span id="btn-analyze-room-text">🔍 Analisar Cômodo e Gerar Proposta 3D</span>
+              </button>
+              <button type="button" class="btn btn-outline btn-block btn-sm" id="btn-start-blank-room">
+                📐 Montar Ambiente Manualmente (Sem Foto)
+              </button>
+              <p id="room-ai-engine-hint" class="planner-cta-hint">
+                Visão Computacional 3D (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Atualiza o 3D ao vivo abaixo
+              </p>
             </div>
 
-            <!-- Botão Principal + Modo Livre Sem Foto -->
-            <button type="button" class="btn btn-primary btn-block btn-lg" id="btn-analyze-empty-room" style="margin-top: 16px;">
-              <span id="btn-analyze-room-text">🔍 Analisar Cômodo e Gerar Proposta 3D</span>
-            </button>
-            <button type="button" class="btn btn-outline btn-block" id="btn-start-blank-room" style="margin-top: 8px; font-size: 0.82rem; padding: 8px 12px;">
-              📐 Montar Ambiente Manualmente (Sem Foto)
-            </button>
-            <p id="room-ai-engine-hint" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
-              Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Tabela real
-            </p>
+            <!-- Passo 4: Personalização Ao Vivo de MDF, Frentes & Ferragens -->
+            <details class="customizer-accordion" open>
+              <summary class="customizer-summary">
+                <div class="step-header" style="margin-bottom: 0;">
+                  <span class="step-number">4</span>
+                  <span class="step-label">MDF, Frentes &amp; Ferragens (Ao Vivo no 3D)</span>
+                </div>
+                <span class="customizer-chevron">▾</span>
+              </summary>
+
+              <div class="customizer-body">
+                <div class="wood-grid" id="room-finish-selector">
+                  ${finishesHtml}
+                </div>
+
+                <div class="field-group">
+                  <label for="room-full-catalog-select" class="field-label">
+                    Pesquisar todos os ${ALL_MDF_FINISHES.length} padrões Duratex / Arauco:
+                  </label>
+                  <select id="room-full-catalog-select" class="select-control select-control--compact">
+                    ${catalogOptionsHtml}
+                  </select>
+                </div>
+
+                <!-- Combinação 2 cores: Caixaria interna -->
+                <div class="subpanel-card">
+                  <label class="checkbox-row">
+                    <input type="checkbox" id="room-split-carcass-toggle" checked />
+                    <span>Combinar Caixaria Interna em Branco (economia de chapas)</span>
+                  </label>
+                  <div id="room-carcass-select-wrap">
+                    <select id="room-carcass-select" class="select-control select-control--compact" aria-label="Padrão da caixaria interna">
+                      ${carcassOptionsHtml}
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Tampo -->
+                <div class="field-group">
+                  <span class="field-label">Tom da Bancada / Tampo</span>
+                  <div class="pill-toggle-row" id="room-counter-selector">
+                    <button type="button" class="ctrl-btn active room-counter-btn" data-counter="claro">Tampo Claro</button>
+                    <button type="button" class="ctrl-btn room-counter-btn" data-counter="escuro">Tampo Escuro</button>
+                    <button type="button" class="ctrl-btn room-counter-btn" data-counter="madeira">Tampo Madeira</button>
+                  </div>
+                </div>
+
+                <!-- Estilo das Frentes, Puxador e Espessura -->
+                <div class="subpanel-card">
+                  <div class="field-group">
+                    <span class="field-label">Estilo das Frentes / Vidros</span>
+                    <div class="pill-toggle-row" id="room-front-style-selector">
+                      <button type="button" class="ctrl-btn active room-front-style-btn" data-front-style="lisa">Lisa Reta</button>
+                      <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="cava45">Cava 45°</button>
+                      <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="provencal">Provençal</button>
+                      <button type="button" class="ctrl-btn room-front-style-btn" data-front-style="vidro_reflecta">Vidro Reflecta</button>
+                    </div>
+                  </div>
+                  <div class="two-col-grid">
+                    <div class="field-group">
+                      <label for="room-handle-style-select" class="field-label">Puxador / Acionamento</label>
+                      <select id="room-handle-style-select" class="select-control select-control--compact">
+                        <option value="perfil_18">Perfil Alumínio 18mm</option>
+                        <option value="perfil_15">Perfil Slim 15mm</option>
+                        <option value="fecho_toque">Fecho Toque (Sem Puxador)</option>
+                      </select>
+                    </div>
+                    <div class="field-group">
+                      <label for="room-thickness-select" class="field-label">Espessura Estrutural</label>
+                      <select id="room-thickness-select" class="select-control select-control--compact">
+                        <option value="15mm">15mm Padrão (+6mm)</option>
+                        <option value="18mm">18mm Reforçado</option>
+                        <option value="25mm_engrossado">25/30mm Engrossado</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <span class="field-label">Linha de Ferragens</span>
+                  <div class="tension-pills-row" id="room-hardware-selector">
+                    ${hardwareHtml}
+                  </div>
+                </div>
+              </div>
+            </details>
 
           </div>
 
-          <!-- Coluna Direita: Visualizador 3D + Estimativa + Edição Rápida + WhatsApp -->
+          <!-- Coluna Direita (Fixa no Scroll Desktop): Visualizador 3D + Orçamento + Edição + Export -->
           <div class="visualizer-column">
 
             <div class="atelier-canvas-card">
@@ -243,20 +268,22 @@ export function renderRoomPlannerStudio(): string {
                 <span class="stage-hint" id="room-dims-pill">Escala calibrada (cm)</span>
               </div>
 
-              <div class="atelier-canvas-viewport" id="room-planner-canvas" style="min-height: 410px;"></div>
+              <div class="atelier-canvas-viewport" id="room-planner-canvas"></div>
 
-              <div class="stage-controls-bar">
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <div class="stage-controls-stack">
+                <div class="stage-controls-row">
+                  <span class="controls-group-label">Cena 3D:</span>
                   <button type="button" class="ctrl-btn" id="room-btn-autorotate">Girar: OFF</button>
                   <button type="button" class="ctrl-btn" id="room-btn-wireframe">Aramado</button>
                   <button type="button" class="ctrl-btn active" id="room-btn-shell">Paredes</button>
                   <button type="button" class="ctrl-btn" id="room-btn-moge" style="display: none;">Malha MoGe-2</button>
                 </div>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                  <button type="button" class="ctrl-btn" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp (.DAE)</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Malha .OBJ em escala métrica">OBJ</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC (.DXF)</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte + BOM (.CSV)</button>
+                <div class="stage-controls-row stage-controls-row--export">
+                  <span class="controls-group-label">Exportar:</span>
+                  <button type="button" class="ctrl-btn ctrl-btn--primary" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp (.DAE)</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Malha .OBJ em escala métrica">.OBJ</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC (.DXF)</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte + BOM (.CSV)</button>
                   <button type="button" class="ctrl-btn" id="room-btn-download-glb" title="Modelo 3D GLB para Web/Blender">.GLB</button>
                 </div>
               </div>
@@ -272,45 +299,45 @@ export function renderRoomPlannerStudio(): string {
                 <div class="deal-price" id="room-deal-price">Envie uma foto</div>
               </div>
 
-              <div id="room-analysis-details" style="display: none; margin: 12px 0; font-size: 0.85rem; color: var(--text-secondary);">
-                <p id="room-architect-notes" style="margin-bottom: 10px; line-height: 1.5;"></p>
-                <div id="room-obstacles-badges" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;"></div>
-                <div id="room-modules-list" style="background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px;"></div>
+              <div id="room-analysis-details" class="analysis-details-wrap">
+                <p id="room-architect-notes" class="architect-notes-text"></p>
+                <div id="room-obstacles-badges" class="obstacles-badges-row"></div>
+                <div id="room-modules-list" class="module-list-card"></div>
 
                 <!-- Adicionar módulo avulso direto na cena 3D -->
-                <div id="room-add-module-bar" style="margin-top: 8px; padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--border-strong); background: #fff; display: grid; grid-template-columns: 1fr 84px auto; gap: 6px; align-items: center;">
-                  <select id="room-add-module-type" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
+                <div id="room-add-module-bar" class="add-module-bar">
+                  <select id="room-add-module-type" class="select-control select-control--compact" aria-label="Tipo de módulo para adicionar">
                     ${addModuleOptionsHtml}
                   </select>
-                  <select id="room-add-module-wall" class="prompt-input-area" style="padding: 6px 6px; min-height: 0; font-size: 0.76rem;">
+                  <select id="room-add-module-wall" class="select-control select-control--compact" aria-label="Parede de posicionamento">
                     <option value="back">Fundo</option>
                     <option value="left">Esq.</option>
                     <option value="right">Dir.</option>
                     <option value="center">Centro</option>
                   </select>
-                  <button type="button" class="ctrl-btn active" id="btn-add-custom-module" style="padding: 6px 10px; white-space: nowrap; font-weight: 700;">+ Módulo</button>
+                  <button type="button" class="ctrl-btn active" id="btn-add-custom-module">+ Módulo</button>
                 </div>
               </div>
 
               <div class="deal-perks" id="room-bom-perks">
                 <div class="deal-perk-item">✓ Cantos em L, tamponamento até o teto e muxarabi</div>
                 <div class="deal-perk-item">✓ Cava 45°, Provençal, Vidro Reflecta e 18/25mm</div>
-                <div class="deal-perk-item">✓ SketchUp nativo (.DAE / .OBJ) + Corte CNC (.DXF / .CSV em mm)</div>
+                <div class="deal-perk-item">✓ SketchUp nativo (.DAE / .OBJ) + Corte CNC (.DXF / .CSV mm)</div>
                 <div class="deal-perk-item">✓ Adicione móveis e ajuste medidas (-/+ 10 cm) na hora</div>
               </div>
 
               <div class="deal-actions">
                 <a
                   id="room-btn-whatsapp"
-                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20um%20orçamento%20de%20móveis%20planejados%20com%20a%2083%20Ambientes%20Planejados."
+                  href="https://wa.me/558398229900?text=Olá!%20Gostaria%20de%20orçar%20um%20projeto%20planejado%20pelo%20simulador%203D%20da%2083%20Ambientes."
                   target="_blank"
                   rel="noopener noreferrer"
                   class="btn btn-whatsapp btn-lg"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.771.815 2.791.815 3.179 0 5.765-2.586 5.765-5.766 0-3.18-2.586-5.766-5.765-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.741 0-3.376-.448-4.807-1.231l-5.193 1.36 1.385-5.059c-.886-1.488-1.385-3.228-1.385-5.07 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
                   </svg>
-                  <span>Enviar Projeto + Estimativa no WhatsApp</span>
+                  <span>Enviar Projeto 3D e Pré-Orçamento no WhatsApp</span>
                 </a>
               </div>
             </div>

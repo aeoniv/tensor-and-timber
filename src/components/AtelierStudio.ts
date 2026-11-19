@@ -3,11 +3,11 @@ export function renderAtelierStudio(): string {
     <section class="section section-atelier" id="atelier-section">
       <div class="container">
         
-        <div class="section-title-wrap">
-          <span class="badge">Estúdio 3D Interativo &bull; Hugging Face ZeroGPU</span>
-          <h2 class="section-title">Geração 3D por Texto ou Imagem</h2>
+        <div class="section-header text-center">
+          <span class="badge">Estúdio 3D Interativo &bull; Móveis Autorais &amp; Tensegridade</span>
+          <h2 class="section-title">Geração 3D por <span class="accent-text">Texto ou Croqui</span></h2>
           <p class="section-subtitle">
-            Informe a descrição do móvel ou faça upload de um croqui/foto de referência. O motor neural ZeroGPU processa a geometria e compila a malha 3D real (.GLB) diretamente no navegador.
+            Descreva uma peça exclusiva ou envie um croqui/foto de referência. A IA reconstrói a geometria em 3D real (.GLB) para visualização e orçamento sob medida.
           </p>
         </div>
 
@@ -128,12 +128,14 @@ export function renderAtelierStudio(): string {
             </div>
 
             <!-- PRIMARY ACTION: GENERATE 3D BUTTON -->
-            <button class="btn btn-primary btn-block btn-lg" id="btn-generate-custom-3d" style="margin-top: 20px;">
-              <span id="btn-generate-3d-text">✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)</span>
-            </button>
-            <p style="font-size: 0.78rem; color: #78716c; text-align: center; margin-top: 8px;">
-              Motor Neural ZeroGPU ativo &bull; Reconstrução 3D real por texto ou imagem &bull; Download .GLB
-            </p>
+            <div class="planner-cta-block" style="margin-bottom: 0;">
+              <button class="btn btn-primary btn-block btn-lg" id="btn-generate-custom-3d">
+                <span id="btn-generate-3d-text">✨ Gerar Objeto 3D com IA</span>
+              </button>
+              <p class="planner-cta-hint">
+                Reconstrução 3D real por texto ou imagem &bull; Download imediato .GLB
+              </p>
+            </div>
 
           </div>
 
@@ -149,12 +151,12 @@ export function renderAtelierStudio(): string {
               <div class="atelier-canvas-viewport" id="atelier-3d-canvas"></div>
 
               <div class="stage-controls-bar">
-                <div style="display: flex; gap: 8px;">
+                <div class="pill-toggle-row">
                   <button class="ctrl-btn active" id="atelier-btn-autorotate">Girar: ON</button>
                   <button class="ctrl-btn" id="atelier-btn-wireframe">Aramado</button>
                   <button class="ctrl-btn" id="atelier-btn-lighting">Luz Natural</button>
                 </div>
-                <button class="ctrl-btn" id="btn-download-glb">Baixar 3D (.GLB)</button>
+                <button class="ctrl-btn ctrl-btn--primary" id="btn-download-glb">Baixar 3D (.GLB)</button>
               </div>
             </div>
 

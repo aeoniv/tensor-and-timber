@@ -292,7 +292,7 @@ class AtelierApp {
         }
         this.showToast('Croqui carregado! Clique em Gerar Objeto 3D para processar.');
         const btnText = document.getElementById('btn-generate-3d-text');
-        if (btnText) btnText.textContent = '✨ Gerar Objeto 3D a partir da Imagem (Hugging Face)';
+        if (btnText) btnText.textContent = '✨ Gerar Objeto 3D com Base na Imagem';
       };
       reader.readAsDataURL(file);
     };
@@ -330,7 +330,7 @@ class AtelierApp {
       }
       this.showToast('Referência removida.');
       const btnText = document.getElementById('btn-generate-3d-text');
-      if (btnText) btnText.textContent = '✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)';
+      if (btnText) btnText.textContent = '✨ Gerar Objeto 3D com IA';
     });
 
     // 6. PRIMARY ACTION: GENERATE CUSTOM 3D OBJECT BUTTON
@@ -348,10 +348,10 @@ class AtelierApp {
 
     const prompt = promptInput || `${this.currentModelName} em madeira ${this.currentWood} com cabos de ${this.currentTension}`;
 
-    // Set loading state with live ZeroGPU TRELLIS neural synthesis indicators
+    // Set loading state with neural synthesis indicators
     if (btn) btn.disabled = true;
-    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Conectando ao ZeroGPU TRELLIS...</span>`;
-    if (statusLabel) statusLabel.textContent = 'Sintetizando Malha Neural 3D (.GLB)...';
+    if (btnText) btnText.innerHTML = `<span class="loading-spinner"></span> <span>Gerando modelo 3D em nuvem...</span>`;
+    if (statusLabel) statusLabel.textContent = 'Sintetizando Modelo 3D (.GLB)...';
 
     try {
       let meta: any = null;
@@ -380,13 +380,13 @@ class AtelierApp {
         colors: ['#10b981', '#f5c542', '#38bdf8']
       });
 
-      this.showToast('Malha 3D neural (.GLB) gerada com sucesso via TRELLIS!');
+      this.showToast('Modelo 3D (.GLB) gerado com sucesso!');
     } catch (err) {
       console.error('Error in custom 3D generation:', err);
-      this.showToast('Modelo 3D neural calibrado e carregado no ateliê.');
+      this.showToast('Modelo 3D calibrado e carregado no ateliê.');
     } finally {
       if (btn) btn.disabled = false;
-      if (btnText) btnText.innerHTML = `✨ Gerar Objeto 3D com IA (Hugging Face ZeroGPU)`;
+      if (btnText) btnText.innerHTML = `✨ Gerar Objeto 3D com IA`;
       if (statusLabel) statusLabel.textContent = 'Visualização 3D Ativa';
     }
   }
