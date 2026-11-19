@@ -229,8 +229,35 @@ export function renderRoomPlannerStudio(): string {
               📐 Montar Ambiente Manualmente (Sem Foto)
             </button>
             <p id="room-ai-engine-hint" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
-              Visão Computacional Hugging Face (MoGe-2 + Qwen2-VL) &bull; Layouts em L / Ilha &bull; Tabela real
+              Visão Computacional Hugging Face (Créditos Router + ZeroGPU) &bull; Tabela real
             </p>
+
+            <details id="room-hf-settings" style="margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); font-size: 0.76rem;">
+              <summary style="cursor: pointer; font-weight: 700; color: var(--text-secondary); user-select: none;">
+                ⚙️ Token Hugging Face &amp; Motor de Créditos (Opcional)
+              </summary>
+              <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                <select id="room-ai-engine-mode" class="prompt-input-area" style="padding: 6px 8px; min-height: 0; font-size: 0.76rem;">
+                  <option value="auto">Automático (Créditos da Conta → ZeroGPU)</option>
+                  <option value="router">Usar Créditos da Conta (Inference Providers)</option>
+                  <option value="zerogpu">Somente Spaces ZeroGPU (Gratuito / PRO)</option>
+                </select>
+                <input
+                  id="room-hf-token-input"
+                  type="password"
+                  autocomplete="off"
+                  class="prompt-input-area"
+                  style="padding: 7px 9px; min-height: 0; font-size: 0.76rem;"
+                  placeholder="hf_... (salvo só no seu navegador)"
+                  aria-label="Token Hugging Face opcional"
+                />
+                <span style="color: var(--text-muted); line-height: 1.4;">
+                  ZeroGPU usa cota diária de segundos; <strong>Inference Providers</strong> debita dos <strong>créditos ($) da conta</strong>. No token em
+                  <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style="color: var(--brasil-verde); text-decoration: underline;">huggingface.co/settings/tokens</a>,
+                  marque <strong>Make calls to Inference Providers</strong>.
+                </span>
+              </div>
+            </details>
 
           </div>
 

@@ -6,9 +6,12 @@ import time
 import uuid
 import shutil
 import base64
+import hashlib
 import mimetypes
 import threading
 import traceback
+import urllib.request
+import urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
@@ -59,13 +62,95 @@ VALID_MODULES = {
 }
 
 
-def get_space_client(space_id: str) -> Client:
+ROUTER_VISION_MODELS = [
+    'Qwen/Qwen3-VL-8B-Instruct',
+    'Qwen/Qwen2.5-VL-72B-Instruct',
+    'Qwen/Qwen3-VL-30B-A3B-Instruct',
+]
+
+
+def get_space_client(space_id: str, token: str | None = None) -> Client:
+    effective_token = (token or HF_TOKEN or '').strip() or None
+    key = (space_id, hashlib.sha256((effective_token or 'anon').encode()).hexdigest()[:12])
     with _clients_lock:
-        if space_id not in _clients:
-            print(f'[HF] Connecting to Space {space_id}...', flush=True)
-            _clients[space_id] = Client(space_id, token=HF_TOKEN or None)
+        if key not in _clients:
+            print(f'[HF] Connecting to Space {space_id} (auth={bool(effective_token)})...', flush=True)
+            _clients[key] = Client(space_id, token=effective_token)
             print(f'[HF] Connected to {space_id}!', flush=True)
-        return _clients[space_id]
+        return _clients[key]
+
+
+def call_hf_router_vision(img_path: Path, prompt_text: str, token: str | None = None) -> tuple[str, str]:
+    active_token = (token or HF_TOKEN or '').strip()
+    if not active_token:
+        raise PermissionError('HF Token não configurado para chamar HF Inference Providers.')
+
+    img_bytes = img_path.read_bytes()
+    b64 = base64.b64encode(img_bytes).decode('ascii')
+    data_uri = f'data:image/png;base64,{b64}'
+
+    last_err = None
+    for model_id in ROUTER_VISION_MODELS:
+        payload = json.dumps({
+            'model': model_id,
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': [
+                        {'type': 'image_url', 'image_url': {'url': data_uri}},
+                        {'type': 'text', 'text': prompt_text},
+                    ],
+                }
+            ],
+            'max_tokens': 1400,
+            'temperature': 0.15,
+        }).encode('utf-8')
+        req = urllib.request.Request(
+            'https://router.huggingface.co/v1/chat/completions',
+            data=payload,
+            headers={
+                'Authorization': f'Bearer {active_token}',
+                'Content-Type': 'application/json',
+            },
+            method='POST',
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                body = json.loads(resp.read().decode('utf-8'))
+                content = body['choices'][0]['message']['content']
+                if content:
+                    return str(content), model_id
+        except urllib.error.HTTPError as he:
+            err_body = he.read().decode('utf-8', errors='ignore')
+            if he.code in (401, 403):
+                raise PermissionError(
+                    f'HF Router {he.code}: token atual não tem permissão "Make calls to Inference Providers" ({err_body[:180]})'
+                )
+            last_err = f'{model_id} HTTP {he.code}: {err_body[:180]}'
+        except Exception as exc:
+            last_err = f'{model_id}: {exc}'
+
+    raise RuntimeError(f'HF Inference Router falhou: {last_err}')
+
+
+def format_hf_error_ptbr(err: Exception, router_note: str = '') -> str:
+    raw = str(err)
+    low = raw.lower()
+    is_quota = any(k in low for k in ['quota', 'zerogpu', 'exceeded', 'gpu', 'rate limit', '429'])
+    is_perm = 'inference providers' in low or '403' in low or '401' in low or 'unauthorized' in low or 'token' in low
+    if is_quota or is_perm or router_note:
+        details = []
+        if is_quota:
+            details.append('Cota diária gratuita/ZeroGPU do Hugging Face esgotada nas Spaces públicas.')
+        if '403' in router_note.lower() or 'inference providers' in router_note.lower() or is_perm:
+            details.append(
+                'Seu HF Token Fine-grained atual não tem a permissão "Make calls to Inference Providers" ativada para debitar dos créditos da conta ($).'
+            )
+        details.append(
+            'Solução: em huggingface.co/settings/tokens crie/edite um Fine-grained Token marcando "Make calls to Inference Providers" e "Read access to contents of all repos", e cole no campo "Token Hugging Face" abaixo (ou no .env).'
+        )
+        return ' '.join(details)
+    return f'Falha no pipeline Hugging Face ao analisar a foto: {raw}'
 
 
 def decode_base64_image(image_data: str, out_path: Path, max_dim: int = 1024) -> tuple[int, int]:
@@ -132,8 +217,8 @@ def clamp(v: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, v))
 
 
-def run_moge2_task(img_path: Path, run_id: str) -> dict:
-    moge = get_space_client('Ruicheng/MoGe-2')
+def run_moge2_task(img_path: Path, run_id: str, token: str | None = None) -> dict:
+    moge = get_space_client('Ruicheng/MoGe-2', token)
     res = moge.predict(
         image=handle_file(str(img_path)),
         max_size=512,
@@ -190,35 +275,7 @@ def run_moge2_task(img_path: Path, run_id: str) -> dict:
     }
 
 
-def run_detection_task(img_path: Path) -> dict:
-    det = get_space_client('maxiw/Qwen2-VL-Detection')
-    default_sys = (
-        'You are a helpfull assistant to detect objects in images. When asked to detect elements based on a description '
-        'you return bounding boxes for all elements in the form of [xmin, ymin, xmax, ymax] whith the values beeing '
-        'scaled to 1000 by 1000 pixels. When there are more than one result, answer with a list of bounding boxes '
-        'in the form of [[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ...].'
-    )
-    res = det.predict(
-        image=handle_file(str(img_path)),
-        text_input='Identify the window, plumbing water pipe/drain, electrical outlets, doors, and back wall in this empty room.',
-        system_prompt=default_sys,
-        model_id='Qwen/Qwen2-VL-7B-Instruct',
-        api_name='/run_example',
-    )
-    raw_text = res[0]
-    if isinstance(raw_text, str) and raw_text.strip().startswith('['):
-        try:
-            unwrapped = json.loads(raw_text)
-            if isinstance(unwrapped, list):
-                raw_text = unwrapped
-        except Exception:
-            pass
-    if isinstance(raw_text, list):
-        raw_text_str = '\n'.join(str(x) for x in raw_text)
-    else:
-        raw_text_str = str(raw_text or '')
-    raw_text_str = raw_text_str.replace('\\n', '\n')
-
+def parse_detection_raw_text(raw_text_str: str) -> dict:
     boxes = []
     parsed = extract_json_payload(raw_text_str)
     if isinstance(parsed, list):
@@ -253,6 +310,51 @@ def run_detection_task(img_path: Path) -> dict:
                     })
 
     return {'items': boxes, 'rawText': raw_text_str}
+
+
+def run_detection_via_router(img_path: Path, token: str | None = None) -> tuple[dict, str]:
+    det_prompt = (
+        'Detect architectural elements in this empty room interior photo.\n'
+        'Return ONLY a JSON array of objects [{"label": "...", "bbox": [xmin, ymin, xmax, ymax]}] '
+        'with integer coordinates normalized to 0..1000.\n'
+        'Only include elements actually visible in the photo: '
+        '"back wall" (the main front-facing wall excluding angled side walls/floor/ceiling), '
+        '"window", "door", "electrical outlet", "plumbing pipe".\n'
+        'If there is no visible door or window, omit it cleanly.'
+    )
+    out_text, used_model = call_hf_router_vision(img_path, det_prompt, token)
+    return parse_detection_raw_text(out_text), f'HF Router ({used_model})'
+
+
+def run_detection_task(img_path: Path, token: str | None = None) -> dict:
+    det = get_space_client('maxiw/Qwen2-VL-Detection', token)
+    default_sys = (
+        'You are a helpfull assistant to detect objects in images. When asked to detect elements based on a description '
+        'you return bounding boxes for all elements in the form of [xmin, ymin, xmax, ymax] whith the values beeing '
+        'scaled to 1000 by 1000 pixels. When there are more than one result, answer with a list of bounding boxes '
+        'in the form of [[xmin, ymin, xmax, ymax], [xmin, ymin, xmax, ymax], ...].'
+    )
+    res = det.predict(
+        image=handle_file(str(img_path)),
+        text_input='Identify the window, plumbing water pipe/drain, electrical outlets, doors, and back wall in this empty room.',
+        system_prompt=default_sys,
+        model_id='Qwen/Qwen2-VL-7B-Instruct',
+        api_name='/run_example',
+    )
+    raw_text = res[0]
+    if isinstance(raw_text, str) and raw_text.strip().startswith('['):
+        try:
+            unwrapped = json.loads(raw_text)
+            if isinstance(unwrapped, list):
+                raw_text = unwrapped
+        except Exception:
+            pass
+    if isinstance(raw_text, list):
+        raw_text_str = '\n'.join(str(x) for x in raw_text)
+    else:
+        raw_text_str = str(raw_text or '')
+    raw_text_str = raw_text_str.replace('\\n', '\n')
+    return parse_detection_raw_text(raw_text_str)
 
 
 def _bbox_iou(a: list, b: list) -> float:
@@ -359,9 +461,7 @@ def calibrate_room_geometry(det_result: dict, img_size: tuple[int, int], ref_cm:
     return dims, [wx1, wy1, wx2, wy2], obstacles
 
 
-def run_planner_task(img_path: Path, room_type: str, dims: dict, obstacles: list, requirements: str) -> dict:
-    planner = get_space_client('GanymedeNil/Qwen2-VL-7B')
-
+def build_planner_prompt(room_type: str, dims: dict, obstacles: list, requirements: str) -> str:
     allowed_by_room = {
         'cozinha': 'balcao_pia, balcao_gavetas, balcao_cooktop, balcao_canto_L, balcao_lava_loucas, ilha_gourmet, aereo_portas, aereo_basculante, aereo_canto_L, fechamento_teto, torre_quente, nicho_geladeira, cristaleira_vidro, mesa_retratil',
         'quarto': 'guarda_roupa_correr, guarda_roupa_abrir, closet_cabideiro_aberto, cama_bau_planejada, criado_mudo, painel_cabeceira, cabeceira_estofada, penteadeira_camarim, sapateira_prateleiras, bancada_estudo, fechamento_teto',
@@ -418,7 +518,7 @@ def run_planner_task(img_path: Path, room_type: str, dims: dict, obstacles: list
     obs_summary = '\n'.join(obs_lines) if obs_lines else '- None detected on main back wall'
     user_req = requirements.strip() if requirements.strip() else f'Projeto completo funcional de {room_type} planejada'
 
-    prompt = (
+    return (
         f'You are a senior Brazilian custom cabinetry architect (móveis projetados).\n'
         f'Room type: {room_type}. Calibrated back wall size: width={dims["widthCm"]}cm, height={dims["heightCm"]}cm, room depth={dims["depthCm"]}cm.\n'
         f'Detected architectural obstacles:\n{obs_summary}\n'
@@ -439,6 +539,20 @@ def run_planner_task(img_path: Path, room_type: str, dims: dict, obstacles: list
         f'  ]\n'
         f'}}'
     )
+
+
+def run_planner_via_router(img_path: Path, room_type: str, dims: dict, obstacles: list, requirements: str, token: str | None = None) -> tuple[dict, str]:
+    prompt = build_planner_prompt(room_type, dims, obstacles, requirements)
+    out_text, used_model = call_hf_router_vision(img_path, prompt, token)
+    parsed = extract_json_payload(out_text)
+    if not isinstance(parsed, dict) or not isinstance(parsed.get('modules'), list):
+        raise ValueError(f'HF Router planner returned invalid JSON: {str(out_text)[:300]}')
+    return parsed, f'HF Router ({used_model})'
+
+
+def run_planner_task(img_path: Path, room_type: str, dims: dict, obstacles: list, requirements: str, token: str | None = None) -> dict:
+    planner = get_space_client('GanymedeNil/Qwen2-VL-7B', token)
+    prompt = build_planner_prompt(room_type, dims, obstacles, requirements)
 
     out_text = planner.predict(
         image=handle_file(str(img_path)),
@@ -683,37 +797,69 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
         except Exception:
             ref_cm = 320.0
         requirements = str(body.get('requirements', '')).strip()
+        req_token = str(body.get('hfToken') or '').strip() or HF_TOKEN
+        engine_mode = str(body.get('engineMode', 'auto')).strip().lower()
 
         run_id = str(uuid.uuid4())[:8]
         temp_img_path = BASE_DIR / f'temp_room_{run_id}.png'
+        router_note = ''
 
         try:
             t0 = time.time()
             img_size = decode_base64_image(image_data, temp_img_path, max_dim=960)
-            print(f'[ROOM-AI] Stage 1 (MoGe-2 || Qwen2-VL-Detection) for {room_type} ({img_size[0]}x{img_size[1]})...', flush=True)
+            print(f'[ROOM-AI] Stage 1 for {room_type} ({img_size[0]}x{img_size[1]}), token={bool(req_token)}, mode={engine_mode}...', flush=True)
+
+            perception_engine = 'maxiw/Qwen2-VL-Detection'
+            architect_engine = 'GanymedeNil/Qwen2-VL-7B'
 
             with ThreadPoolExecutor(max_workers=2) as pool:
-                fut_det = pool.submit(run_detection_task, temp_img_path)
-                fut_moge = pool.submit(run_moge2_task, temp_img_path, run_id)
+                fut_moge = pool.submit(run_moge2_task, temp_img_path, run_id, req_token) if engine_mode != 'router' else None
 
-                det_result = fut_det.result(timeout=90)
+                det_result = None
+                use_router = bool(req_token) and engine_mode != 'zerogpu'
+                if use_router:
+                    try:
+                        det_result, perception_engine = run_detection_via_router(temp_img_path, req_token)
+                    except Exception as re_err:
+                        router_note = str(re_err)
+                        print(f'[ROOM-AI] HF Router detection skipped ({router_note}), falling back to ZeroGPU...', flush=True)
+                        if engine_mode == 'router':
+                            raise re_err
+
+                if det_result is None:
+                    det_result = run_detection_task(temp_img_path, req_token)
+                    perception_engine = 'maxiw/Qwen2-VL-Detection (ZeroGPU)'
+
                 dims, back_wall_box, obstacles = calibrate_room_geometry(det_result, img_size, ref_cm, ref_type)
 
-                print(f'[ROOM-AI] Stage 2 (Qwen2-VL-7B Architect) {room_type} wall={dims["widthCm"]}x{dims["heightCm"]}cm, obstacles={len(obstacles)}...', flush=True)
-                plan_result = run_planner_task(temp_img_path, room_type, dims, obstacles, requirements)
+                print(f'[ROOM-AI] Stage 2 Architect {room_type} wall={dims["widthCm"]}x{dims["heightCm"]}cm, obstacles={len(obstacles)}...', flush=True)
+                plan_result = None
+                if use_router and '403' not in router_note and 'inference providers' not in router_note.lower():
+                    try:
+                        plan_result, architect_engine = run_planner_via_router(temp_img_path, room_type, dims, obstacles, requirements, req_token)
+                    except Exception as pe_err:
+                        router_note = router_note or str(pe_err)
+                        print(f'[ROOM-AI] HF Router planner skipped ({pe_err}), falling back to ZeroGPU...', flush=True)
+                        if engine_mode == 'router':
+                            raise pe_err
+
+                if plan_result is None:
+                    plan_result = run_planner_task(temp_img_path, room_type, dims, obstacles, requirements, req_token)
+                    architect_engine = 'GanymedeNil/Qwen2-VL-7B (ZeroGPU)'
 
                 moge_result = {'roomGlbUrl': None, 'depthMapUrl': None, 'fov': {}}
                 moge_ok = False
-                try:
-                    moge_result = fut_moge.result(timeout=95)
-                    moge_ok = bool(moge_result.get('roomGlbUrl'))
-                except Exception as me:
-                    print(f'[ROOM-AI] MoGe-2 optional overlay skipped: {me}', flush=True)
+                if fut_moge is not None:
+                    try:
+                        moge_result = fut_moge.result(timeout=95)
+                        moge_ok = bool(moge_result.get('roomGlbUrl'))
+                    except Exception as me:
+                        print(f'[ROOM-AI] MoGe-2 optional overlay skipped: {me}', flush=True)
 
             modules, notes = validate_and_resolve_modules(plan_result, dims, obstacles, room_type)
 
             elapsed = round(time.time() - t0, 1)
-            print(f'[ROOM-AI] Completed in {elapsed}s -> {len(obstacles)} obstacles, {len(modules)} modules.', flush=True)
+            print(f'[ROOM-AI] Completed in {elapsed}s via {architect_engine} -> {len(obstacles)} obstacles, {len(modules)} modules.', flush=True)
 
             resp = {
                 'success': True,
@@ -729,8 +875,8 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 'architectNotesPtBr': notes,
                 'aiEngines': {
                     'geometry3d': 'Ruicheng/MoGe-2' if moge_ok else 'Perspective Calibration',
-                    'perception': 'maxiw/Qwen2-VL-Detection',
-                    'architect': 'GanymedeNil/Qwen2-VL-7B',
+                    'perception': perception_engine,
+                    'architect': architect_engine,
                 },
             }
             self._set_headers(200)
@@ -742,7 +888,7 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
             self._set_headers(502)
             self.wfile.write(json.dumps({
                 'success': False,
-                'error': f'Falha no pipeline Hugging Face ao analisar a foto: {str(e)}',
+                'error': format_hf_error_ptbr(e, router_note),
             }, ensure_ascii=False).encode('utf-8'))
         finally:
             if temp_img_path.exists():
@@ -751,6 +897,7 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
     def _handle_generate_3d(self, body: dict):
         prompt = body.get('prompt', 'Modern walnut tensegrity dining table').strip()
         image_data = body.get('image', None)
+        req_token = str(body.get('hfToken') or '').strip() or HF_TOKEN
 
         print(f'[API] 3D Generation request received! Prompt: {prompt}, has_image: {bool(image_data)}', flush=True)
 
@@ -761,7 +908,7 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
             if image_data and 'base64,' in image_data:
                 decode_base64_image(image_data, temp_img_path, max_dim=1024)
             else:
-                flux = get_space_client('black-forest-labs/FLUX.1-schnell')
+                flux = get_space_client('black-forest-labs/FLUX.1-schnell', req_token)
                 flux_prompt = f'{prompt}, professional architectural product design, isolated on clean white background, 3d furniture photography, sharp focus, 8k'
                 res_path, _ = flux.predict(
                     prompt=flux_prompt,
@@ -775,7 +922,7 @@ class AI3DServerHandler(BaseHTTPRequestHandler):
                 img = Image.open(res_path).convert('RGB')
                 img.save(temp_img_path)
 
-            trellis = get_space_client('trellis-community/TRELLIS')
+            trellis = get_space_client('trellis-community/TRELLIS', req_token)
             trellis.predict(api_name='/start_session')
             prep_res = trellis.predict(image=handle_file(str(temp_img_path)), api_name='/preprocess_image')
             seed = trellis.predict(True, 0, api_name='/get_seed')
