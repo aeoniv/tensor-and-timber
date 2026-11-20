@@ -9,7 +9,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
             Projete em <span class="accent-text">3D em Tempo Real</span>
           </h2>
           <p class="section-subtitle">
-            Todas as ferramentas 3D reunidas: gere o ambiente completo pela foto (com SketchUp .DAE e corte CNC) ou crie peças exclusivas por texto e croqui.
+            Visualize seu ambiente completo pela foto ou crie peças exclusivas em 3D antes de fechar o orçamento.
           </p>
 
           <!-- Unified Switcher Tabs between both 3D Studios -->
@@ -24,7 +24,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
               data-hub-tab="room"
             >
               <span class="studio-tab-title">Ambientes Planejados 3D</span>
-              <span class="studio-tab-sub">Foto do cômodo &bull; 124 MDFs &bull; .DAE / .DXF</span>
+              <span class="studio-tab-sub">Envie a foto do espaço e personalize acabamentos</span>
             </button>
 
             <button
@@ -37,7 +37,7 @@ export function renderStudio3DHub(roomHtml: string, atelierHtml: string): string
               data-hub-tab="atelier"
             >
               <span class="studio-tab-title">Criador de Móvel 3D</span>
-              <span class="studio-tab-sub">Texto ou croqui &bull; Peças exclusivas .GLB</span>
+              <span class="studio-tab-sub">Descreva sua ideia ou envie um croqui de referência</span>
             </button>
           </div>
         </div>

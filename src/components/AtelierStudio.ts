@@ -2,8 +2,8 @@ export function renderAtelierStudio(): string {
   return `
     <div id="atelier-section" class="hub-inner-workspace">
       <div class="hub-workspace-caption">
-        <span><strong>Criador de Móvel 3D por Texto ou Croqui</strong> &bull; Reconstrua peças exclusivas com cabos tensores e madeira.</span>
-        <span class="badge">Malha 3D Real (.GLB)</span>
+        <span><strong>Criador de Móvel 3D</strong> &bull; Peças exclusivas desenhadas sob medida.</span>
+        <span class="badge">Visualização 3D</span>
       </div>
 
       <div class="atelier-grid">
@@ -131,7 +131,7 @@ export function renderAtelierStudio(): string {
                 <span id="btn-generate-3d-text">Gerar Objeto 3D com IA</span>
               </button>
               <p class="planner-cta-hint">
-                Reconstrução 3D real por texto ou imagem &bull; Download imediato .GLB
+                Geração 3D por texto ou imagem de referência
               </p>
             </div>
 
@@ -154,7 +154,7 @@ export function renderAtelierStudio(): string {
                   <button class="ctrl-btn" id="atelier-btn-wireframe">Aramado</button>
                   <button class="ctrl-btn" id="atelier-btn-lighting">Luz Natural</button>
                 </div>
-                <button class="ctrl-btn ctrl-btn--primary" id="btn-download-glb">Baixar 3D (.GLB)</button>
+                <button class="ctrl-btn ctrl-btn--primary" id="btn-download-glb">Baixar Modelo 3D</button>
               </div>
             </div>
 

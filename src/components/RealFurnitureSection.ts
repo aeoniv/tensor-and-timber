@@ -162,7 +162,7 @@ export function renderRealFurnitureSection(): string {
             Móveis em <span class="accent-text">Madeira &amp; Tensão</span>
           </h2>
           <p class="section-subtitle">
-            Exemplos de peças desenvolvidas sob encomenda. As medidas, os materiais (madeira maciça, MDF ou compensado) e os acabamentos são sempre adaptados para o seu projeto.
+            Peças desenvolvidas sob encomenda, com dimensões e acabamentos personalizados para o seu espaço.
           </p>
         </div>
 

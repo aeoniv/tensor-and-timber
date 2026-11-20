@@ -49,16 +49,16 @@ export function renderHero(): string {
             <!-- Trust Signals -->
             <div class="hero-trust-row">
               <div class="trust-item">
-                <span class="trust-title">Precisão em mm</span>
-                <span class="trust-desc">Projeto paramétrico + corte CNC e fita de borda</span>
+                <span class="trust-title">Acabamento Fino</span>
+                <span class="trust-desc">Marcenaria sob medida com montagem profissional</span>
               </div>
               <div class="trust-item">
-                <span class="trust-title">124 Padrões MDF</span>
-                <span class="trust-desc">Duratex, Arauco, Cava 45°, Provençal e Reflecta</span>
+                <span class="trust-title">Amplo Catálogo</span>
+                <span class="trust-desc">Madeiras nobres, MDFs selecionados e vidros</span>
               </div>
               <div class="trust-item">
-                <span class="trust-title">SketchUp &amp; CNC</span>
-                <span class="trust-desc">Visualização ao vivo + exportação .DAE / .DXF</span>
+                <span class="trust-title">Visualização 3D</span>
+                <span class="trust-desc">Confira proporções e cores antes da produção</span>
               </div>
             </div>
           </div>

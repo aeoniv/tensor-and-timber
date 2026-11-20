@@ -67,7 +67,7 @@ export function renderFooter(): string {
         <div class="footer-bottom">
           <p>&copy; 2025–2026 83 EMPREENDIMENTOS LTDA (83 Ambientes Planejados) &bull; Tensor &amp; Timber. CNPJ: 59.492.848/0001-28. Fabricado com orgulho no Brasil 🇧🇷.</p>
           <div style="display: flex; gap: 16px;">
-            <span>Material à escolha do cliente</span>
+            <span>Projeto Personalizado</span>
             <span>Móveis Sob Medida</span>
           </div>
         </div>

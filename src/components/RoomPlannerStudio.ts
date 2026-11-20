@@ -52,8 +52,8 @@ export function renderRoomPlannerStudio(): string {
   return `
     <div id="room-planner-section" class="hub-inner-workspace">
       <div class="hub-workspace-caption">
-        <span><strong>Projeto por Foto do Cômodo</strong> &bull; A IA identifica vãos e pontos hidráulicos e propõe os módulos em 3D.</span>
-        <span class="badge">7 Ambientes &bull; ${MODULE_CATALOG_TEMPLATES.length} Móveis &bull; ${ALL_MDF_FINISHES.length} Padrões MDF</span>
+        <span><strong>Projeto por Foto</strong> &bull; Envie a foto do espaço e visualize a proposta em 3D.</span>
+        <span class="badge">Simulação Interativa</span>
       </div>
 
       <div class="atelier-grid">
@@ -277,11 +277,11 @@ export function renderRoomPlannerStudio(): string {
                 </div>
                 <div class="stage-controls-row stage-controls-row--export">
                   <span class="controls-group-label">Exportar:</span>
-                  <button type="button" class="ctrl-btn ctrl-btn--primary" id="room-btn-export-dae" title="Collada .DAE nativo para SketchUp com componentes e cores MDF">SketchUp .DAE</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Malha .OBJ em escala métrica">.OBJ</button>
-                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-dxf" title="Plano de corte 2D AutoCAD R12 .DXF em mm (chapas 2750x1850)">CNC .DXF</button>
-                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-csv" title="Plano de corte em mm, fita de borda C1/C2/L1/L2, veio e ferragens (BOM)">Corte .CSV</button>
-                  <button type="button" class="ctrl-btn" id="room-btn-download-glb" title="Modelo 3D GLB para Web/Blender">.GLB</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--primary" id="room-btn-export-dae" title="Exportar para SketchUp">SketchUp</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-export-obj" title="Exportar malha 3D">3D (.OBJ)</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-dxf" title="Exportar planta de corte 2D">Planta 2D</button>
+                  <button type="button" class="ctrl-btn ctrl-btn--accent" id="room-btn-export-csv" title="Exportar lista de corte">Lista de Corte</button>
+                  <button type="button" class="ctrl-btn" id="room-btn-download-glb" title="Baixar modelo 3D">Modelo 3D</button>
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ export function renderRoomPlannerStudio(): string {
               <div class="deal-perks" id="room-bom-perks">
                 <div class="deal-perk-item">✓ Cantos em L, tamponamento até o teto e muxarabi</div>
                 <div class="deal-perk-item">✓ Cava 45°, Provençal, Vidro Reflecta e 18/25mm</div>
-                <div class="deal-perk-item">✓ SketchUp nativo (.DAE / .OBJ) + Corte CNC (.DXF / .CSV mm)</div>
+                <div class="deal-perk-item">✓ Exportação para SketchUp e lista de corte</div>
                 <div class="deal-perk-item">✓ Adicione móveis e ajuste medidas (-/+ 10 cm) na hora</div>
               </div>
 
